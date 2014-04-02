@@ -1,5 +1,6 @@
 package com.your.company.HelloWorld;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -295,8 +296,26 @@ public class Chromecast extends CordovaPlugin implements Cast.MessageReceivedCal
 									sessionId = result.getSessionId();
 									String applicationStatus = result.getApplicationStatus();
 									boolean wasLaunched = result.getWasLaunched();
-									if (cbContext != null && !cbContext.isFinished()) {
-										cbContext.success("launchSuccess");
+									try {
+										Cast.CastApi.setMessageReceivedCallbacks(mApiClient,
+												mRemoteMediaPlayer.getNamespace(), mRemoteMediaPlayer);
+										mRemoteMediaPlayer
+										.requestStatus(mApiClient)
+										.setResultCallback(
+												new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
+													@Override
+													public void onResult(MediaChannelResult result) {
+														if (!result.getStatus().isSuccess()) {
+															System.out.println("Failed to request status.");
+														}
+														if (cbContext != null && !cbContext.isFinished()) {
+															cbContext.success("launchSuccess");
+														}
+													}
+												});
+									} catch (IOException e) {
+										e.printStackTrace();
+										System.out.println("Exception while creating media channel" + e.getMessage());
 									}
 								} else {
 									if (cbContext != null && !cbContext.isFinished()) {
