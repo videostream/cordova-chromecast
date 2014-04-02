@@ -33,6 +33,27 @@ Chromecast.prototype.initialize = function() {
 	this.on("applicationStatusChanged", function () {
 		// 
 	});
+	this.on("disconnect", function () {
+		// 
+	});
+	this.on("message", function (namespace, message) {
+		// 
+	});
+};
+Chromecast.prototype.play = function(cb) {
+	this.exec("mediaControl", "play", cb);
+};
+Chromecast.prototype.pause = function(cb) {
+	this.exec("mediaControl", "pause", cb);
+};
+Chromecast.prototype.stop = function(cb) {
+	this.exec("mediaControl", "stop"cb);
+};
+Chromecast.prototype.seek = function(pos, cb) {
+	this.exec("mediaControl", "seek", pos, cb);
+};
+Chromecast.prototype.volume = function(level, cb) {
+	this.exec("mediaControl", "volume", level, cb);
 };
 Chromecast.prototype.loadUrl = function(url) {
 	this.exec("loadUrl", url || "http://192.168.1.104:5556/", function(err) {

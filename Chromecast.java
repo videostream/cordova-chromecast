@@ -8,6 +8,7 @@ import com.google.android.gms.cast.Cast.Listener;
 import com.google.android.gms.cast.RemoteMediaPlayer.MediaChannelResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 
@@ -167,7 +168,39 @@ public class Chromecast extends CordovaPlugin implements Cast.MessageReceivedCal
     	}
     	return true;
     }
-	
+    
+    /*
+     * Chromecast Media Controls
+     */
+    
+    public boolean mediaControl(JSONArray args, final CallbackContext cbContext) throws IllegalArgumentException, JSONException {
+		String action = args.getString(0);
+		PendingResult<MediaChannelResult> res = null;
+		if (action.equals("stop")) {
+			res = mRemoteMediaPlayer.stop(mApiClient);
+		} else if (action.equals("play")) {
+			res = mRemoteMediaPlayer.play(mApiClient);
+		} else if (action.equals("pause")) {
+			res = mRemoteMediaPlayer.pause(mApiClient);
+		} else if (action.equals("seek")) {
+			res = mRemoteMediaPlayer.seek(mApiClient, args.getLong(1));
+		} else if (action.equals("volume")) {
+			res = mRemoteMediaPlayer.setStreamVolume(mApiClient, args.getDouble(1));
+		}
+		res.setResultCallback(new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
+		    @Override
+		    public void onResult(MediaChannelResult result) {
+				if (result.getStatus().isSuccess()) {
+					System.out.println("Media loaded successfully");
+					cbContext.success();
+				} else {
+					cbContext.error("request failed");
+				}
+		    }
+		});
+    	return true;
+    }
+    
     /*
      * Chromecast asynchronous callbacks
      */
