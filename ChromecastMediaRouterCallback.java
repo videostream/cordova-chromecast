@@ -1,0 +1,49 @@
+package com.videostream.chromecast;
+
+import java.util.ArrayList;
+
+import android.support.v7.media.MediaRouter;
+import android.support.v7.media.MediaRouter.RouteInfo;
+
+public class ChromecastMediaRouterCallback extends MediaRouter.Callback {
+	private ArrayList<RouteInfo> routes = new ArrayList<RouteInfo>();
+	
+	private Chromecast callback = null;
+	
+	public void registerCallbacks(Chromecast instance) {
+		this.callback = instance;
+	}
+	
+	public RouteInfo getRoute(int index) {
+		return routes.get(index);
+	}
+	@Override
+	public void onRouteAdded(MediaRouter router, RouteInfo route) {
+		routes.add(route);
+		if (this.callback != null) {
+			this.callback.onRouteAdded(router, route);
+		}
+	}
+	
+	@Override
+	public void onRouteRemoved(MediaRouter router, RouteInfo route) {
+		routes.remove(route);
+		if (this.callback != null) {
+			this.callback.onRouteRemoved(router, route);
+		}
+	}
+	
+	@Override
+	public void onRouteSelected(MediaRouter router, RouteInfo info) {
+		if (this.callback != null) {
+			this.callback.onRouteSelected(router, info);
+		}
+	}
+	
+	@Override
+	public void onRouteUnselected(MediaRouter router, RouteInfo info) {
+		if (this.callback != null) {
+			this.callback.onRouteUnselected(router, info);
+		}
+	}
+}
