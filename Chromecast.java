@@ -41,7 +41,6 @@ public class Chromecast extends CordovaPlugin implements Cast.MessageReceivedCal
 
     public void initialize(final CordovaInterface cordova, CordovaWebView webView) {
     	super.initialize(cordova, webView);
-    	webView.sendJavascript("");
         mCastClientListener = new Cast.Listener() {
         	public void onApplicationStatusChanged() {onChromecastStatusChanged();}
         	public void onVolumeChanged() {onChromecastVolumeChanged();}
@@ -120,16 +119,26 @@ public class Chromecast extends CordovaPlugin implements Cast.MessageReceivedCal
                         .addConnectionCallbacks(this)
                         .addOnConnectionFailedListener(this)
                         .build();
-		mApiClient.connect();
+		try {
+			mApiClient.connect();	
+		} catch (Exception ex) {
+			System.out.println(ex.getMessage());
+		}
 
 		return true;
     }
     
-    public boolean loadUrl (JSONArray args, CallbackContext cbContext) {
+    public boolean loadUrl (JSONArray args, final CallbackContext cbContext) throws JSONException {
+    	String url = args.getString(0);
+    	if (mSelectedDevice == null) {
+    		args.put(0, 0);
+    		this.launch(args, cbContext);
+    	}
     	MediaMetadata mediaMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
     	mediaMetadata.putString(MediaMetadata.KEY_TITLE, "My video");
+
     	MediaInfo mediaInfo = new MediaInfo.Builder(
-    	    "http://192.168.1.104:5556/")
+    			url)
     	    .setContentType("video/mp4")
     	    .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
     	    .setMetadata(mediaMetadata)
@@ -141,15 +150,20 @@ public class Chromecast extends CordovaPlugin implements Cast.MessageReceivedCal
 			    public void onResult(MediaChannelResult result) {
 					if (result.getStatus().isSuccess()) {
 						System.out.println("Media loaded successfully");
+						cbContext.success();
 					}
 			    }
 			});
     	} catch (IllegalStateException e) {
     		e.printStackTrace();
     		System.out.println("Problem occurred with media during loading");
+    		cbContext.error("Problem occurred with media during loading");
+    		return false;
     	} catch (Exception e) {
     		e.printStackTrace();
+    		cbContext.error("Problem opening media during loading");
     		System.out.println("Problem opening media during loading");
+    		return false;
     	}
     	return true;
     }
@@ -182,12 +196,14 @@ public class Chromecast extends CordovaPlugin implements Cast.MessageReceivedCal
 	
 	public void onChromecastDisconnected(int errorCode) {
 		  System.out.println("app disconnected");
+			this.webView.sendJavascript("Chromecast.emit('disconnect')");
 	}
 
 	@Override
 	public void onMessageReceived(CastDevice castDevice, String namespace,
 			String message) {
 		System.out.println("Message Received: " + castDevice.getFriendlyName() + " " + message);
+		this.webView.sendJavascript("Chromecast.emit('message', '"+namespace+"', '"+message+"')");
 	}
 	
 	public String getNamespace() {

@@ -2,15 +2,21 @@ var Chromecast = function () {
 	EventEmitter.call(this);
 	if (!Chromecast.instance) {
 		Chromecast.instance = this;
+		this.initialize();
 		this.getDevices();
+		this.devices = {};
 		return this;
 	}
 	return Chromecast.instance;
 }
 Chromecast.prototype = Object.create(EventEmitter.prototype);
 Chromecast.prototype.initialize = function() {
+	var self = this;
 	this.on("device", function (id, deviceName) {
-		// 
+		if (!self.devices[id]) {
+			self.devices[id] = deviceName;
+			console.log(id, deviceName);
+		}
 	});
 	this.on("deviceRemoved", function (id, deviceName) {
 		// 
@@ -27,6 +33,17 @@ Chromecast.prototype.initialize = function() {
 	this.on("applicationStatusChanged", function () {
 		// 
 	});
+};
+Chromecast.prototype.loadUrl = function(url) {
+	this.exec("loadUrl", url || "http://192.168.1.104:5556/", function(err) {
+		if (err) {
+			console.log("error");
+		}
+	});
+};
+Chromecast.prototype.launch = function(castId) {
+	// body...
+	this.exec("launch", castId || 0);
 };
 Chromecast.prototype.echo = function(str) {
 	this.exec("echo", str, function (str) {
