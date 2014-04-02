@@ -182,56 +182,56 @@ public class Chromecast extends CordovaPlugin implements Cast.MessageReceivedCal
 		boolean f = mApiClient.isConnected();
 		boolean j = mApiClient.isConnecting();
 		
-		mRemoteMediaPlayer.requestStatus(mApiClient).setResultCallback(new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
-	        @Override
-	        public void onResult(RemoteMediaPlayer.MediaChannelResult mediaChannelResult) {
-	            Status stat = mediaChannelResult.getStatus();
-	            if(stat.isSuccess()) {
-	            	
-				}else {
-					
-				}
-	        }
-		});
-		mRemoteMediaPlayer.setOnStatusUpdatedListener(new OnStatusUpdatedListener() {
-			@Override
-			public void onStatusUpdated() {
-				PendingResult<MediaChannelResult> res = null;
-				try {
-					if (action.equals("stop")) {
-						res = mRemoteMediaPlayer.stop(mApiClient);
-//										Cast.CastApi.stopApplication(mApiClient);
-					} else if (action.equals("play")) {
-						res = mRemoteMediaPlayer.play(mApiClient);
-					} else if (action.equals("pause")) {
-						res = mRemoteMediaPlayer.pause(mApiClient);
-					} else if (action.equals("seek")) {
-						res = mRemoteMediaPlayer.seek(mApiClient, args.getLong(1));
-					} else if (action.equals("volume")) {
-						Cast.CastApi.setVolume(mApiClient, args.getDouble(1));
-//										res = mRemoteMediaPlayer.setStreamVolume(mApiClient, args.getDouble(1));
-					}
-					if (res != null) {
-						res.setResultCallback(new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
-						    @Override
-						    public void onResult(MediaChannelResult result) {
-								if (result.getStatus().isSuccess()) {
-									System.out.println("Media loaded successfully");
-									cbContext.success();
-								} else {
-									cbContext.error("request failed");
-								}
-						    }
-						});
-					} else {
-						cbContext.error("invalid message");
-					}
-				} catch (Exception ex) {
-					cbContext.error(ex.getMessage());
-				}
+//		mRemoteMediaPlayer.requestStatus(mApiClient).setResultCallback(new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
+//	        @Override
+//	        public void onResult(RemoteMediaPlayer.MediaChannelResult mediaChannelResult) {
+//	            Status stat = mediaChannelResult.getStatus();
+//	            if(stat.isSuccess()) {
+//	            	
+//				}else {
+//					
+//				}
+//	        }
+//		});
+//		mRemoteMediaPlayer.setOnStatusUpdatedListener(new OnStatusUpdatedListener() {
+//			@Override
+//			public void onStatusUpdated() {
+//				
+//			}
+//		});
+		PendingResult<MediaChannelResult> res = null;
+		try {
+			if (action.equals("stop")) {
+				res = mRemoteMediaPlayer.stop(mApiClient);
+//				Cast.CastApi.stopApplication(mApiClient);
+			} else if (action.equals("play")) {
+				res = mRemoteMediaPlayer.play(mApiClient);
+			} else if (action.equals("pause")) {
+				res = mRemoteMediaPlayer.pause(mApiClient);
+			} else if (action.equals("seek")) {
+				res = mRemoteMediaPlayer.seek(mApiClient, args.getLong(1));
+			} else if (action.equals("volume")) {
+//				Cast.CastApi.setVolume(mApiClient, args.getDouble(1));
+				res = mRemoteMediaPlayer.setStreamVolume(mApiClient, args.getDouble(1));
 			}
-		});
-	
+			if (res != null) {
+				res.setResultCallback(new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
+				    @Override
+				    public void onResult(MediaChannelResult result) {
+						if (result.getStatus().isSuccess()) {
+							System.out.println("Media loaded successfully");
+							cbContext.success();
+						} else {
+							cbContext.error("request failed");
+						}
+				    }
+				});
+			} else {
+				cbContext.error("invalid message");
+			}
+		} catch (Exception ex) {
+			cbContext.error(ex.getMessage());
+		}
 		return true;
     }
     
