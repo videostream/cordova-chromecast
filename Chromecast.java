@@ -186,19 +186,22 @@ public class Chromecast extends CordovaPlugin implements Cast.MessageReceivedCal
 			res = mRemoteMediaPlayer.seek(mApiClient, args.getLong(1));
 		} else if (action.equals("volume")) {
 			res = mRemoteMediaPlayer.setStreamVolume(mApiClient, args.getDouble(1));
+		} 
+		if (res != null) {
+			res.setResultCallback(new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
+			    @Override
+			    public void onResult(MediaChannelResult result) {
+					if (result.getStatus().isSuccess()) {
+						System.out.println("Media loaded successfully");
+						cbContext.success();
+					} else {
+						cbContext.error("request failed");
+					}
+			    }
+			});
+	    	return true;
 		}
-		res.setResultCallback(new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
-		    @Override
-		    public void onResult(MediaChannelResult result) {
-				if (result.getStatus().isSuccess()) {
-					System.out.println("Media loaded successfully");
-					cbContext.success();
-				} else {
-					cbContext.error("request failed");
-				}
-		    }
-		});
-    	return true;
+		return false;
     }
     
     /*
