@@ -47,7 +47,7 @@ Chromecast.prototype.pause = function(cb) {
 	this.exec("mediaControl", "pause", cb);
 };
 Chromecast.prototype.stop = function(cb) {
-	this.exec("mediaControl", "stop"cb);
+	this.exec("mediaControl", "stop", cb);
 };
 Chromecast.prototype.seek = function(pos, cb) {
 	this.exec("mediaControl", "seek", pos, cb);
