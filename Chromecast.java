@@ -4,8 +4,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import com.google.android.gms.cast.*;
+import com.google.android.gms.cast.Cast.ApplicationConnectionResult;
 import com.google.android.gms.cast.Cast.Listener;
 import com.google.android.gms.cast.RemoteMediaPlayer.MediaChannelResult;
+import com.google.android.gms.cast.RemoteMediaPlayer.OnStatusUpdatedListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
@@ -106,35 +108,36 @@ public class Chromecast extends CordovaPlugin implements Cast.MessageReceivedCal
     }
     
     public boolean launch (JSONArray args, CallbackContext cbContext) throws JSONException {
-    	int index = args.getInt(0);
-    	this.launchCallback = cbContext;
-    	RouteInfo info = mMediaRouterCallback.getRoute(index);
-    	mSelectedDevice = CastDevice.getFromBundle(info.getExtras());
-//    	String routeId = info.getId();
-    	
-    	Cast.CastOptions.Builder apiOptionsBuilder = Cast.CastOptions
-                .builder(mSelectedDevice, mCastClientListener);
-    	final Activity activity = cordova.getActivity();
-		mApiClient = new GoogleApiClient.Builder(activity.getApplicationContext())
-                        .addApi(Cast.API, apiOptionsBuilder.build())
-                        .addConnectionCallbacks(this)
-                        .addOnConnectionFailedListener(this)
-                        .build();
-		try {
-			mApiClient.connect();	
-		} catch (Exception ex) {
-			System.out.println(ex.getMessage());
-		}
-
-		return true;
+    	if (mApiClient == null || (!mApiClient.isConnected() && !mApiClient.isConnecting())) {
+        	int index = args.getInt(0);
+        	this.launchCallback = cbContext;
+        	RouteInfo info = mMediaRouterCallback.getRoute(index);
+        	mSelectedDevice = CastDevice.getFromBundle(info.getExtras());
+//        	String routeId = info.getId();
+        	
+        	Cast.CastOptions.Builder apiOptionsBuilder = Cast.CastOptions
+                    .builder(mSelectedDevice, mCastClientListener);
+        	final Activity activity = cordova.getActivity();
+    		mApiClient = new GoogleApiClient.Builder(activity.getApplicationContext())
+                            .addApi(Cast.API, apiOptionsBuilder.build())
+                            .addConnectionCallbacks(this)
+                            .addOnConnectionFailedListener(this)
+                            .build();
+    		try {
+    			if (!mApiClient.isConnected() && !mApiClient.isConnecting()) {
+        			mApiClient.connect();
+    			}
+    			return true;
+    		} catch (Exception ex) {
+    			System.out.println(ex.getMessage());
+    			return false;
+    		}
+    	}
+		return false;
     }
     
     public boolean loadUrl (JSONArray args, final CallbackContext cbContext) throws JSONException {
     	String url = args.getString(0);
-    	if (mSelectedDevice == null) {
-    		args.put(0, 0);
-    		this.launch(args, cbContext);
-    	}
     	MediaMetadata mediaMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
     	mediaMetadata.putString(MediaMetadata.KEY_TITLE, "My video");
 
@@ -172,42 +175,68 @@ public class Chromecast extends CordovaPlugin implements Cast.MessageReceivedCal
     /*
      * Chromecast Media Controls
      */
-    
-    public boolean mediaControl(JSONArray args, final CallbackContext cbContext) throws IllegalArgumentException, JSONException {
-		String action = args.getString(0);
-		PendingResult<MediaChannelResult> res = null;
-		if (action.equals("stop")) {
-			res = mRemoteMediaPlayer.stop(mApiClient);
-		} else if (action.equals("play")) {
-			res = mRemoteMediaPlayer.play(mApiClient);
-		} else if (action.equals("pause")) {
-			res = mRemoteMediaPlayer.pause(mApiClient);
-		} else if (action.equals("seek")) {
-			res = mRemoteMediaPlayer.seek(mApiClient, args.getLong(1));
-		} else if (action.equals("volume")) {
-			res = mRemoteMediaPlayer.setStreamVolume(mApiClient, args.getDouble(1));
-		} 
-		if (res != null) {
-			res.setResultCallback(new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
-			    @Override
-			    public void onResult(MediaChannelResult result) {
-					if (result.getStatus().isSuccess()) {
-						System.out.println("Media loaded successfully");
-						cbContext.success();
-					} else {
-						cbContext.error("request failed");
+    public boolean mediaControl(final JSONArray args, final CallbackContext cbContext) throws IllegalArgumentException, JSONException {
+		final String action = args.getString(0);
+
+		boolean f = mApiClient.isConnected();
+		boolean j = mApiClient.isConnecting();
+		
+		mRemoteMediaPlayer.requestStatus(mApiClient).setResultCallback(new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
+	        @Override
+	        public void onResult(RemoteMediaPlayer.MediaChannelResult mediaChannelResult) {
+	            Status stat = mediaChannelResult.getStatus();
+	            if(stat.isSuccess()) {
+	            	
+				}else {
+					
+				}
+	        }
+		});
+		mRemoteMediaPlayer.setOnStatusUpdatedListener(new OnStatusUpdatedListener() {
+			@Override
+			public void onStatusUpdated() {
+				PendingResult<MediaChannelResult> res = null;
+				try {
+					if (action.equals("stop")) {
+						res = mRemoteMediaPlayer.stop(mApiClient);
+//										Cast.CastApi.stopApplication(mApiClient);
+					} else if (action.equals("play")) {
+						res = mRemoteMediaPlayer.play(mApiClient);
+					} else if (action.equals("pause")) {
+						res = mRemoteMediaPlayer.pause(mApiClient);
+					} else if (action.equals("seek")) {
+						res = mRemoteMediaPlayer.seek(mApiClient, args.getLong(1));
+					} else if (action.equals("volume")) {
+						Cast.CastApi.setVolume(mApiClient, args.getDouble(1));
+//										res = mRemoteMediaPlayer.setStreamVolume(mApiClient, args.getDouble(1));
 					}
-			    }
-			});
-	    	return true;
-		}
-		return false;
+					if (res != null) {
+						res.setResultCallback(new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
+						    @Override
+						    public void onResult(MediaChannelResult result) {
+								if (result.getStatus().isSuccess()) {
+									System.out.println("Media loaded successfully");
+									cbContext.success();
+								} else {
+									cbContext.error("request failed");
+								}
+						    }
+						});
+					} else {
+						cbContext.error("invalid message");
+					}
+				} catch (Exception ex) {
+					cbContext.error(ex.getMessage());
+				}
+			}
+		});
+	
+		return true;
     }
     
     /*
      * Chromecast asynchronous callbacks
      */
-    
 	public void onChromecastStatusChanged() {
 		if (mApiClient != null) {
 			try {
@@ -245,7 +274,8 @@ public class Chromecast extends CordovaPlugin implements Cast.MessageReceivedCal
 	public String getNamespace() {
 		return "urn:x-cast:com.example.custom";
 	}
-
+	
+	private String sessionId = null;
 	boolean mWaitingForReconnect = false;
 	@Override
 	public void onConnected(Bundle connectionHint) {
@@ -261,10 +291,10 @@ public class Chromecast extends CordovaPlugin implements Cast.MessageReceivedCal
 							public void onResult(Cast.ApplicationConnectionResult result) {
 								Status status = result.getStatus();
 								if (status.isSuccess()) {
-//									ApplicationMetadata applicationMetadata = result.getApplicationMetadata();
-//									String sessionId = result.getSessionId();
-//									String applicationStatus = result.getApplicationStatus();
-//									boolean wasLaunched = result.getWasLaunched();
+									ApplicationMetadata applicationMetadata = result.getApplicationMetadata();
+									sessionId = result.getSessionId();
+									String applicationStatus = result.getApplicationStatus();
+									boolean wasLaunched = result.getWasLaunched();
 									if (cbContext != null && !cbContext.isFinished()) {
 										cbContext.success("launchSuccess");
 									}
@@ -301,22 +331,18 @@ public class Chromecast extends CordovaPlugin implements Cast.MessageReceivedCal
 	}
 	
 	protected void onRouteAdded(MediaRouter router, RouteInfo route) {
-		// Send to JS client.
 		this.webView.sendJavascript("Chromecast.emit('device', '"+route.getId()+"', '" + route.getName() + "')");
 	}
 
 	protected void onRouteRemoved(MediaRouter router, RouteInfo route) {
-		// Send to JS client.
 		this.webView.sendJavascript("Chromecast.emit('deviceRemoved', '"+route.getId()+"', '" + route.getName() + "')");
 	}
 
 	protected void onRouteSelected(MediaRouter router, RouteInfo route) {
-		// Send to JS client.
 		this.webView.sendJavascript("Chromecast.emit('routeSelected', '"+route.getId()+"', '" + route.getName() + "')");
 	}
 
 	protected void onRouteUnselected(MediaRouter router, RouteInfo route) {
-		// Send to JS client.
 		this.webView.sendJavascript("Chromecast.emit('routeUnselected', '"+route.getId()+"', '" + route.getName() + "')");
 	}
 }
