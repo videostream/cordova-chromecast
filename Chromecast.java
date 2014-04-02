@@ -1,4 +1,4 @@
-package com.videostream.chromecast;
+package com.your.company.HelloWorld;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -47,8 +47,6 @@ public class Chromecast extends CordovaPlugin implements Cast.MessageReceivedCal
         	public void onVolumeChanged() {onChromecastVolumeChanged();}
         	public void onApplicationDisconnected(int errorCode) {onChromecastDisconnected(errorCode);}
         };
-        
-        this.getDevices();
     }
     
     @Override
@@ -84,7 +82,7 @@ public class Chromecast extends CordovaPlugin implements Cast.MessageReceivedCal
     	return true;
     }
     
-    public boolean getDevices () {
+    public boolean getDevices (JSONArray args, final CallbackContext cbContext) {
     	final Activity activity = cordova.getActivity();
         final Chromecast that = this;
         activity.runOnUiThread(new Runnable() {
@@ -95,6 +93,7 @@ public class Chromecast extends CordovaPlugin implements Cast.MessageReceivedCal
         		.build();
         		mMediaRouterCallback.registerCallbacks(that);
         		mMediaRouter.addCallback(mMediaRouteSelector, mMediaRouterCallback, MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY);
+        		cbContext.success();
         	}
         });
         return true;
@@ -163,6 +162,7 @@ public class Chromecast extends CordovaPlugin implements Cast.MessageReceivedCal
 		if (mApiClient != null) {
 			try {
 				System.out.println("onApplicationStatusChanged: " + Cast.CastApi.getApplicationStatus(mApiClient));
+				this.webView.sendJavascript("Chromecast.emit('applicationStatusChanged', '"+Cast.CastApi.getApplicationStatus(mApiClient)+"')");
 			} catch (Exception ex) {
 				
 			}
@@ -173,6 +173,7 @@ public class Chromecast extends CordovaPlugin implements Cast.MessageReceivedCal
 	    if (mApiClient != null) {
 	    	try {
 	    		System.out.println("onVolumeChanged: " + Cast.CastApi.getVolume(mApiClient));
+	    		this.webView.sendJavascript("Chromecast.emit('volumeChanged', '"+Cast.CastApi.getVolume(mApiClient)+"')");
 	    	} catch (Exception ex) {
 	    		
 	    	}
@@ -249,22 +250,22 @@ public class Chromecast extends CordovaPlugin implements Cast.MessageReceivedCal
 	
 	protected void onRouteAdded(MediaRouter router, RouteInfo route) {
 		// Send to JS client.
-		this.webView.sendJavascript("Chromecast.emit('device', " + route.getName() + ")");
+		this.webView.sendJavascript("Chromecast.emit('device', '"+route.getId()+"', '" + route.getName() + "')");
 	}
 
 	protected void onRouteRemoved(MediaRouter router, RouteInfo route) {
 		// Send to JS client.
-		this.webView.sendJavascript("Chromecast.emit('deviceRemoved', " + route.getName() + ")");
+		this.webView.sendJavascript("Chromecast.emit('deviceRemoved', '"+route.getId()+"', '" + route.getName() + "')");
 	}
 
 	protected void onRouteSelected(MediaRouter router, RouteInfo route) {
 		// Send to JS client.
-		this.webView.sendJavascript("Chromecast.emit('routeSelected', " + route.getName() + ")");
+		this.webView.sendJavascript("Chromecast.emit('routeSelected', '"+route.getId()+"', '" + route.getName() + "')");
 	}
 
 	protected void onRouteUnselected(MediaRouter router, RouteInfo route) {
 		// Send to JS client.
-		this.webView.sendJavascript("Chromecast.emit('routeUnselected', " + route.getName() + ")");
+		this.webView.sendJavascript("Chromecast.emit('routeUnselected', '"+route.getId()+"', '" + route.getName() + "')");
 	}
 }
 

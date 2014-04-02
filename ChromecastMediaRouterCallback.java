@@ -1,4 +1,4 @@
-package com.videostream.chromecast;
+package com.your.company.HelloWorld;
 
 import java.util.ArrayList;
 
