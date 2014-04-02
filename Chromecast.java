@@ -133,6 +133,8 @@ public class Chromecast extends CordovaPlugin implements Cast.MessageReceivedCal
     			System.out.println(ex.getMessage());
     			return false;
     		}
+    	} else {
+    		cbContext.error("Already Launched");
     	}
 		return false;
     }
@@ -276,6 +278,10 @@ public class Chromecast extends CordovaPlugin implements Cast.MessageReceivedCal
 									sessionId = result.getSessionId();
 									String applicationStatus = result.getApplicationStatus();
 									boolean wasLaunched = result.getWasLaunched();
+
+									if (cbContext != null && !cbContext.isFinished()) {
+										cbContext.success();
+									}
 									try {
 										Cast.CastApi.setMessageReceivedCallbacks(mApiClient,
 												mRemoteMediaPlayer.getNamespace(), mRemoteMediaPlayer);
@@ -288,9 +294,6 @@ public class Chromecast extends CordovaPlugin implements Cast.MessageReceivedCal
 														if (!result.getStatus().isSuccess()) {
 															System.out.println("Failed to request status.");
 														}
-														if (cbContext != null && !cbContext.isFinished()) {
-															cbContext.success("launchSuccess");
-														}
 													}
 												});
 									} catch (IOException e) {
@@ -299,7 +302,7 @@ public class Chromecast extends CordovaPlugin implements Cast.MessageReceivedCal
 									}
 								} else {
 									if (cbContext != null && !cbContext.isFinished()) {
-										cbContext.equals("launchFailed");
+										cbContext.error("launchFailed");
 									}
 								}
 							}

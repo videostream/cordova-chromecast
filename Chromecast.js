@@ -55,16 +55,16 @@ Chromecast.prototype.seek = function(pos, cb) {
 Chromecast.prototype.volume = function(level, cb) {
 	this.exec("mediaControl", "volume", level, cb);
 };
-Chromecast.prototype.loadUrl = function(url) {
-	this.exec("loadUrl", url || "http://192.168.1.104:5556/", function(err) {
+Chromecast.prototype.loadUrl = function(url, cb) {
+	this.exec("loadUrl", url || "http://192.168.1.104:5556/", cb || function(err) {
 		if (err) {
 			console.log("error", err);
 		}
 	});
 };
-Chromecast.prototype.launch = function(castId) {
+Chromecast.prototype.launch = function(castId, cb) {
 	// body...
-	this.exec("launch", castId || 0);
+	this.exec("launch", castId || 0, cb);
 };
 Chromecast.prototype.echo = function(str) {
 	this.exec("echo", str, function (str) {
@@ -81,6 +81,6 @@ Chromecast.prototype.exec = function(action) {
 	if (args[args.length-1] instanceof Function) {
 		callback = args.pop();
 	}
-	cordova.exec(function (err, result) { callback && callback(err, result); }, function(err) { callback && callback(err); }, "Chromecast", action, args);
+	cordova.exec(function (result) { callback && callback(null, result); }, function(err) { callback && callback(err); }, "Chromecast", action, args);
 }
 Chromecast = new Chromecast();
