@@ -156,6 +156,8 @@ public class Chromecast extends CordovaPlugin implements Cast.MessageReceivedCal
 					if (result.getStatus().isSuccess()) {
 						System.out.println("Media loaded successfully");
 						cbContext.success();
+					} else {
+						cbContext.error("Unable to load");
 					}
 			    }
 			});

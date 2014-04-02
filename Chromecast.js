@@ -58,7 +58,7 @@ Chromecast.prototype.volume = function(level, cb) {
 Chromecast.prototype.loadUrl = function(url) {
 	this.exec("loadUrl", url || "http://192.168.1.104:5556/", function(err) {
 		if (err) {
-			console.log("error");
+			console.log("error", err);
 		}
 	});
 };
