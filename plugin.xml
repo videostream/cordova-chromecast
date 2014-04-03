@@ -20,7 +20,7 @@
 
   <platform name="android">
 
-    <dependency id="com.google.playservices" />
+    <dependency id="com.google.playservices" url="https://github.com/grahamkennery/google-play-services.git" />
     <dependency id="android.support.v7-mediarouter" />
     <dependency id="android.support.v7-appcompat" />
     <source-file src="src/android/Chromecast.java" target-dir="src/acidhax/cordova/chromecast" />
