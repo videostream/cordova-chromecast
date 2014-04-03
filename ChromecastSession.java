@@ -51,25 +51,29 @@ public class ChromecastSession implements GoogleApiClient.ConnectionCallbacks, O
 		this.device = CastDevice.getFromBundle(this.routeInfo.getExtras());
 	}
 	
-	public void connectToDevice(String AppID) {
+	public void launch(String AppID) {
 		this.AppID = AppID;
+		this.connectToDevice();
+	}
+	
+	private void connectToDevice() {
 		Cast.CastOptions.Builder apiOptionsBuilder = Cast.CastOptions
                 .builder(this.device, mCastClientListener);
 		this.mApiClient = new GoogleApiClient.Builder(cordova.getActivity().getApplicationContext())
-		.addApi(Cast.API, apiOptionsBuilder.build())
-        .addConnectionCallbacks(this)
-        .addOnConnectionFailedListener(this)
-        .build();
+			.addApi(Cast.API, apiOptionsBuilder.build())
+	        .addConnectionCallbacks(this)
+	        .addOnConnectionFailedListener(this)
+	        .build();
 		
 		this.mApiClient.connect();
 	}
 	
-	public void launchApplication() {
+	private void launchApplication() {
 		Cast.CastApi.launchApplication(mApiClient, this.AppID, false)
 		.setResultCallback(launchApplicationResultCallback);
 	}
 	
-	public void connectRemoteMediaPlayer() throws IllegalStateException, IOException {
+	private void connectRemoteMediaPlayer() throws IllegalStateException, IOException {
 		Cast.CastApi.setMessageReceivedCallbacks(mApiClient, mRemoteMediaPlayer.getNamespace(), mRemoteMediaPlayer);
 		mRemoteMediaPlayer.requestStatus(mApiClient)
 		.setResultCallback(connectRemoteMediaPlayerCallback);
