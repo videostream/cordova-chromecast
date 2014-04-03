@@ -14,4 +14,9 @@ Chromecast.on("volumeChanged", callback);
 Chromecast.on("applicationStatusChanged", callback);
 Chromecast.on("disconnect", callback);
 Chromecast.on("message", callback);
+Chromecast.play(callback);
+Chromecast.pause(callback);
+Chromecast.stop(callback);
+Chromecast.seek(seekPosition, callback);
+Chromecast.setVolume(volumePercentage, callback);
 ```
