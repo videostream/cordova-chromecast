@@ -1,13 +1,20 @@
 package com.your.company.HelloWorld;
 
+import java.io.IOException;
+
+import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
 
 import com.google.android.gms.cast.Cast;
+import com.google.android.gms.cast.Cast.ApplicationConnectionResult;
 import com.google.android.gms.cast.CastDevice;
 import com.google.android.gms.cast.RemoteMediaPlayer;
 import com.google.android.gms.cast.Cast.Listener;
+import com.google.android.gms.cast.RemoteMediaPlayer.MediaChannelResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 
 import android.app.Activity;
@@ -28,6 +35,7 @@ public class ChromecastSession implements GoogleApiClient.ConnectionCallbacks, O
 	private CastDevice device = null;
 	private ChromecastMediaController controller = new ChromecastMediaController(mRemoteMediaPlayer);
 	private Listener mCastClientListener;
+	private String AppID;
 	
 	public ChromecastSession(CordovaInterface cordovaInterface) {
 		this.cordova = cordovaInterface;
@@ -37,11 +45,14 @@ public class ChromecastSession implements GoogleApiClient.ConnectionCallbacks, O
         	public void onApplicationDisconnected(int errorCode) {}
         };
 	}
+	
 	public void setRouteInfo(RouteInfo routeInfo) {
 		this.routeInfo = routeInfo;
 		this.device = CastDevice.getFromBundle(this.routeInfo.getExtras());
 	}
-	public void launchApp(String AppId) {
+	
+	public void connectToDevice(String AppID) {
+		this.AppID = AppID;
 		Cast.CastOptions.Builder apiOptionsBuilder = Cast.CastOptions
                 .builder(this.device, mCastClientListener);
 		this.mApiClient = new GoogleApiClient.Builder(cordova.getActivity().getApplicationContext())
@@ -49,7 +60,42 @@ public class ChromecastSession implements GoogleApiClient.ConnectionCallbacks, O
         .addConnectionCallbacks(this)
         .addOnConnectionFailedListener(this)
         .build();
+		
+		this.mApiClient.connect();
 	}
+	
+	public void launchApplication() {
+		Cast.CastApi.launchApplication(mApiClient, this.AppID, false)
+		.setResultCallback(launchApplicationResultCallback);
+	}
+	
+	public void connectRemoteMediaPlayer() throws IllegalStateException, IOException {
+		Cast.CastApi.setMessageReceivedCallbacks(mApiClient, mRemoteMediaPlayer.getNamespace(), mRemoteMediaPlayer);
+		mRemoteMediaPlayer.requestStatus(mApiClient)
+		.setResultCallback(connectRemoteMediaPlayerCallback);
+	}
+	
+	private ResultCallback<Cast.ApplicationConnectionResult> launchApplicationResultCallback = new ResultCallback<Cast.ApplicationConnectionResult>() {
+		@Override
+		public void onResult(ApplicationConnectionResult result) {
+			Status status = result.getStatus();
+			if (status.isSuccess()) {
+				
+			} else {
+				
+			}
+		}
+		
+	};
+	
+	private ResultCallback<RemoteMediaPlayer.MediaChannelResult> connectRemoteMediaPlayerCallback = new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
+		@Override
+		public void onResult(MediaChannelResult result) {
+			if (!result.getStatus().isSuccess()) {
+				System.out.println("Failed to request status.");
+			}
+		}
+	};
 	
 	/*
 	 * For Google API Client.
@@ -58,7 +104,7 @@ public class ChromecastSession implements GoogleApiClient.ConnectionCallbacks, O
 	 */
 	@Override
 	public void onConnected(Bundle connectionHint) {
-		
+		this.launchApplication();
 	}
 	@Override
 	public void onConnectionSuspended(int cause) {
