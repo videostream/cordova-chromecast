@@ -114,7 +114,6 @@ public class Chromecast extends CordovaPlugin implements Cast.MessageReceivedCal
         	this.launchCallback = cbContext;
         	RouteInfo info = mMediaRouterCallback.getRoute(id);
         	mSelectedDevice = CastDevice.getFromBundle(info.getExtras());
-//        	String routeId = info.getId();
         	
         	Cast.CastOptions.Builder apiOptionsBuilder = Cast.CastOptions
                     .builder(mSelectedDevice, mCastClientListener);

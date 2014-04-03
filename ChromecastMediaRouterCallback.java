@@ -21,7 +21,6 @@ public class ChromecastMediaRouterCallback extends MediaRouter.Callback {
 			}
 		}
 		return null;
-//		return routes.get(index);
 	}
 	public RouteInfo getRoute(int index) {
 		return routes.get(index);
