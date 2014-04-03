@@ -5,7 +5,7 @@ var Chromecast = function () {
 	if (!Chromecast.instance) {
 		Chromecast.instance = this;
 		this.initialize();
-		this.getDevices();
+		// this.getDevices();
 		this.devices = {};
 		return this;
 	}
@@ -67,8 +67,8 @@ Chromecast.prototype.echo = function(str) {
 		alert(str);
 	})
 };
-Chromecast.prototype.getDevices = function() {
-	this.exec("getDevices");
+Chromecast.prototype.getDevices = function(appId) {
+	this.exec("getDevices", appId);
 };
 Chromecast.prototype.exec = function(action) {
 	var args = [].slice.call(arguments);
