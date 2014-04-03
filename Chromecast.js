@@ -41,19 +41,19 @@ Chromecast.prototype.initialize = function() {
 	});
 };
 Chromecast.prototype.play = function(cb) {
-	this.exec("mediaControl", "play", cb);
+	this.exec("play", cb);
 };
 Chromecast.prototype.pause = function(cb) {
-	this.exec("mediaControl", "pause", cb);
+	this.exec("pause", cb);
 };
 Chromecast.prototype.stop = function(cb) {
-	this.exec("mediaControl", "stop", cb);
+	this.exec("stop", cb);
 };
 Chromecast.prototype.seek = function(pos, cb) {
-	this.exec("mediaControl", "seek", pos, cb);
+	this.exec("seek", pos, cb);
 };
 Chromecast.prototype.volume = function(level, cb) {
-	this.exec("mediaControl", "volume", level, cb);
+	this.exec("volume", level, cb);
 };
 Chromecast.prototype.loadUrl = function(url, cb) {
 	this.exec("loadUrl", url || "http://192.168.1.104:5556/", cb || function(err) {
