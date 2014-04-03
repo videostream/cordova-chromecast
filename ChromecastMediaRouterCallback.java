@@ -13,7 +13,16 @@ public class ChromecastMediaRouterCallback extends MediaRouter.Callback {
 	public void registerCallbacks(Chromecast instance) {
 		this.callback = instance;
 	}
-	
+
+	public RouteInfo getRoute(String id) {
+		for (RouteInfo i : this.routes) {
+			if (i.getId().equals(id)) {
+				return i;
+			}
+		}
+		return null;
+//		return routes.get(index);
+	}
 	public RouteInfo getRoute(int index) {
 		return routes.get(index);
 	}

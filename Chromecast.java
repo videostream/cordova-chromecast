@@ -110,9 +110,9 @@ public class Chromecast extends CordovaPlugin implements Cast.MessageReceivedCal
     
     public boolean launch (JSONArray args, CallbackContext cbContext) throws JSONException {
     	if (mApiClient == null || (!mApiClient.isConnected() && !mApiClient.isConnecting())) {
-        	int index = args.getInt(0);
+        	String id = args.getString(0);
         	this.launchCallback = cbContext;
-        	RouteInfo info = mMediaRouterCallback.getRoute(index);
+        	RouteInfo info = mMediaRouterCallback.getRoute(id);
         	mSelectedDevice = CastDevice.getFromBundle(info.getExtras());
 //        	String routeId = info.getId();
         	
