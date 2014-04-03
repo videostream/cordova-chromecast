@@ -1,4 +1,4 @@
-package com.your.company.HelloWorld;
+package acidhax.cordova.chromecast;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
