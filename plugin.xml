@@ -21,8 +21,8 @@
   <platform name="android">
 
     <dependency id="com.google.playservices" url="https://github.com/grahamkennery/google-play-services.git" />
-    <dependency id="android.support.v7-mediarouter" />
-    <dependency id="android.support.v7-appcompat" />
+    <dependency id="android.support.v7-mediarouter" url="https://github.com/grahamkennery/cordova-plugin-android-support-v7-mediarouter.git"/>
+    <dependency id="android.support.v7-appcompat" url="https://github.com/grahamkennery/cordova-plugin-android-support-v7-appcompat.git"/>
     <source-file src="src/android/Chromecast.java" target-dir="src/acidhax/cordova/chromecast" />
     <source-file src="src/android/ChromecastMediaController.java" target-dir="src/acidhax/cordova/chromecast" />
     <source-file src="src/android/ChromecastMediaRouterCallback.java" target-dir="src/acidhax/cordova/chromecast" />
