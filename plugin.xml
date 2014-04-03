@@ -22,10 +22,11 @@
   </js-module>
 
   <platform name="android">
-    <source-file src="src/android/Chromecast.java" target-dir="src/org/apache/cordova" />
-    <source-file src="src/android/ChromecastMediaController.java" target-dir="src/org/apache/cordova" />
-    <source-file src="src/android/ChromecastMediaRouterCallback.java" target-dir="src/org/apache/cordova" />
-    <source-file src="src/android/ChromecastSession.java" target-dir="src/org/apache/cordova" />
+    <source-file src="src/android/Chromecast.java" target-dir="src/acidhax/cordova/chromecast" />
+    <source-file src="src/android/ChromecastMediaController.java" target-dir="src/acidhax/cordova/chromecast" />
+    <source-file src="src/android/ChromecastMediaRouterCallback.java" target-dir="src/acidhax/cordova/chromecast" />
+    <source-file src="src/android/ChromecastSession.java" target-dir="src/acidhax/cordova/chromecast" />
+    <source-file src="src/android/ChromecastException.java" target-dir="src/acidhax/cordova/chromecast" />
 
     <config-file target="res/xml/config.xml" parent="/widget">
       <feature name="Chromecast">
