@@ -10,10 +10,10 @@
   <name>Cordova ChromeCast</name>
 
   <js-module src="Chromecast.js" name="Chromecast">
-    <!--
-      <clobbers target="chromecast" />
-    -->
+    <clobbers target="chromecast" />
   </js-module>
+
+  <js-module src="EventEmitter.js" name="EventEmitter"></js-module>
 
   <js-module src="tests/tests.js" name="tests">
   </js-module>

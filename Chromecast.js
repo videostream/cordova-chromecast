@@ -1,3 +1,5 @@
+var EventEmitter = require('acidhax.cordova.chromecast.EventEmitter');
+
 var Chromecast = function () {
 	EventEmitter.call(this);
 	if (!Chromecast.instance) {
