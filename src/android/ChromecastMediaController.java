@@ -1,4 +1,4 @@
-package com.your.company.HelloWorld;
+package acidhax.cordova.chromecast;
 
 import com.google.android.gms.cast.RemoteMediaPlayer;
 
