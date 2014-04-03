@@ -83,4 +83,5 @@ Chromecast.prototype.exec = function(action) {
 	}
 	cordova.exec(function (result) { callback && callback(null, result); }, function(err) { callback && callback(err); }, "Chromecast", action, args);
 }
-Chromecast = new Chromecast();
+
+module.exports = new Chromecast();
