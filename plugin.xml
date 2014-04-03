@@ -8,9 +8,6 @@
   </engines>
 
   <name>Cordova ChromeCast</name>
-  <!--
-    <dependency id="org.apache.cordova.file" version="1.0.1" />
-  -->
 
   <js-module src="Chromecast.js" name="Chromecast">
     <!--
@@ -22,10 +19,14 @@
   </js-module>
 
   <platform name="android">
-    <source-file src="src/android/Chromecast.java" target-dir="src/acidhax/cordova/chromecast" />
-    <source-file src="src/android/ChromecastMediaController.java" target-dir="src/acidhax/cordova/chromecast" />
-    <source-file src="src/android/ChromecastMediaRouterCallback.java" target-dir="src/acidhax/cordova/chromecast" />
-    <source-file src="src/android/ChromecastSession.java" target-dir="src/acidhax/cordova/chromecast" />
+
+    <dependency id="com.google.playservices" />
+    <dependency id="android.support.v7-mediarouter" />
+    <dependency id="android.support.v7-appcompat" />
+    <source-file src="src/android/Chromecast.java" target-dir="rc/acidhax/cordova/chromecast" />
+    <source-file src="src/android/ChromecastMediaController.java" target-dir="rc/acidhax/cordova/chromecast" />
+    <source-file src="src/android/ChromecastMediaRouterCallback.java" target-dir="rc/acidhax/cordova/chromecast" />
+    <source-file src="src/android/ChromecastSession.java" target-dir="rc/acidhax/cordova/chromecast" />
     <source-file src="src/android/ChromecastException.java" target-dir="src/acidhax/cordova/chromecast" />
 
     <config-file target="res/xml/config.xml" parent="/widget">
