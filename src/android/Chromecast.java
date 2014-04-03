@@ -190,19 +190,19 @@ public class Chromecast extends CordovaPlugin {
     
 	
 	protected void onRouteAdded(MediaRouter router, RouteInfo route) {
-		this.webView.sendJavascript("Chromecast.emit('device', '"+route.getId()+"', '" + route.getName() + "')");
+		this.webView.sendJavascript("chromecast.emit('device', '"+route.getId()+"', '" + route.getName() + "')");
 	}
 
 	protected void onRouteRemoved(MediaRouter router, RouteInfo route) {
-		this.webView.sendJavascript("Chromecast.emit('deviceRemoved', '"+route.getId()+"', '" + route.getName() + "')");
+		this.webView.sendJavascript("chromecast.emit('deviceRemoved', '"+route.getId()+"', '" + route.getName() + "')");
 	}
 
 	protected void onRouteSelected(MediaRouter router, RouteInfo route) {
-		this.webView.sendJavascript("Chromecast.emit('routeSelected', '"+route.getId()+"', '" + route.getName() + "')");
+		this.webView.sendJavascript("chromecast.emit('routeSelected', '"+route.getId()+"', '" + route.getName() + "')");
 	}
 
 	protected void onRouteUnselected(MediaRouter router, RouteInfo route) {
-		this.webView.sendJavascript("Chromecast.emit('routeUnselected', '"+route.getId()+"', '" + route.getName() + "')");
+		this.webView.sendJavascript("chromecast.emit('routeUnselected', '"+route.getId()+"', '" + route.getName() + "')");
 	}
 }
 
