@@ -84,7 +84,11 @@ public class ChromecastSession implements GoogleApiClient.ConnectionCallbacks, O
 		public void onResult(ApplicationConnectionResult result) {
 			Status status = result.getStatus();
 			if (status.isSuccess()) {
-				
+				try {
+					connectRemoteMediaPlayer();
+				} catch (IllegalStateException | IOException e) {
+					e.printStackTrace();
+				}
 			} else {
 				
 			}
@@ -95,7 +99,9 @@ public class ChromecastSession implements GoogleApiClient.ConnectionCallbacks, O
 	private ResultCallback<RemoteMediaPlayer.MediaChannelResult> connectRemoteMediaPlayerCallback = new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
 		@Override
 		public void onResult(MediaChannelResult result) {
-			if (!result.getStatus().isSuccess()) {
+			if (result.getStatus().isSuccess()) {
+				
+			} else {
 				System.out.println("Failed to request status.");
 			}
 		}
