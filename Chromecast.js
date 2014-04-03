@@ -21,12 +21,6 @@ Chromecast.prototype.initialize = function() {
 	this.on("deviceRemoved", function (id, deviceName) {
 		// 
 	});
-	this.on("launch", function () {
-		// 
-	});
-	this.on("launchFailed", function () {
-		// 
-	});
 	this.on("volumeChanged", function () {
 		// 
 	});
@@ -67,7 +61,7 @@ Chromecast.prototype.launch = function(castId, cb) {
 	this.exec("launch", castId || 0, cb);
 };
 Chromecast.prototype.echo = function(str) {
-	this.exec("echo", str, function (str) {
+	this.exec("echo", str, function (err, str) {
 		alert(str);
 	})
 };
