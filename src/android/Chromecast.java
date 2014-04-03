@@ -80,11 +80,24 @@ public class Chromecast extends CordovaPlugin implements Cast.MessageReceivedCal
 		}
     }
     
+    /**
+     * Execute function - Just echos - yay test
+     * @param args
+     * @param cbContext
+     * @return
+     * @throws JSONException
+     */
     public boolean echo (JSONArray args, CallbackContext cbContext) throws JSONException {
     	cbContext.success(args.getString(0));
     	return true;
     }
     
+    /**
+     * Execute function - Begins populating available Chromecast devices for a given appId 
+     * @param args
+     * @param cbContext
+     * @return
+     */
     public boolean getDevices (JSONArray args, final CallbackContext cbContext) {
     	final Activity activity = cordova.getActivity();
         final Chromecast that = this;
@@ -102,12 +115,26 @@ public class Chromecast extends CordovaPlugin implements Cast.MessageReceivedCal
         return true;
     }
     
+    /**
+     * Execute function - Returns more information on a specific Chromecast device
+     * TODO: Make it work
+     * @param args
+     * @param cbContext
+     * @throws JSONException
+     */
     public void getRoute(JSONArray args, CallbackContext cbContext) throws JSONException {
     	int index = args.getInt(0);
     	RouteInfo info = mMediaRouterCallback.getRoute(index);
     	cbContext.success(info.getName());
     }
     
+    /**
+     * Execute function - Launches a specific AppId on a Chromecast device
+     * @param args
+     * @param cbContext
+     * @return
+     * @throws JSONException
+     */
     public boolean launch (JSONArray args, CallbackContext cbContext) throws JSONException {
     	if (mApiClient == null || (!mApiClient.isConnected() && !mApiClient.isConnecting())) {
         	String id = args.getString(0);
@@ -138,6 +165,14 @@ public class Chromecast extends CordovaPlugin implements Cast.MessageReceivedCal
 		return false;
     }
     
+    
+    /**
+     * Execute function - Loads a URL in an app that supports the Chromecast MediaReceiver
+     * @param args
+     * @param cbContext
+     * @return
+     * @throws JSONException
+     */
     public boolean loadUrl (JSONArray args, final CallbackContext cbContext) throws JSONException {
     	String url = args.getString(0);
     	MediaMetadata mediaMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
@@ -176,8 +211,14 @@ public class Chromecast extends CordovaPlugin implements Cast.MessageReceivedCal
     	return true;
     }
     
-    /*
-     * Chromecast Media Controls
+    /**
+     * Execute function - passes media control commands to the MediaReceiver
+     * TODO: Break into smaller functions: play, pause, stop, etc
+     * @param args
+     * @param cbContext
+     * @return
+     * @throws IllegalArgumentException
+     * @throws JSONException
      */
     public boolean mediaControl(final JSONArray args, final CallbackContext cbContext) throws IllegalArgumentException, JSONException {
 		final String action = args.getString(0);
