@@ -58,9 +58,9 @@ Chromecast.prototype.loadUrl = function(url, cb) {
 		}
 	});
 };
-Chromecast.prototype.launch = function(castId, cb) {
+Chromecast.prototype.launch = function(castId, appId, cb) {
 	// body...
-	this.exec("launch", castId || 0, cb);
+	this.exec("launch", castId || 0, appId, cb);
 };
 Chromecast.prototype.echo = function(str) {
 	this.exec("echo", str, function (err, str) {

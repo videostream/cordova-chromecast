@@ -1,8 +1,11 @@
 exports.init = function() {
   eval(require('org.apache.cordova.test-framework.test').injectJasmineInterface(this, 'this'));
-  jasmine.DEFAULT_TIMEOUT_INTERVAL = 5000;
+  jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
 
   var cc = require('acidhax.cordova.chromecast.Chromecast');
+
+  var defaultReceiverAppId = 'CC1AD845';
+  var videoUrl = 'http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4';
 
   describe('Chromecast', function () {
     var fail = function(done, why) {
@@ -14,18 +17,42 @@ exports.init = function() {
     };
 
     it("should contain definitions", function() {
-      expect(typeof cc.initialize).toBeDefined();
-      expect(typeof cc.play).toBeDefined();
-      expect(typeof cc.pause).toBeDefined();
-      expect(typeof cc.stop).toBeDefined();
-      expect(typeof cc.seek).toBeDefined();
-      expect(typeof cc.volume).toBeDefined();
-      expect(typeof cc.loadUrl).toBeDefined();
-      expect(typeof cc.launch).toBeDefined();
-      expect(typeof cc.echo).toBeDefined();
-      expect(typeof cc.getDevices).toBeDefined();
-      expect(typeof cc.initialize).toBeDefined();
+      expect(typeof chromecast.getDevices).toBeDefined();
+      expect(typeof chromecast.launch).toBeDefined();
+      expect(typeof chromecast.play).toBeDefined();
+      expect(typeof chromecast.pause).toBeDefined();
+      expect(typeof chromecast.stop).toBeDefined();
+      expect(typeof chromecast.seek).toBeDefined();
+      expect(typeof chromecast.volume).toBeDefined();
+      expect(typeof chromecast.loadUrl).toBeDefined();
+      expect(typeof chromecast.echo).toBeDefined();
     });
+
+    it('discovering and launching', function(done) {
+      var onDevice = function(deviceId, deviceName) {
+
+        chromecast.removeListener('device', onDevice);
+
+        expect(deviceId).toBeDefined();
+        expect(deviceName).toBeDefined();
+
+        chromecast.launch(deviceId, defaultReceiverAppId, function(err) {
+          expect(err).toEqual(null);
+          setTimeout(done, 2000);
+        });
+      };
+
+      chromecast.on('device', onDevice);
+      chromecast.getDevices(defaultReceiverAppId);
+    });
+
+    it('loading a url', function(done) {
+      chromecast.loadUrl(videoUrl, function(err) {
+        expect(err).toEqual(null);
+        done();
+      })
+    });
+
   });
 };
 
