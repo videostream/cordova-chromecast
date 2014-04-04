@@ -121,14 +121,20 @@ public class Chromecast extends CordovaPlugin {
      * @param cbContext
      * @throws JSONException
      */
-    public boolean getRoute(JSONArray args, CallbackContext cbContext) throws JSONException {
-    	String index = args.getString(0);
-    	RouteInfo info = mMediaRouterCallback.getRoute(index);
-        if (info != null) {
-            cbContext.success(info.getName());    
-        } else {
-            cbContext.error("No route found in " + mMediaRouterCallback.getRoutes().size() + " route(s)");
-        }
+    public boolean getRoute(JSONArray args, final CallbackContext cbContext) throws JSONException {
+    	final Activity activity = cordova.getActivity();
+    	final String index = args.getString(0);
+
+        activity.runOnUiThread(new Runnable() {
+        	public void run() {
+            	RouteInfo info = mMediaRouterCallback.getRoute(index);
+                if (info != null) {
+                    cbContext.success(info.getName());    
+                } else {
+                    cbContext.error("No route found in " + mMediaRouterCallback.getRoutes().size() + " route(s)");
+                }
+        	}
+        });
     	
         return true;
     }
