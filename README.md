@@ -3,6 +3,7 @@ cordova-chromecast
 
 Chromecast running in Cordova
 
+Events:
 ```
 Chromecast.on("device", function (deviceId, deviceName) {
 });
@@ -17,6 +18,10 @@ Chromecast.on("disconnect", function () {
 Chromecast.on("message", function (namespace, message) {
 });
 
+```
+
+Controls:
+```
 Chromecast.launch(chromecastId, callback);
 Chromecast.loadUrl(url, callback);
 Chromecast.play(callback);
