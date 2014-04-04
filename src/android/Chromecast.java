@@ -1,19 +1,10 @@
 package acidhax.cordova.chromecast;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 
 import com.google.android.gms.cast.*;
-import com.google.android.gms.cast.Cast.ApplicationConnectionResult;
-import com.google.android.gms.cast.Cast.Listener;
-import com.google.android.gms.cast.RemoteMediaPlayer.MediaChannelResult;
-import com.google.android.gms.cast.RemoteMediaPlayer.OnStatusUpdatedListener;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
 
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CordovaWebView;
@@ -23,7 +14,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import android.app.Activity;
-import android.os.Bundle;
 import android.support.v7.media.MediaRouter;
 import android.support.v7.media.MediaRouteSelector;
 import android.support.v7.media.MediaRouter.RouteInfo;
@@ -48,16 +38,37 @@ public class Chromecast extends CordovaPlugin {
     		Method methodToExecute = null;
     		for (Method method : list) {
     			if (method.getName().equals(action)) {
-    				methodToExecute = method;
-    				break;
+    				Type[] types = method.getGenericParameterTypes();
+    				if (args.length() + 1 == types.length) { // +1 is the cbContext
+    					boolean isValid = false;
+        				for (int i = 0; i < args.length(); i++) {
+            				Class arg = args.get(i).getClass();
+            				if (types[i] == arg) {
+            					isValid = true;
+            				} else {
+            					isValid = false;
+            					break;
+            				}
+        				}
+        				if (isValid) {
+            				methodToExecute = method;
+            				break;
+        				}
+    				}
     			}
     		}
     		if (methodToExecute != null) {
+    			Type[] types = methodToExecute.getGenericParameterTypes();
+    			Object[] variableArgs = new Object[types.length];
+    			for (int i = 0; i < args.length(); i++) {
+    				variableArgs[i] = args.get(i);
+    			}
+    			variableArgs[variableArgs.length-1] = cbContext;
         		Class<?> r = methodToExecute.getReturnType();
         		if (r == boolean.class) {
-            		return (Boolean) methodToExecute.invoke(this, args, cbContext);
+            		return (Boolean) methodToExecute.invoke(this, variableArgs);
         		} else {
-        			methodToExecute.invoke(this, args, cbContext);
+        			methodToExecute.invoke(this, variableArgs);
         			return true;
         		}
     		} else {
@@ -82,8 +93,8 @@ public class Chromecast extends CordovaPlugin {
      * @return
      * @throws JSONException
      */
-    public boolean echo (JSONArray args, CallbackContext cbContext) throws JSONException {
-    	cbContext.success(args.getString(0));
+    public boolean echo (String echo, CallbackContext cbContext) throws JSONException {
+    	cbContext.success(echo);
     	return true;
     }
     
@@ -93,10 +104,9 @@ public class Chromecast extends CordovaPlugin {
      * @param cbContext
      * @return
      */
-    public boolean getDevices (JSONArray args, final CallbackContext cbContext) throws JSONException {
+    public boolean getDevices (final String appId, final CallbackContext cbContext) throws JSONException {
     	final Activity activity = cordova.getActivity();
         final Chromecast that = this;
-        final String appId = args.getString(0);
         activity.runOnUiThread(new Runnable() {
         	public void run() {
         		mMediaRouter = MediaRouter.getInstance(activity.getApplicationContext());
@@ -121,9 +131,8 @@ public class Chromecast extends CordovaPlugin {
      * @param cbContext
      * @throws JSONException
      */
-    public boolean getRoute(JSONArray args, final CallbackContext cbContext) throws JSONException {
+    public boolean getRoute(final String index, final CallbackContext cbContext) throws JSONException {
     	final Activity activity = cordova.getActivity();
-    	final String index = args.getString(0);
 
         activity.runOnUiThread(new Runnable() {
         	public void run() {
@@ -146,9 +155,7 @@ public class Chromecast extends CordovaPlugin {
      * @return
      * @throws JSONException
      */
-    public boolean launch (JSONArray args, CallbackContext callbackContext) throws JSONException {
-    	String id = args.getString(0);
-    	String appId = args.getString(1);
+    public boolean launch (String deviceId, String appId, CallbackContext callbackContext) throws JSONException {
     	RouteInfo info = mMediaRouterCallback.getRoute(id);
     	
     	if (this.currentSession == null) {
@@ -174,7 +181,7 @@ public class Chromecast extends CordovaPlugin {
      * @param callbackContext
      * @return
      */
-    public boolean kill (JSONArray args, CallbackContext callbackContext) {
+    public boolean kill (CallbackContext callbackContext) {
     	if (this.currentSession != null) {
     		this.currentSession.kill(callbackContext);
     		this.currentSession = null;
@@ -190,35 +197,32 @@ public class Chromecast extends CordovaPlugin {
      * @return
      * @throws JSONException
      */
-    public boolean loadUrl(JSONArray args, final CallbackContext callbackContext) throws JSONException {
-    	String url = args.getString(0);
+    public boolean loadUrl(String url, final CallbackContext callbackContext) throws JSONException {
     	return this.currentSession.loadUrl(url, callbackContext);
     }
     
     
-    public boolean play(JSONArray args, CallbackContext callbackContext) {
+    public boolean play(CallbackContext callbackContext) {
     	currentSession.play(callbackContext);
     	return true;
     }
     
-    public boolean pause(JSONArray args, CallbackContext callbackContext) {
+    public boolean pause(CallbackContext callbackContext) {
     	currentSession.pause(callbackContext);
     	return true;
     }
     
-    public boolean stop(JSONArray args, CallbackContext callbackContext) {
+    public boolean stop(CallbackContext callbackContext) {
     	currentSession.stop(callbackContext);
     	return true;
     }
     
-    public boolean seek(JSONArray args, CallbackContext callbackContext) throws JSONException {
-    	long seekTime = args.getLong(0);
+    public boolean seek(long seekTime, CallbackContext callbackContext) throws JSONException {
     	currentSession.seek(seekTime, callbackContext);
     	return true;
     }
     
-    public boolean setVolume(JSONArray args, CallbackContext callbackContext) throws JSONException {
-    	double volume = args.getDouble(0);
+    public boolean setVolume(double volume, CallbackContext callbackContext) throws JSONException {
     	currentSession.setVolume(volume, callbackContext);
     	return true;
     }

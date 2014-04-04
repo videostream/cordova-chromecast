@@ -10,15 +10,12 @@ import com.google.android.gms.cast.Cast.ApplicationConnectionResult;
 import com.google.android.gms.cast.CastDevice;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.RemoteMediaPlayer;
-import com.google.android.gms.cast.Cast.Listener;
 import com.google.android.gms.cast.RemoteMediaPlayer.MediaChannelResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.support.v7.media.MediaRouter.RouteInfo;
 
