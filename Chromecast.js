@@ -67,6 +67,9 @@ Chromecast.prototype.echo = function(str) {
 		alert(str);
 	})
 };
+Chromecast.prototype.kill = function(cb) {
+	this.exec("kill", cb);
+};
 Chromecast.prototype.getDevices = function(appId) {
 	this.exec("getDevices", appId);
 };

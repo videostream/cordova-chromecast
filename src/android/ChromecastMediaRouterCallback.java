@@ -1,6 +1,7 @@
 package acidhax.cordova.chromecast;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 import android.support.v7.media.MediaRouter;
 import android.support.v7.media.MediaRouter.RouteInfo;
@@ -22,9 +23,15 @@ public class ChromecastMediaRouterCallback extends MediaRouter.Callback {
 		}
 		return null;
 	}
+
 	public RouteInfo getRoute(int index) {
 		return routes.get(index);
 	}
+
+	public Collection<RouteInfo> getRoutes() {
+		return routes;
+	}
+
 	@Override
 	public void onRouteAdded(MediaRouter router, RouteInfo route) {
 		routes.add(route);

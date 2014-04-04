@@ -82,6 +82,13 @@ exports.init = function() {
       });
     });
 
+    it('kill', function(done) {
+      chromecast.kill(function(err) {
+        expect(err).toEqual(null);
+        setTimeout(done, 5000);
+      });
+    });
+
   });
 };
 
