@@ -224,9 +224,21 @@ public class Chromecast extends CordovaPlugin {
     }
     
 	
-	protected void onRouteAdded(MediaRouter router, RouteInfo route) {
-		this.webView.sendJavascript("chromecast.emit('device', '"+route.getId()+"', '" + route.getName() + "')");
-	}
+	protected void onRouteAdded(MediaRouter router, final RouteInfo route) {
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(500);
+                    Chromecast.this.webView.sendJavascript("chromecast.emit('device', '"+route.getId()+"', '" + route.getName() + "')");
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            
+        }).start();
+    }
 
 	protected void onRouteRemoved(MediaRouter router, RouteInfo route) {
 		this.webView.sendJavascript("chromecast.emit('deviceRemoved', '"+route.getId()+"', '" + route.getName() + "')");

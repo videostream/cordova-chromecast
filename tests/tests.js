@@ -2,7 +2,7 @@ exports.init = function() {
   eval(require('org.apache.cordova.test-framework.test').injectJasmineInterface(this, 'this'));
   jasmine.DEFAULT_TIMEOUT_INTERVAL = 25000;
 
-  var cc = require('acidhax.cordova.chromecast.Chromecast');
+  // var cc = require('acidhax.cordova.chromecast.Chromecast');
 
   var defaultReceiverAppId = 'CC1AD845';
   var videoUrl = 'http://s3.nwgat.net/flvplayers3/bbb.mp4';

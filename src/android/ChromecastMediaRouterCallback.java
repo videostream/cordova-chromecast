@@ -7,7 +7,7 @@ import android.support.v7.media.MediaRouter;
 import android.support.v7.media.MediaRouter.RouteInfo;
 
 public class ChromecastMediaRouterCallback extends MediaRouter.Callback {
-	private ArrayList<RouteInfo> routes = new ArrayList<RouteInfo>();
+	private final ArrayList<RouteInfo> routes = new ArrayList<RouteInfo>();
 	
 	private Chromecast callback = null;
 	
@@ -15,7 +15,7 @@ public class ChromecastMediaRouterCallback extends MediaRouter.Callback {
 		this.callback = instance;
 	}
 
-	public RouteInfo getRoute(String id) {
+	public synchronized RouteInfo getRoute(String id) {
 		for (RouteInfo i : this.routes) {
 			if (i.getId().equals(id)) {
 				return i;
@@ -24,16 +24,16 @@ public class ChromecastMediaRouterCallback extends MediaRouter.Callback {
 		return null;
 	}
 
-	public RouteInfo getRoute(int index) {
+	public synchronized RouteInfo getRoute(int index) {
 		return routes.get(index);
 	}
 
-	public Collection<RouteInfo> getRoutes() {
+	public synchronized Collection<RouteInfo> getRoutes() {
 		return routes;
 	}
 
 	@Override
-	public void onRouteAdded(MediaRouter router, RouteInfo route) {
+	public synchronized void onRouteAdded(MediaRouter router, RouteInfo route) {
 		routes.add(route);
 		if (this.callback != null) {
 			this.callback.onRouteAdded(router, route);
