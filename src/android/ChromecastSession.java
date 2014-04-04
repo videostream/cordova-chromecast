@@ -61,6 +61,7 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 		this.mRemoteMediaPlayer.stop(mApiClient).setResultCallback(new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
 			@Override
 			public void onResult(MediaChannelResult result) {
+				Cast.CastApi.stopApplication(mApiClient);
 				mApiClient.disconnect();
 				killContext.success();
 			}
