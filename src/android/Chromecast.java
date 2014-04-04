@@ -147,6 +147,19 @@ public class Chromecast extends CordovaPlugin {
     	return true;
     }
     
+    /**
+     * Kill the session. Stops as well.
+     * @param args
+     * @param callbackContext
+     * @return
+     */
+    public boolean kill (JSONArray args, CallbackContext callbackContext) {
+    	if (this.currentSession != null) {
+    		this.currentSession.kill(callbackContext);
+    		this.currentSession = null;
+    	}
+    	return true;
+    }
     
     /**
      * Execute function - Loads a URL in an app that supports the Chromecast MediaReceiver
