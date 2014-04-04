@@ -1,6 +1,6 @@
 exports.init = function() {
   eval(require('org.apache.cordova.test-framework.test').injectJasmineInterface(this, 'this'));
-  jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000;
+  jasmine.DEFAULT_TIMEOUT_INTERVAL = 25000;
 
   var cc = require('acidhax.cordova.chromecast.Chromecast');
 
@@ -50,22 +50,36 @@ exports.init = function() {
     it('loading a url', function(done) {
       chromecast.loadUrl(videoUrl, function(err) {
         expect(err).toEqual(null);
-        setTimeout(done, 2000);
+        setTimeout(done, 5000);
       })
     });
 
-    it('pausing', function(done) {
-      chrome.pause(function(err) {
+    it('pause', function(done) {
+      chromecast.pause(function(err) {
         expect(err).toEqual(null);
-        setTimeout(done, 1000);
+        setTimeout(done, 5000);
       })
     });
 
-    it('playing', function(done) {
-      chrome.pause(function(err) {
+    it('play', function(done) {
+      chromecast.play(function(err) {
         expect(err).toEqual(null);
-        setTimeout(done, 1000);
+        setTimeout(done, 5000);
       })
+    });
+
+    it('setVolume', function(done) {
+      chromecast.setVolume(0.5, function(err) {
+        expect(err).toEqual(null);
+        setTimeout(done, 5000);
+      });
+    });
+
+    it('seek', function(done) {
+      chromecast.seek(15, function(err) {
+        expect(err).toEqual(null);
+        setTimeout(done, 5000);
+      });
     });
 
   });
