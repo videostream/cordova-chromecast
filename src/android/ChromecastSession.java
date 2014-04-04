@@ -65,6 +65,7 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 				killContext.success();
 			}
 		});
+		Cast.CastApi.stopApplication(mApiClient);
 	}
 	
 	public boolean loadUrl(String url, final CallbackContext loadUrlContext) {
