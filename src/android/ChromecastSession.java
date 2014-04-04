@@ -61,6 +61,7 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 		this.mRemoteMediaPlayer.stop(mApiClient).setResultCallback(new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
 			@Override
 			public void onResult(MediaChannelResult result) {
+				Cast.CastApi.stopApplication(mApiClient);
 				mApiClient.disconnect();
 				killContext.success();
 			}
@@ -115,7 +116,14 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 	}
 	
 	public void setVolume(double volume, CallbackContext callbackContext) {
-		chromecastMediaController.setVolume(volume, mApiClient, callbackContext);
+		// chromecastMediaController.setVolume(volume, mApiClient, callbackContext);
+		try {
+			Cast.CastApi.setVolume(mApiClient, volume);
+			callbackContext.success();
+		} catch (Exception e) {
+			e.printStackTrace();
+			callbackContext.error("Failure");
+		}
 	}
 	
 	public void setMute(boolean muted, CallbackContext callbackContext) {

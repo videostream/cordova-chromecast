@@ -106,6 +106,10 @@ public class Chromecast extends CordovaPlugin {
         		mMediaRouterCallback.registerCallbacks(that);
         		mMediaRouter.addCallback(mMediaRouteSelector, mMediaRouterCallback, MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY);
         		cbContext.success();
+
+                for (RouteInfo route : mMediaRouterCallback.getRoutes()) {
+                    that.webView.sendJavascript("chromecast.emit('device', '"+route.getId()+"', '" + route.getName() + "')");
+                }
         	}
         });
         return true;
@@ -163,6 +167,7 @@ public class Chromecast extends CordovaPlugin {
     	if (this.currentSession != null) {
     		this.currentSession.kill(callbackContext);
     		this.currentSession = null;
+            callbackContext.success();
     	}
     	return true;
     }

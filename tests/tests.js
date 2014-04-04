@@ -5,7 +5,7 @@ exports.init = function() {
   var cc = require('acidhax.cordova.chromecast.Chromecast');
 
   var defaultReceiverAppId = 'CC1AD845';
-  var videoUrl = 'https://googledrive.com/host/0B5O0KxB-nibPcUxXdU5WaGFrckU/big_buck_bunny.mp4';
+  var videoUrl = 'http://s3.nwgat.net/flvplayers3/bbb.mp4';
 
   describe('Chromecast', function () {
     var fail = function(done, why) {
@@ -77,6 +77,13 @@ exports.init = function() {
 
     it('seek', function(done) {
       chromecast.seek(15, function(err) {
+        expect(err).toEqual(null);
+        setTimeout(done, 5000);
+      });
+    });
+
+    it('kill', function(done) {
+      chromecast.kill(function(err) {
         expect(err).toEqual(null);
         setTimeout(done, 5000);
       });
