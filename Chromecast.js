@@ -15,9 +15,9 @@ Chromecast.prototype = Object.create(EventEmitter.prototype);
 Chromecast.prototype.initialize = function() {
 	var self = this;
 	this.on("device", function (id, deviceName) {
+		console.log(id, deviceName);
 		if (!self.devices[id]) {
 			self.devices[id] = deviceName;
-			console.log(id, deviceName);
 		}
 	});
 	this.on("deviceRemoved", function (id, deviceName) {
@@ -73,6 +73,11 @@ Chromecast.prototype.kill = function(cb) {
 Chromecast.prototype.getDevices = function(appId) {
 	this.exec("getDevices", appId);
 };
+
+Chromecast.prototype.getRoute = function(castId, cb) {
+	this.exec('getRoute', castId, cb);
+};
+
 Chromecast.prototype.exec = function(action) {
 	var args = [].slice.call(arguments);
 	args.shift();

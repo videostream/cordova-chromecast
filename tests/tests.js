@@ -36,10 +36,17 @@ exports.init = function() {
           expect(deviceId).toBeDefined();
           expect(deviceName).toBeDefined();
 
-          chromecast.launch(deviceId, defaultReceiverAppId, function(err) {
-            expect(err).toEqual(null);
-            setTimeout(done, 2000);
-          });
+          console.log('ON DEVICE', deviceId, deviceName);
+          chromecast.getRoute(deviceId, function(err, name) {
+            expect(err).toBe(null);
+            expect(name).not.toBe(null);
+            console.log('GET ROUTE', err, name);
+            
+            chromecast.launch(deviceId, defaultReceiverAppId, function(err) {
+              expect(err).toEqual(null);
+              setTimeout(done, 2000);
+            });
+          })
         }
       };
 
@@ -57,35 +64,35 @@ exports.init = function() {
     it('pause', function(done) {
       chromecast.pause(function(err) {
         expect(err).toEqual(null);
-        setTimeout(done, 5000);
+        setTimeout(done, 2000);
       })
     });
 
     it('play', function(done) {
       chromecast.play(function(err) {
         expect(err).toEqual(null);
-        setTimeout(done, 5000);
+        setTimeout(done, 2000);
       })
     });
 
     it('setVolume', function(done) {
       chromecast.setVolume(0.5, function(err) {
         expect(err).toEqual(null);
-        setTimeout(done, 5000);
+        setTimeout(done, 1000);
       });
     });
 
     it('seek', function(done) {
       chromecast.seek(15, function(err) {
         expect(err).toEqual(null);
-        setTimeout(done, 5000);
+        setTimeout(done, 2000);
       });
     });
 
     it('kill', function(done) {
       chromecast.kill(function(err) {
         expect(err).toEqual(null);
-        setTimeout(done, 5000);
+        done();
       });
     });
 
