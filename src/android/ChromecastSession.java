@@ -156,7 +156,9 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 			if (status.isSuccess()) {
 				try {
 					connectRemoteMediaPlayer();
-				} catch (IllegalStateException | IOException e) {
+				} catch (IllegalStateException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			} else {

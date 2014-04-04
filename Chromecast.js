@@ -48,8 +48,8 @@ Chromecast.prototype.stop = function(cb) {
 Chromecast.prototype.seek = function(pos, cb) {
 	this.exec("seek", pos, cb);
 };
-Chromecast.prototype.volume = function(level, cb) {
-	this.exec("volume", level, cb);
+Chromecast.prototype.setVolume = function(volume, cb) {
+	this.exec("setVolume", volume, cb);
 };
 Chromecast.prototype.loadUrl = function(url, cb) {
 	this.exec("loadUrl", url || "http://192.168.1.104:5556/", cb || function(err) {
