@@ -32,7 +32,7 @@ public class Chromecast extends CordovaPlugin {
 	
     private MediaRouter mMediaRouter;
     private MediaRouteSelector mMediaRouteSelector;
-    private ChromecastMediaRouterCallback mMediaRouterCallback = new ChromecastMediaRouterCallback();
+    private final ChromecastMediaRouterCallback mMediaRouterCallback = new ChromecastMediaRouterCallback();
     
     private ChromecastSession currentSession;
     
@@ -106,12 +106,11 @@ public class Chromecast extends CordovaPlugin {
         		mMediaRouterCallback.registerCallbacks(that);
         		mMediaRouter.addCallback(mMediaRouteSelector, mMediaRouterCallback, MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY);
         		cbContext.success();
-
-                for (RouteInfo route : mMediaRouterCallback.getRoutes()) {
-                    that.webView.sendJavascript("chromecast.emit('device', '"+route.getId()+"', '" + route.getName() + "')");
-                }
         	}
         });
+        for (RouteInfo route : mMediaRouterCallback.getRoutes()) {
+            that.webView.sendJavascript("chromecast.emit('device', '"+route.getId()+"', '" + route.getName() + "')");
+        }
         return true;
     }
     
@@ -122,10 +121,16 @@ public class Chromecast extends CordovaPlugin {
      * @param cbContext
      * @throws JSONException
      */
-    public void getRoute(JSONArray args, CallbackContext cbContext) throws JSONException {
-    	int index = args.getInt(0);
+    public boolean getRoute(JSONArray args, CallbackContext cbContext) throws JSONException {
+    	String index = args.getString(0);
     	RouteInfo info = mMediaRouterCallback.getRoute(index);
-    	cbContext.success(info.getName());
+        if (info != null) {
+            cbContext.success(info.getName());    
+        } else {
+            cbContext.error("No route found in " + mMediaRouterCallback.getRoutes().size() + " route(s)");
+        }
+    	
+        return true;
     }
     
     /**
