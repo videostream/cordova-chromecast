@@ -1,11 +1,11 @@
 exports.init = function() {
   eval(require('org.apache.cordova.test-framework.test').injectJasmineInterface(this, 'this'));
-  jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
+  jasmine.DEFAULT_TIMEOUT_INTERVAL = 20000;
 
   var cc = require('acidhax.cordova.chromecast.Chromecast');
 
   var defaultReceiverAppId = 'CC1AD845';
-  var videoUrl = 'http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4';
+  var videoUrl = 'https://googledrive.com/host/0B5O0KxB-nibPcUxXdU5WaGFrckU/big_buck_bunny.mp4';
 
   describe('Chromecast', function () {
     var fail = function(done, why) {
@@ -30,16 +30,17 @@ exports.init = function() {
 
     it('discovering and launching', function(done) {
       var onDevice = function(deviceId, deviceName) {
+        if (deviceName.indexOf('Ugly') > -1) {
+          chromecast.removeListener('device', onDevice);
 
-        chromecast.removeListener('device', onDevice);
+          expect(deviceId).toBeDefined();
+          expect(deviceName).toBeDefined();
 
-        expect(deviceId).toBeDefined();
-        expect(deviceName).toBeDefined();
-
-        chromecast.launch(deviceId, defaultReceiverAppId, function(err) {
-          expect(err).toEqual(null);
-          setTimeout(done, 2000);
-        });
+          chromecast.launch(deviceId, defaultReceiverAppId, function(err) {
+            expect(err).toEqual(null);
+            setTimeout(done, 2000);
+          });
+        }
       };
 
       chromecast.on('device', onDevice);
