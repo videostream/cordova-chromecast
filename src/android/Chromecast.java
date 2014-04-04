@@ -55,7 +55,7 @@ public class Chromecast extends CordovaPlugin {
     		if (methodToExecute != null) {
         		Class<?> r = methodToExecute.getReturnType();
         		if (r == boolean.class) {
-            		return (boolean) methodToExecute.invoke(this, args, cbContext);
+            		return (Boolean) methodToExecute.invoke(this, args, cbContext);
         		} else {
         			methodToExecute.invoke(this, args, cbContext);
         			return true;
@@ -63,10 +63,16 @@ public class Chromecast extends CordovaPlugin {
     		} else {
     			return false;
     		}
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			e.printStackTrace();
-			return false;
-		}
+		} catch (IllegalAccessException e) {
+            e.printStackTrace();
+            return false;
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            return false;
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
     
     /**

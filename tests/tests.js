@@ -50,7 +50,21 @@ exports.init = function() {
     it('loading a url', function(done) {
       chromecast.loadUrl(videoUrl, function(err) {
         expect(err).toEqual(null);
-        done();
+        setTimeout(done, 2000);
+      })
+    });
+
+    it('pausing', function(done) {
+      chrome.pause(function(err) {
+        expect(err).toEqual(null);
+        setTimeout(done, 1000);
+      })
+    });
+
+    it('playing', function(done) {
+      chrome.pause(function(err) {
+        expect(err).toEqual(null);
+        setTimeout(done, 1000);
       })
     });
 
