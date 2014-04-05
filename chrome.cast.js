@@ -89,7 +89,8 @@ chrome.cast = {
 		RECEIVER_UNAVAILABLE: "receiver_unavailable",
 		SESSION_ERROR: "session_error",
 		TIMEOUT: "timeout",
-		UNKNOWN: "unknown"
+		UNKNOWN: "unknown",
+		NOT_IMPLEMENTED: "not_implemented"
 	},
 
 	/**
@@ -474,16 +475,7 @@ chrome.cast.initialize = function (apiConfig, successCallback, errorCallback) {
 		if (!err) {
 			successCallback();
 		} else {
-			var error;
-			if (err === 'INVALID_PARAMETER') {
-				error = new chrome.cast.Error(chrome.cast.ErrorCode.INVALID_PARAMETER, 'The parameters to the operation were not valid.', {});
-			} else if (err === 'timeout' || err === 'TIMEOUT') {
-				error = new chrome.cast.Error(chrome.cast.ErrorCode.TIMEOUT, 'The operation timed out.', {});
-			} else {
-				error = new chrome.cast.Error(chrome.cast.ErrorCode.UNKNOWN, err, {});
-			}
-
-			errorCallback(error);
+			handleError(err, errorCallback);
 		}
 	});
 };
@@ -506,23 +498,18 @@ chrome.cast.requestSession = function (successCallback, errorCallback, opt_sessi
 		return;
 	}
 
-	execute('requestSession', function(err) {
+	execute('requestSession', function(err, obj) {
 		if (!err) {
+			var sessionId = obj.sessionId;
 			var appId = _sessionRequest.appId;
+			var displayName = obj.displayName;
+			var appImages = [];
+			var receiver = new chrome.cast.Receiver(obj.label, obj.friendlyName, obj.capabilities || [], obj.volume);
+
+			successCallback(session);
+			_sessionListener(session);
 		} else {
-			if (err === 'TIMEOUT' || err === 'timeout') {
-				errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.TIMEOUT, 'The operation timed out.', {}));
-			} else if (err === 'INVALID_PARAMETER') {
-				errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.INVALID_PARAMETER, 'The parameters to the operation were not valid.', {}));
-			} else if (err === 'RECEIVER_UNAVAILABLE') {
-				errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.RECEIVER_UNAVAILABLE, 'No receiver was compatible with the session request.'));
-			} else if (err === 'CANCEL') {
-				errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.CANCEL, 'The operation was canceled by the user.'));
-			} else if (err === 'CHANNEL_ERROR') {
-				errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.CHANNEL_ERROR, 'A channel to the receiver is not available.'));
-			} else if (err === 'SESSION_ERROR') {
-				errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.SESSION_ERROR, 'A session could not be created, or a session was invalid.'));
-			}
+			handleError(err, errorCallback);
 		}
 	});
 };
@@ -560,7 +547,11 @@ chrome.cast.setCustomReceivers = function (receivers, successCallback, errorCall
  * @property {string}							statusText 	Descriptive text for the current application content, for example “My Wedding Slideshow”.
  */
 chrome.cast.Session = function(sessionId, appId, displayName, appImages, receiver) {
-	// TODO: Implement
+	this.sessionId = sessionId;
+	this.appId = appId;
+	this.displayName = displayName;
+	this.appImages = appImages || [];
+	this.receiver = receiver;
 };
 
 /**
@@ -570,7 +561,18 @@ chrome.cast.Session = function(sessionId, appId, displayName, appImages, receive
  * @param {function} 	errorCallback   The possible errors are TIMEOUT, API_NOT_INITIALIZED, INVALID_PARAMETER, CHANNEL_ERROR, and EXTENSION_MISSING.
  */
 chrome.cast.Session.prototype.setReceiverVolumeLevel = function (newLevel, successCallback, errorCallback) {
-	// TODO: Implement
+	if (chrome.cast.isAvailable === false) {
+		errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.API_NOT_INITIALIZED), 'The API is not initialized.', {});
+		return;
+	}
+
+	execute('setReceiverVolumeLevel', newLevel, function(err) {
+		if (!err) {
+			success && successCallback();
+		} else {
+			handleError(err, errorCallback);
+		}
+	});
 };
 
 
@@ -581,7 +583,18 @@ chrome.cast.Session.prototype.setReceiverVolumeLevel = function (newLevel, succe
  * @param {function} errorCallback   	The possible errors are TIMEOUT, API_NOT_INITIALIZED, INVALID_PARAMETER, CHANNEL_ERROR, and EXTENSION_MISSING.
  */
 chrome.cast.Session.prototype.setReceiverMuted = function (muted, successCallback, errorCallback) {
-	// TODO: Implement
+	if (chrome.cast.isAvailable === false) {
+		errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.API_NOT_INITIALIZED), 'The API is not initialized.', {});
+		return;
+	}
+
+	execute('setReceiverMuted', muted, function(err) {
+		if (!err) {
+			success && successCallback();
+		} else {
+			handleError(err, errorCallback);
+		}
+	});
 };
 
 /**
@@ -590,7 +603,18 @@ chrome.cast.Session.prototype.setReceiverMuted = function (muted, successCallbac
  * @param {function} errorCallback   The possible errors are TIMEOUT, API_NOT_INITIALIZED, CHANNEL_ERROR, and EXTENSION_MISSING.
  */
 chrome.cast.Session.prototype.stop = function (successCallback, errorCallback) {
-	// TODO: Implement
+	if (chrome.cast.isAvailable === false) {
+		errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.API_NOT_INITIALIZED), 'The API is not initialized.', {});
+		return;
+	}
+
+	execute('stopSession', function(err) {
+		if (!err) {
+			success && successCallback();
+		} else {
+			handleError(err, errorCallback);
+		}
+	});
 };
 
 /**
@@ -603,7 +627,18 @@ chrome.cast.Session.prototype.stop = function (successCallback, errorCallback) {
  * @param  {[type]} 			errorCallback   Invoked on error. The possible errors are TIMEOUT, API_NOT_INITIALIZED, INVALID_PARAMETER, CHANNEL_ERROR, SESSION_ERROR, and EXTENSION_MISSING
  */
 chrome.cast.Session.prototype.sendMessage = function (namespace, message, successCallback, errorCallback) {
-	// TODO: Implement
+	if (chrome.cast.isAvailable === false) {
+		errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.API_NOT_INITIALIZED), 'The API is not initialized.', {});
+		return;
+	}
+
+	execute('sendMessage', namespace, message, function(err) {
+		if (!err) {
+			success && successCallback();
+		} else {
+			handleError(err, errorCallback);
+		}
+	});
 };
 
 /**
@@ -615,6 +650,7 @@ chrome.cast.Session.prototype.sendMessage = function (namespace, message, succes
  */
 chrome.cast.Session.prototype.addUpdateListener = function (listener) {
 	// TODO: Implement
+	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
 };
 
 /**
@@ -623,6 +659,7 @@ chrome.cast.Session.prototype.addUpdateListener = function (listener) {
  */
 chrome.cast.Session.prototype.removeUpdateListener = function (listener) {
 	// TODO: Implement
+	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
 };
 
 /**
@@ -633,6 +670,7 @@ chrome.cast.Session.prototype.removeUpdateListener = function (listener) {
  */
 chrome.cast.Session.prototype.addMessageListener = function (namespace, listener) {
 	// TODO: Implement
+	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
 };
 
 /**
@@ -642,6 +680,7 @@ chrome.cast.Session.prototype.addMessageListener = function (namespace, listener
  */
 chrome.cast.Session.prototype.removeMessageListener = function (namespace, listener) {
 	// TODO: Implement
+	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
 };
 
 /**
@@ -650,6 +689,7 @@ chrome.cast.Session.prototype.removeMessageListener = function (namespace, liste
  */
 chrome.cast.Session.prototype.addMediaListener = function (listener) {
 	// TODO: Implement
+	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
 };
 
 /**
@@ -658,6 +698,7 @@ chrome.cast.Session.prototype.addMediaListener = function (listener) {
  */
 chrome.cast.Session.prototype.removeMediaListener = function (listener) {
 	// TODO: Implement
+	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
 };
 
 /**
@@ -667,7 +708,13 @@ chrome.cast.Session.prototype.removeMediaListener = function (listener) {
  * @param  {function} errorCallback   Invoked on error. The possible errors are TIMEOUT, API_NOT_INITIALIZED, INVALID_PARAMETER, CHANNEL_ERROR, SESSION_ERROR, and EXTENSION_MISSING.
  */
 chrome.cast.Session.prototype.loadMedia = function (loadRequest, successCallback, errorCallback) {
+	if (chrome.cast.isAvailable === false) {
+		errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.API_NOT_INITIALIZED), 'The API is not initialized.', {});
+		return;
+	}
+
 	// TODO: Implement
+	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
 };
 
 
@@ -699,7 +746,8 @@ chrome.cast.media.Media = function(sessionId, mediaSessionId) {
  * @param  {function} 						errorCallback   Invoked on error. The possible errors are TIMEOUT, API_NOT_INITIALIZED, INVALID_PARAMETER, CHANNEL_ERROR, SESSION_ERROR, and EXTENSION_MISSING.
  */
 chrome.cast.media.Media.prototype.play = function (playRequest, successCallback, errorCallback) {
-
+	// TODO: Implement
+	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
 };
 
 /**
@@ -709,7 +757,8 @@ chrome.cast.media.Media.prototype.play = function (playRequest, successCallback,
  * @param  {function} 						errorCallback   Invoked on error. The possible errors are TIMEOUT, API_NOT_INITIALIZED, INVALID_PARAMETER, CHANNEL_ERROR, SESSION_ERROR, and EXTENSION_MISSING.
  */
 chrome.cast.media.Media.prototype.pause = function (pauseRequest, successCallback, errorCallback) {
-
+	// TODO: Implement
+	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
 };
 
 /**
@@ -719,7 +768,8 @@ chrome.cast.media.Media.prototype.pause = function (pauseRequest, successCallbac
  * @param  {function} 						errorCallback   Invoked on error. The possible errors are TIMEOUT, API_NOT_INITIALIZED, INVALID_PARAMETER, CHANNEL_ERROR, SESSION_ERROR, and EXTENSION_MISSING.
  */
 chrome.cast.media.Media.prototype.seek = function (seekRequest, successCallback, errorCallback) {
-
+	// TODO: Implement
+	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
 };
 
 /**
@@ -729,7 +779,8 @@ chrome.cast.media.Media.prototype.seek = function (seekRequest, successCallback,
  * @param  {function} 						errorCallback   Invoked on error. The possible errors are TIMEOUT, API_NOT_INITIALIZED, INVALID_PARAMETER, CHANNEL_ERROR, SESSION_ERROR, and EXTENSION_MISSING.
  */
 chrome.cast.media.Media.prototype.stop = function (stopRequest, successCallback, errorCallback) {
-
+	// TODO: Implement
+	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
 };
 
 /**
@@ -739,7 +790,8 @@ chrome.cast.media.Media.prototype.stop = function (stopRequest, successCallback,
  * @param {function} errorCallback   Invoked on error. The possible errors are TIMEOUT, API_NOT_INITIALIZED, INVALID_PARAMETER, CHANNEL_ERROR, SESSION_ERROR, and EXTENSION_MISSING.
  */
 chrome.cast.media.Media.prototype.setVolume = function (volumeRequest, successCallback, errorCallback) {
-
+	// TODO: Implement
+	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
 };
 
 /**
@@ -748,7 +800,8 @@ chrome.cast.media.Media.prototype.setVolume = function (volumeRequest, successCa
  * @returns {boolean} True if the player supports the command.
  */
 chrome.cast.media.Media.prototype.supportsCommand = function (command) {
-
+	// TODO: Implement
+	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
 };
 
 /**
@@ -756,7 +809,8 @@ chrome.cast.media.Media.prototype.supportsCommand = function (command) {
  * @returns {number} number An estimate of the current playback position in seconds since the start of the media.
  */
 chrome.cast.media.Media.prototype.getEstimatedTime = function () {
-
+	// TODO: Implement
+	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
 };
 
 /**
@@ -765,7 +819,8 @@ chrome.cast.media.Media.prototype.getEstimatedTime = function () {
  * @param {function} listener The listener to add. The parameter indicates whether the Media object is still alive.
  */
 chrome.cast.media.Media.prototype.addUpdateListener = function (listener) {
-
+	// TODO: Implement
+	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
 };
 
 /**
@@ -773,7 +828,8 @@ chrome.cast.media.Media.prototype.addUpdateListener = function (listener) {
  * @param {function} listener The listener to remove.
  */
 chrome.cast.media.Media.prototype.removeUpdateListener = function (listener) {
-
+	// TODO: Implement
+	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
 };
 
 
@@ -801,6 +857,37 @@ function execute (action) {
 	}
 	cordova.exec(function (result) { callback && callback(null, result); }, function(err) { callback && callback(err); }, "Chromecast", action, args);
 }
+
+function handleError(err, callback) {
+	var errorCode = chrome.cast.ErrorCode.UNKNOWN;
+	var errorDescription = err;
+	var errorData = {};
+
+	if (err === 'TIMEOUT' || err === 'timeout') {
+		errorCode = chrome.cast.ErrorCode.TIMEOUT;
+		errorDescription = 'The operation timed out.';
+	} else if (err === 'INVALID_PARAMETER') {
+		errorCode = chrome.cast.ErrorCode.INVALID_PARAMETER;
+		errorDescription = 'The parameters to the operation were not valid.';
+	} else if (err === 'RECEIVER_UNAVAILABLE') {
+		errorCode = chrome.cast.ErrorCode.RECEIVER_UNAVAILABLE;
+		errorDescription = 'No receiver was compatible with the session request.';
+	} else if (err === 'CANCEL') {
+		errorCode = chrome.cast.ErrorCode.CANCEL;
+		errorDescription = 'The operation was canceled by the user.';
+	} else if (err === 'CHANNEL_ERROR') {
+		errorCode = chrome.cast.ErrorCode.CHANNEL_ERROR;
+		errorDescription = 'A channel to the receiver is not available.';
+	} else if (err === 'SESSION_ERROR') {
+		errorCode = chrome.cast.ErrorCode.SESSION_ERROR;
+		errorDescription = 'A session could not be created, or a session was invalid.';
+	}
+
+	var error = new Error(errorCode, errorDescription, errorData);
+	if (callback) {
+		callback(error);
+	}
+};
 
 
 execute('setup', function(err) {
