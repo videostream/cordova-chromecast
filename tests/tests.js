@@ -7,6 +7,76 @@ exports.init = function() {
   var defaultReceiverAppId = 'CC1AD845';
   var videoUrl = 'http://s3.nwgat.net/flvplayers3/bbb.mp4';
 
+
+  describe('chrome.cast', function() {
+    it('should contain definitions', function(done) {
+      expect(chrome.cast.VERSION).toBeDefined();
+      expect(chrome.cast.ReceiverAvailability).toBeDefined();
+      expect(chrome.cast.ReceiverType).toBeDefined();
+      expect(chrome.cast.SenderPlatform).toBeDefined();
+      expect(chrome.cast.AutoJoinPolicy).toBeDefined();
+      expect(chrome.cast.Capability).toBeDefined();
+      expect(chrome.cast.DefaultActionPolicy).toBeDefined();
+      expect(chrome.cast.ErrorCode).toBeDefined();
+      expect(chrome.cast.timeout).toBeDefined();
+      expect(chrome.cast.isAvailable).toBeDefined();
+      expect(chrome.cast.ApiConfig).toBeDefined();
+      expect(chrome.cast.Receiver).toBeDefined();
+      expect(chrome.cast.DialRequest).toBeDefined();
+      expect(chrome.cast.SessionRequest).toBeDefined();
+      expect(chrome.cast.Error).toBeDefined();
+      expect(chrome.cast.Image).toBeDefined();
+      expect(chrome.cast.SenderApplication).toBeDefined();
+      expect(chrome.cast.Volume).toBeDefined();
+      expect(chrome.cast.media).toBeDefined();
+      expect(chrome.cast.initialize).toBeDefined();
+      expect(chrome.cast.requestSession).toBeDefined();
+      expect(chrome.cast.setCustomReceivers).toBeDefined();
+      expect(chrome.cast.Session).toBeDefined();
+      expect(chrome.cast.media.PlayerState).toBeDefined();
+      expect(chrome.cast.media.ResumeState).toBeDefined();
+      expect(chrome.cast.media.MediaCommand).toBeDefined();
+      expect(chrome.cast.media.MetadataType).toBeDefined();
+      expect(chrome.cast.media.StreamType).toBeDefined();
+      expect(chrome.cast.media.timeout).toBeDefined();
+      expect(chrome.cast.media.LoadRequest).toBeDefined();
+      expect(chrome.cast.media.PlayRequest).toBeDefined();
+      expect(chrome.cast.media.SeekRequest).toBeDefined();
+      expect(chrome.cast.media.VolumeRequest).toBeDefined();
+      expect(chrome.cast.media.StopRequest).toBeDefined();
+      expect(chrome.cast.media.PauseRequest).toBeDefined();
+      expect(chrome.cast.media.GenericMediaMetadata).toBeDefined();
+      expect(chrome.cast.media.MovieMediaMetadata).toBeDefined();
+      expect(chrome.cast.media.MusicTrackMediaMetadata).toBeDefined();
+      expect(chrome.cast.media.PhotoMediaMetadata).toBeDefined();
+      expect(chrome.cast.media.TvShowMediaMetadata).toBeDefined();
+      expect(chrome.cast.media.MediaInfo).toBeDefined();
+      expect(chrome.cast.media.Media).toBeDefined();
+      expect(chrome.cast.Session.prototype.setReceiverVolumeLevel).toBeDefined();
+      expect(chrome.cast.Session.prototype.setReceiverMuted).toBeDefined();
+      expect(chrome.cast.Session.prototype.stop).toBeDefined();
+      expect(chrome.cast.Session.prototype.sendMessage).toBeDefined();
+      expect(chrome.cast.Session.prototype.addUpdateListener).toBeDefined();
+      expect(chrome.cast.Session.prototype.removeUpdateListener).toBeDefined();
+      expect(chrome.cast.Session.prototype.addMessageListener).toBeDefined();
+      expect(chrome.cast.Session.prototype.removeMessageListener).toBeDefined();
+      expect(chrome.cast.Session.prototype.addMediaListener).toBeDefined();
+      expect(chrome.cast.Session.prototype.removeMediaListener).toBeDefined();
+      expect(chrome.cast.Session.prototype.loadMedia).toBeDefined();
+      expect(chrome.cast.media.Media.prototype.play).toBeDefined();
+      expect(chrome.cast.media.Media.prototype.pause).toBeDefined();
+      expect(chrome.cast.media.Media.prototype.seek).toBeDefined();
+      expect(chrome.cast.media.Media.prototype.stop).toBeDefined();
+      expect(chrome.cast.media.Media.prototype.setVolume).toBeDefined();
+      expect(chrome.cast.media.Media.prototype.supportsCommand).toBeDefined();
+      expect(chrome.cast.media.Media.prototype.getEstimatedTime).toBeDefined();
+      expect(chrome.cast.media.Media.prototype.addUpdateListener).toBeDefined();
+      expect(chrome.cast.media.Media.prototype.removeUpdateListener).toBeDefined();
+      done();
+    });
+  })
+
+
   describe('Chromecast', function () {
     var fail = function(done, why) {
       if (typeof why !== 'undefined') {
