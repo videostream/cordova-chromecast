@@ -4,11 +4,16 @@ exports.init = function() {
 
   // var cc = require('acidhax.cordova.chromecast.Chromecast');
 
-  var defaultReceiverAppId = 'CC1AD845';
+  var applicationID = 'CC1AD845';
   var videoUrl = 'http://s3.nwgat.net/flvplayers3/bbb.mp4';
 
 
   describe('chrome.cast', function() {
+
+    var _session;
+    var _receiverAvailability;
+    var _currentMedia;
+
     it('should contain definitions', function(done) {
       expect(chrome.cast.VERSION).toBeDefined();
       expect(chrome.cast.ReceiverAvailability).toBeDefined();
@@ -74,10 +79,107 @@ exports.init = function() {
       expect(chrome.cast.media.Media.prototype.removeUpdateListener).toBeDefined();
       done();
     });
-  })
+
+    it('api should be available', function(done) {
+      setTimeout(function() {
+        expect(chrome.cast.isAvailable).toEqual(true);
+        done();
+      }, 1000)
+    });
+
+    it('initialize should succeed', function(done) {
+      var sessionRequest = new chrome.cast.SessionRequest(applicationID);
+      var apiConfig = new chrome.cast.ApiConfig(sessionRequest, function(session) {
+        _session = session;
+      }, function(available) {
+        _receiverAvailability = available;
+      });
+
+      chrome.cast.initialize(apiConfig, function() {
+        done();
+      }, function(err) {
+        expect(err).toBe(null);
+        done();
+      });
+    });
+
+    it('receiver available', function(done) {
+      setTimeout(function() {
+        expect(_receiverAvailability).toEqual(chrome.cast.ReceiverAvailability.AVAILABLE);
+        done();
+      }, 2000);
+    });
 
 
-  describe('Chromecast', function () {
+    it('requestSession should succeed', function(done) {
+      chrome.cast.requestSession(function(session) {
+        expect(session).toBeDefined();
+        expect(session.appId).toBeDefined();
+        exepct(session.displayName).toBeDefined();
+        expect(session.receiver).toBeDefined();
+        expect(session.receiver.friendlyName).toBeDefined();
+        done();
+      }, function(err) {
+        expect(err).toBe(null);
+        done();
+      })
+    });
+
+    it('loadRequest should work', function(done) {
+      var mediaInfo = new chrome.cast.media.MediaInfo(videoUrl);
+      var request = new chrome.cast.media.LoadRequest(mediaInfo);
+      _session.loadMedia(request, function(media) {
+        _currentMedia = media;
+        expect(_currentMedia instanceof chrome.cast.media.Media).toBe(true);
+        expect(_currentMedia.sessionId).toEqual(_session.sessionId);
+        done();
+      }, function(err) {
+        expect(err).toBeNull();
+        done();
+      });
+
+    });
+
+    it('pause media should succeed', function(done) {
+      setTimeout(function() {
+        _currentMedia.pause(null, function() {
+          done();
+        }, function(err) {
+          expect(err).toBeNull();
+          done();
+        });
+      }, 1000);
+    });
+
+    it('play media should succeed', function(done) {
+      setTimeout(function() {
+        _currentMedia.play(null, function() {
+          done();
+        }, function(err) {
+          expect(err).toBeNull();
+          done();
+        });
+      }, 1000);
+    });
+
+    it('seek media should succeed', function(done) {
+      setTimeout(function() {
+        var request = new chrome.cast.media.SeekRequest();
+        request.currentTime = 10;
+
+        _currentMedia.seek(request, function() {
+          done();
+        }, function(err) {
+          expect(err).toBeNull();
+          done();
+        });
+      }, 1000);
+    });
+    
+  });
+
+
+  xdescribe('Chromecast', function () {
     var fail = function(done, why) {
       if (typeof why !== 'undefined') {
         console.error(why);
@@ -113,7 +215,7 @@ exports.init = function() {
               expect(name).not.toBe(null);
               console.log('GET ROUTE', err, name);
               
-              chromecast.launch(deviceId, defaultReceiverAppId, function(err) {
+              chromecast.launch(deviceId, applicationID, function(err) {
                 expect(err).toEqual(null);
                 setTimeout(done, 2000);
               });
@@ -123,7 +225,7 @@ exports.init = function() {
       };
 
       chromecast.on('device', onDevice);
-      chromecast.getDevices(defaultReceiverAppId);
+      chromecast.getDevices(applicationID);
     });
 
     it('loading a url', function(done) {
