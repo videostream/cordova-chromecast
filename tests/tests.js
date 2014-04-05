@@ -10,9 +10,9 @@ exports.init = function() {
 
   describe('chrome.cast', function() {
 
-    var _session;
-    var _receiverAvailability;
-    var _currentMedia;
+    var _session = null;
+    var _receiverAvailability = null;
+    var _currentMedia = null;
 
     it('should contain definitions', function(done) {
       expect(chrome.cast.VERSION).toBeDefined();
@@ -128,6 +128,7 @@ exports.init = function() {
     it('loadRequest should work', function(done) {
       var mediaInfo = new chrome.cast.media.MediaInfo(videoUrl);
       var request = new chrome.cast.media.LoadRequest(mediaInfo);
+      expect(_session).not.toBeNull()
       _session.loadMedia(request, function(media) {
         _currentMedia = media;
         expect(_currentMedia instanceof chrome.cast.media.Media).toBe(true);

@@ -642,6 +642,34 @@ chrome.cast.Session.prototype.sendMessage = function (namespace, message, succes
 };
 
 /**
+ * Request to load media. Must not be null.
+ * @param  {chrome.cast.media.LoadRequest} loadRequest     Request to load media. Must not be null.
+ * @param  {function} successCallback Invoked with the loaded Media on success.
+ * @param  {function} errorCallback   Invoked on error. The possible errors are TIMEOUT, API_NOT_INITIALIZED, INVALID_PARAMETER, CHANNEL_ERROR, SESSION_ERROR, and EXTENSION_MISSING.
+ */
+chrome.cast.Session.prototype.loadMedia = function (loadRequest, successCallback, errorCallback) {
+	if (chrome.cast.isAvailable === false) {
+		errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.API_NOT_INITIALIZED), 'The API is not initialized.', {});
+		return;
+	}
+
+	var mediaInfo = loadRequest.media;
+	execute('loadMedia', mediaInfo.contentId, mediaInfo.contentType, mediaInfo.duration, mediaInfo.streamType, loadRequest.autoPlay, loadReuqest.currentTime, function(err, obj) {
+		if (!err) {
+			var media = new chrome.cast.media.Media(session.sessionId, obj.mediaSessionId);
+			media.media = mediaInfo;
+
+			// TODO: Fill in the rest of the media properties
+			
+			successCallback(media);
+
+		} else {
+			handleError(err, errorCallback);
+		}
+	});
+};
+
+/**
  * Adds a listener that is invoked when the status of the Session has changed. 
  * Changes to the following properties will trigger the listener: statusText, namespaces, customData, and the volume of the receiver. 
  * The callback will be invoked with 'true' (isAlive) parameter. 
@@ -701,22 +729,6 @@ chrome.cast.Session.prototype.removeMediaListener = function (listener) {
 	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
 };
 
-/**
- * Request to load media. Must not be null.
- * @param  {chrome.cast.media.LoadRequest} loadRequest     Request to load media. Must not be null.
- * @param  {function} successCallback Invoked with the loaded Media on success.
- * @param  {function} errorCallback   Invoked on error. The possible errors are TIMEOUT, API_NOT_INITIALIZED, INVALID_PARAMETER, CHANNEL_ERROR, SESSION_ERROR, and EXTENSION_MISSING.
- */
-chrome.cast.Session.prototype.loadMedia = function (loadRequest, successCallback, errorCallback) {
-	if (chrome.cast.isAvailable === false) {
-		errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.API_NOT_INITIALIZED), 'The API is not initialized.', {});
-		return;
-	}
-
-	// TODO: Implement
-	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
-};
-
 
 
 
@@ -736,7 +748,18 @@ chrome.cast.Session.prototype.loadMedia = function (loadRequest, successCallback
  * @property {chrome.cast.Volume} 				volume 			The media stream volume.
  */
 chrome.cast.media.Media = function(sessionId, mediaSessionId) {
-
+	this.sessionId = sessionId;
+	this.mediaSessionId = mediaSessionId;
+	this.currentTime = 0;
+	this.playbackRate = 1;
+	this.playerState = chrome.cast.media.PlayerState.BUFFERING;
+	this.supportedMediaCommands = [ 
+		chrome.cast.media.MediaCommand.PAUSE, 
+		chrome.cast.media.MediaCommand.SEEK, 
+		chrome.cast.media.MediaCommand.STREAM_VOLUME, 
+		chrome.cast.media.MediaCommand.STREAM_MUTE 
+	];
+	this.volume = new chrome.cast.Volume(1, false);
 };
 
 /**
@@ -800,8 +823,7 @@ chrome.cast.media.Media.prototype.setVolume = function (volumeRequest, successCa
  * @returns {boolean} True if the player supports the command.
  */
 chrome.cast.media.Media.prototype.supportsCommand = function (command) {
-	// TODO: Implement
-	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
+	return this.supportsCommands.indexOf(command) > -1;
 };
 
 /**
