@@ -30,23 +30,25 @@ exports.init = function() {
 
     it('discovering and launching', function(done) {
       var onDevice = function(deviceId, deviceName) {
-        if (deviceName.indexOf('Ugly') > -1) {
+        if (deviceName.indexOf('Ugly') > -1 || deviceName.indexOf('Graham') > -1) {
           chromecast.removeListener('device', onDevice);
 
           expect(deviceId).toBeDefined();
           expect(deviceName).toBeDefined();
 
           console.log('ON DEVICE', deviceId, deviceName);
-          chromecast.getRoute(deviceId, function(err, name) {
-            expect(err).toBe(null);
-            expect(name).not.toBe(null);
-            console.log('GET ROUTE', err, name);
-            
-            chromecast.launch(deviceId, defaultReceiverAppId, function(err) {
-              expect(err).toEqual(null);
-              setTimeout(done, 2000);
-            });
-          })
+          setTimeout(function() {
+            chromecast.getRoute(deviceId, function(err, name) {
+              expect(err).toBe(null);
+              expect(name).not.toBe(null);
+              console.log('GET ROUTE', err, name);
+              
+              chromecast.launch(deviceId, defaultReceiverAppId, function(err) {
+                expect(err).toEqual(null);
+                setTimeout(done, 2000);
+              });
+            })
+          }, 800);
         }
       };
 

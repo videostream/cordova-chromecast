@@ -22,7 +22,7 @@ public class Chromecast extends CordovaPlugin {
 	
     private MediaRouter mMediaRouter;
     private MediaRouteSelector mMediaRouteSelector;
-    private final ChromecastMediaRouterCallback mMediaRouterCallback = new ChromecastMediaRouterCallback();
+    private volatile ChromecastMediaRouterCallback mMediaRouterCallback = new ChromecastMediaRouterCallback();
     
     private ChromecastSession currentSession;
     
@@ -156,23 +156,29 @@ public class Chromecast extends CordovaPlugin {
      * @throws JSONException
      */
     public boolean launch (String deviceId, String appId, CallbackContext callbackContext) throws JSONException {
-    	RouteInfo info = mMediaRouterCallback.getRoute(id);
-    	
-    	if (this.currentSession == null) {
-    		if (info != null) {
-    			this.currentSession = new ChromecastSession(info, this.cordova);
-    			
-    			// Launch the app.
-    			// TODO: Create a callback interface so we don't have to throw around the CallbackContext
-    			this.currentSession.launch(appId, callbackContext);
-    		} else {
-    			callbackContext.error("No route found by that ID");
-    		}
-    	} else {
-    		callbackContext.error("Already have a session, disconnect first");
-    	}
-    	
-    	return true;
+    	final Activity activity = cordova.getActivity();
+        
+        activity.runOnUiThread(new Runnable() {
+            public void run() {
+                RouteInfo info = mMediaRouterCallback.getRoute(deviceId);
+        
+                if (Chromecast.this.currentSession == null) {
+                    if (info != null) {
+                        Chromecast.this.currentSession = new ChromecastSession(info, Chromecast.this.cordova);
+                        
+                        // Launch the app.
+                        // TODO: Create a callback interface so we don't have to throw around the CallbackContext
+                        Chromecast.this.currentSession.launch(appId, callbackContext);
+                    } else {
+                        callbackContext.error("No route found by that ID");
+                    }
+                } else {
+                    callbackContext.error("Already have a session, disconnect first");
+                }
+            }
+        });
+                
+        return true;
     }
     
     /**

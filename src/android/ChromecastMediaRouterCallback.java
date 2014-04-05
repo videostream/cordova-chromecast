@@ -7,7 +7,7 @@ import android.support.v7.media.MediaRouter;
 import android.support.v7.media.MediaRouter.RouteInfo;
 
 public class ChromecastMediaRouterCallback extends MediaRouter.Callback {
-	private final ArrayList<RouteInfo> routes = new ArrayList<RouteInfo>();
+	private volatile ArrayList<RouteInfo> routes = new ArrayList<RouteInfo>();
 	
 	private Chromecast callback = null;
 	
