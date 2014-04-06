@@ -250,6 +250,106 @@ public class Chromecast extends CordovaPlugin {
         }).start();
     }
 
+
+    /* NEW APIS **/
+    /*   _   _                          _____ _____     
+        | \ | |                   /\   |  __ \_   _|    
+        |  \| | _____      __    /  \  | |__) || |  ___ 
+        | . ` |/ _ \ \ /\ / /   / /\ \ |  ___/ | | / __|
+        | |\  |  __/\ V  V /   / ____ \| |    _| |_\__ \
+        |_| \_|\___| \_/\_/   /_/    \_\_|   |_____|___/
+    */
+   
+   /**
+    * Do everything you need to for "setup" - calling back sets the isAvailable and lets every function on the
+    * javascript side actually do stuff.
+    * @param  callbackContext
+    */
+    public boolean setup (CallbackContext callbackContext) {
+        callbackContext.error("not_implemented");
+        return true;
+    }
+
+    /**
+     * Initialize all of the MediaRouter stuff with the AppId
+     * For now, ignore the autoJoinPolicy and defaultActionPolicy; those will come later
+     * @param  appId               The appId we're going to use for ALL session requests
+     * @param  autoJoinPolicy      tab_and_origin_scoped | origin_scoped | page_scoped
+     * @param  defaultActionPolicy create_session | cast_this_tab
+     * @param  callbackContext
+     */
+    public boolean initialize (String appId, String autoJoinPolicy, String defaultActionPolicy, CallbackContext callbackContext) {
+        callbackContext.error("not_implemented");
+        return true;
+    }
+
+    /**
+     * Request the session for the previously sent appId
+     * THIS IS WHAT LAUNCHES THE CHROMECAST PICKER
+     * @param  callbackContext
+     */
+    public boolean requestSession (CallbackContext callbackContext) {
+        callbackContext.error("not_implemented");
+        return true;
+    }
+
+    /**
+     * Set the volume level on the receiver - this is a Chromecast volume, not a Media volume
+     * @param  newLevel
+     */
+    public boolean setReceiverVolumeLevel (double newLevel, CallbackContext callbackContext) {
+        callbackContext.error("not_implemented");
+        return true;
+    }
+
+    /**
+     * Sets the muted boolean on the receiver - this is a Chromecast mute, not a Media mute
+     * @param  muted           
+     * @param  callbackContext 
+     */
+    public boolean setReceiverMuted (boolean muted, CallbackContext callbackContext) {
+        callbackContext.error("not_implemented");
+        return true;
+    }
+
+    /**
+     * Stop the session! Disconnect! All of that jazz!
+     * @param  callbackContext [description]
+     */
+    public boolean stopSession(CallbackContext callbackContext) {
+        callbackContext.error("not_implemented");
+        return true;
+    }
+
+    /**
+     * Send a custom message to the receiver - we don't need this just yet... it was just simple to implement on the js side
+     * @param  namespace       
+     * @param  message         
+     * @param  callbackContext
+     */
+    public boolean sendMessage (String namespace, String message, CallbackContext callbackContext) {
+        callbackContext.error("not_implemented");
+        return true;
+    }
+
+    /**
+     * Paramaters galore! Ignore most of these - we really just need the contentId (the URL of the media) for now
+     * @param  contentId               The URL of the media item
+     * @param  contentType             MIME type of the content
+     * @param  duration                Duration of the content
+     * @param  streamType              buffered | live | other
+     * @param  loadRequest.autoPlay    Whether or not to automatically start playing the media
+     * @param  loadReuqest.currentTime Where to begin playing from
+     * @param  callbackContext 
+     */
+    public boolean loadMedia (String contentId, String contentType, double duration, String streamType, boolean autoPlay, double currentTime, CallbackContext callbackContext) {
+        callbackContext.error("not_implemented");
+        return true;
+    }
+
+
+
+
 	protected void onRouteRemoved(MediaRouter router, RouteInfo route) {
 		this.webView.sendJavascript("chromecast.emit('deviceRemoved', '"+route.getId()+"', '" + route.getName() + "')");
 	}
