@@ -155,7 +155,7 @@ public class Chromecast extends CordovaPlugin {
      * @return
      * @throws JSONException
      */
-    public boolean launch (String deviceId, String appId, CallbackContext callbackContext) throws JSONException {
+    public boolean launch (final String deviceId, final String appId, final CallbackContext callbackContext) throws JSONException {
     	final Activity activity = cordova.getActivity();
         
         activity.runOnUiThread(new Runnable() {
