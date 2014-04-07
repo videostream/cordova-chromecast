@@ -266,7 +266,7 @@ public class Chromecast extends CordovaPlugin {
     * @param  callbackContext
     */
     public boolean setup (CallbackContext callbackContext) {
-        callbackContext.error("not_implemented");
+        callbackContext.success();
         return true;
     }
 
@@ -278,8 +278,23 @@ public class Chromecast extends CordovaPlugin {
      * @param  defaultActionPolicy create_session | cast_this_tab
      * @param  callbackContext
      */
-    public boolean initialize (String appId, String autoJoinPolicy, String defaultActionPolicy, CallbackContext callbackContext) {
-        callbackContext.error("not_implemented");
+    public boolean initialize (final String appId, String autoJoinPolicy, String defaultActionPolicy, final CallbackContext callbackContext) {
+        final Activity activity = cordova.getActivity();
+        final Chromecast that = this;
+        activity.runOnUiThread(new Runnable() {
+            public void run() {
+                mMediaRouter = MediaRouter.getInstance(activity.getApplicationContext());
+                mMediaRouteSelector = new MediaRouteSelector.Builder()
+                .addControlCategory(CastMediaControlIntent.categoryForCast(appId))
+                .build();
+                mMediaRouterCallback.registerCallbacks(that);
+                mMediaRouter.addCallback(mMediaRouteSelector, mMediaRouterCallback, MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY);
+                callbackContext.success();
+            }
+        });
+        for (RouteInfo route : mMediaRouterCallback.getRoutes()) {
+            that.webView.sendJavascript("chromecast.emit('device', '"+route.getId()+"', '" + route.getName() + "')");
+        }
         return true;
     }
 
