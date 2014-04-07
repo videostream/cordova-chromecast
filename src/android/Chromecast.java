@@ -393,9 +393,14 @@ public class Chromecast extends CordovaPlugin {
      * @param  loadReuqest.currentTime Where to begin playing from
      * @param  callbackContext 
      */
-    public boolean loadMedia (String contentId, String contentType, double duration, String streamType, boolean autoPlay, double currentTime, CallbackContext callbackContext) {
-        callbackContext.error("not_implemented");
-        return true;
+    public boolean loadMedia (String contentId, String contentType, Integer duration, String streamType, Boolean autoPlay, Integer currentTime, CallbackContext callbackContext) {
+        
+    	if (this.currentSession != null) {
+    		return this.currentSession.loadMedia(contentId, contentType, duration, streamType, autoPlay, currentTime, callbackContext);
+    	} else {
+    		callbackContext.error("session_error");
+    		return false;
+    	}
     }
 
     

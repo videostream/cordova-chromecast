@@ -16,13 +16,23 @@ public class ChromecastMediaController {
 		this.remote = mRemoteMediaPlayer;
 	}
 	
-	public MediaInfo createLoadUrlRequest(String url) {
+	public MediaInfo createLoadUrlRequest(String contentId, String contentType, long duration, String streamType, boolean autoPlay, double currentTime) {
 		MediaMetadata mediaMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
-    	mediaMetadata.putString(MediaMetadata.KEY_TITLE, "My video");
+//    	mediaMetadata.putString(MediaMetadata.KEY_TITLE, "My video");
 
-    	MediaInfo mediaInfo = new MediaInfo.Builder(url)
-    	    .setContentType("video/mp4")
-    	    .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+    	int _streamType = MediaInfo.STREAM_TYPE_BUFFERED;
+    	if (streamType.equals("buffered")) {
+    		
+    	} else if (streamType.equals("live")) {
+    		_streamType = MediaInfo.STREAM_TYPE_LIVE;
+    	} else if (streamType.equals("other")) {
+    		_streamType = MediaInfo.STREAM_TYPE_NONE;
+    	}
+    	
+    	MediaInfo mediaInfo = new MediaInfo.Builder(contentId)
+    	    .setContentType(contentType)
+    	    .setStreamType(_streamType)
+    	    .setStreamDuration(duration)
     	    .setMetadata(mediaMetadata)
     	    .build();
     	

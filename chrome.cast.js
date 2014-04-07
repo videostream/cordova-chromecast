@@ -655,7 +655,7 @@ chrome.cast.Session.prototype.loadMedia = function (loadRequest, successCallback
 	}
 
 	var mediaInfo = loadRequest.media;
-	execute('loadMedia', mediaInfo.contentId, mediaInfo.contentType, mediaInfo.duration, mediaInfo.streamType, loadRequest.autoPlay, loadReuqest.currentTime, function(err, obj) {
+	execute('loadMedia', mediaInfo.contentId, mediaInfo.contentType, mediaInfo.duration || 0.0, mediaInfo.streamType, loadRequest.autoPlay || false, loadRequest.currentTime || 0, function(err, obj) {
 		if (!err) {
 			var media = new chrome.cast.media.Media(session.sessionId, obj.mediaSessionId);
 			media.media = mediaInfo;
@@ -886,22 +886,23 @@ function handleError(err, callback) {
 	var errorDescription = err;
 	var errorData = {};
 
-	if (err === 'TIMEOUT' || err === 'timeout') {
+	err = err || "";
+	if (err.toUpperCase() === 'TIMEOUT') {
 		errorCode = chrome.cast.ErrorCode.TIMEOUT;
 		errorDescription = 'The operation timed out.';
-	} else if (err === 'INVALID_PARAMETER') {
+	} else if (err.toUpperCase() === 'INVALID_PARAMETER') {
 		errorCode = chrome.cast.ErrorCode.INVALID_PARAMETER;
 		errorDescription = 'The parameters to the operation were not valid.';
-	} else if (err === 'RECEIVER_UNAVAILABLE') {
+	} else if (err.toUpperCase() === 'RECEIVER_UNAVAILABLE') {
 		errorCode = chrome.cast.ErrorCode.RECEIVER_UNAVAILABLE;
 		errorDescription = 'No receiver was compatible with the session request.';
-	} else if (err === 'CANCEL') {
+	} else if (err.toUpperCase() === 'CANCEL') {
 		errorCode = chrome.cast.ErrorCode.CANCEL;
 		errorDescription = 'The operation was canceled by the user.';
-	} else if (err === 'CHANNEL_ERROR') {
+	} else if (err.toUpperCase() === 'CHANNEL_ERROR') {
 		errorCode = chrome.cast.ErrorCode.CHANNEL_ERROR;
 		errorDescription = 'A channel to the receiver is not available.';
-	} else if (err === 'SESSION_ERROR') {
+	} else if (err.toUpperCase() === 'SESSION_ERROR') {
 		errorCode = chrome.cast.ErrorCode.SESSION_ERROR;
 		errorDescription = 'A session could not be created, or a session was invalid.';
 	}

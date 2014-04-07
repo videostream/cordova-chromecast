@@ -77,7 +77,7 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 	
 	public boolean loadUrl(String url, final CallbackContext loadUrlContext) {
 		try {
-			MediaInfo mediaInfo = chromecastMediaController.createLoadUrlRequest(url);
+			MediaInfo mediaInfo = null;  //chromecastMediaController.createLoadUrlRequest(url);
 			
 			mRemoteMediaPlayer.load(mApiClient, mediaInfo, true)
 				.setResultCallback(new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
@@ -99,6 +99,36 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
     	} catch (Exception e) {
     		e.printStackTrace();
     		loadUrlContext.error("Problem opening media during loading");
+    		System.out.println("Problem opening media during loading");
+    		return false;
+    	}
+    	return true;
+	}
+	
+	public boolean loadMedia(String contentId, String contentType, long duration, String streamType, boolean autoPlay, double currentTime, final CallbackContext callbackContext) {
+		try {
+			MediaInfo mediaInfo = chromecastMediaController.createLoadUrlRequest(contentId, contentType, duration, streamType, autoPlay, currentTime);
+			
+			mRemoteMediaPlayer.load(mApiClient, mediaInfo, true)
+				.setResultCallback(new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
+					@Override
+					public void onResult(MediaChannelResult result) {
+						if (result.getStatus().isSuccess()) {
+							System.out.println("Media loaded successfully");
+							callbackContext.success();
+						} else {
+							callbackContext.error("session_error");
+						}
+				    }
+				});
+    	} catch (IllegalStateException e) {
+    		e.printStackTrace();
+    		System.out.println("Problem occurred with media during loading");
+    		callbackContext.error("session_error");
+    		return false;
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    		callbackContext.error("session_error");
     		System.out.println("Problem opening media during loading");
     		return false;
     	}
