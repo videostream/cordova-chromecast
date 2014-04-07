@@ -500,12 +500,13 @@ chrome.cast.requestSession = function (successCallback, errorCallback, opt_sessi
 
 	execute('requestSession', function(err, obj) {
 		if (!err) {
-			// var sessionId = obj.sessionId;
-			// var appId = _sessionRequest.appId;
-			// var displayName = obj.displayName;
-			// var appImages = [];
-			// var receiver = new chrome.cast.Receiver(obj.label, obj.friendlyName, obj.capabilities || [], obj.volume);
-			var session = {receiver: {}};
+			var sessionId = obj.sessionId;
+			var appId = obj.appId;
+			var displayName = obj.displayName;
+			var appImages = obj.appImages || [];
+			var receiver = new chrome.cast.Receiver(obj.receiver.label, obj.receiver.friendlyName, obj.receiver.capabilities || [], obj.volume || null);
+
+			var session = new chrome.cast.Session(sessionId, appId, displayName, appImages, receiver);
 			successCallback(session);
 			_sessionListener(session);
 		} else {

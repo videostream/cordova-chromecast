@@ -1,10 +1,15 @@
 package acidhax.cordova.chromecast;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import com.google.android.gms.cast.ApplicationMetadata;
 import com.google.android.gms.cast.Cast;
 import com.google.android.gms.cast.Cast.ApplicationConnectionResult;
 import com.google.android.gms.cast.CastDevice;
@@ -15,6 +20,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.common.images.WebImage;
 
 import android.os.Bundle;
 import android.support.v7.media.MediaRouter.RouteInfo;
@@ -32,7 +38,10 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 	private CordovaInterface cordova = null;
 	private CastDevice device = null;
 	private ChromecastMediaController chromecastMediaController = new ChromecastMediaController(mRemoteMediaPlayer);
+	
 	private String appId;
+	private String displayName;
+	private List<WebImage> appImages;
 	
 	private CallbackContext launchContext;
 	
@@ -157,9 +166,46 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 	private ResultCallback<Cast.ApplicationConnectionResult> launchApplicationResultCallback = new ResultCallback<Cast.ApplicationConnectionResult>() {
 		@Override
 		public void onResult(ApplicationConnectionResult result) {
+
+			ApplicationMetadata metadata = result.getApplicationMetadata();
+			ChromecastSession.this.sessionId = result.getSessionId();
+			ChromecastSession.this.displayName = metadata.getName();
+			ChromecastSession.this.appImages = metadata.getImages();
+		
 			Status status = result.getStatus();
+			
 			if (status.isSuccess()) {
 				try {
+					
+					try {
+						ChromecastSession that = ChromecastSession.this;
+						
+						JSONObject out = new JSONObject();
+						out.put("appId", that.appId);
+						
+						JSONArray appImages = new JSONArray();
+						for(WebImage o : that.appImages) {
+							appImages.put(o.toString());
+						}
+						
+						out.put("appImages", appImages);
+						out.put("sessionId", that.sessionId);
+						out.put("displayName", that.displayName);
+						
+						JSONObject receiver = new JSONObject();
+						receiver.put("friendlyName", that.device.getFriendlyName());
+						receiver.put("label", that.device.getDeviceId());
+						
+						out.put("receiver", receiver);
+						
+						that.launchContext.success(out);
+						
+					} catch(JSONException e) {
+						ChromecastSession.this.launchContext.error("Error");
+					}
+					
+					
+					
 					connectRemoteMediaPlayer();
 				} catch (IllegalStateException e) {
 					e.printStackTrace();
@@ -197,7 +243,7 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 	@Override
 	public void onConnected(Bundle connectionHint) {
 		this.launchApplication();
-		this.launchContext.success();
+		//		this.launchContext.success();
 	}
 	
 	
