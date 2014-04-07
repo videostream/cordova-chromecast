@@ -194,114 +194,54 @@ exports.init = function() {
         });
       }, 1000);
     });
-    
-  });
+
+    it('volume and muting', function(done) {
+      var volume = new chrome.cast.Volume();
+      volume.level = 0.5;
+      
+      var request = new chrome.cast.media.VolumeRequest();
+      request.volume = volume;
+
+      _currentMedia.setVolume(request, function() {
+        
+        var request = new chrome.cast.media.VolumeRequest(new chrome.cast.Volume(null, true));
+        _currentMedia.setVolume(request, function() {
 
 
-  xdescribe('Chromecast', function () {
-    var fail = function(done, why) {
-      if (typeof why !== 'undefined') {
-        console.error(why);
-      }
-      expect(true).toBe(false);
-      done();
-    };
-
-    it("should contain definitions", function() {
-      expect(typeof chromecast.getDevices).toBeDefined();
-      expect(typeof chromecast.launch).toBeDefined();
-      expect(typeof chromecast.play).toBeDefined();
-      expect(typeof chromecast.pause).toBeDefined();
-      expect(typeof chromecast.stop).toBeDefined();
-      expect(typeof chromecast.seek).toBeDefined();
-      expect(typeof chromecast.volume).toBeDefined();
-      expect(typeof chromecast.loadUrl).toBeDefined();
-      expect(typeof chromecast.echo).toBeDefined();
-    });
-
-    it('discovering and launching', function(done) {
-      var onDevice = function(deviceId, deviceName) {
-        if (deviceName.indexOf('Ugly') > -1 || deviceName.indexOf('Graham') > -1) {
-          chromecast.removeListener('device', onDevice);
-
-          expect(deviceId).toBeDefined();
-          expect(deviceName).toBeDefined();
-
-          console.log('ON DEVICE', deviceId, deviceName);
-          setTimeout(function() {
-            chromecast.getRoute(deviceId, function(err, name) {
-              expect(err).toBe(null);
-              expect(name).not.toBe(null);
-              console.log('GET ROUTE', err, name);
-              
-              chromecast.launch(deviceId, applicationID, function(err) {
-                expect(err).toEqual(null);
-                setTimeout(done, 2000);
-              });
-            })
-          }, 800);
-        }
-      };
-
-      chromecast.on('device', onDevice);
-      chromecast.getDevices(applicationID);
-    });
-
-    it('loading a url', function(done) {
-      chromecast.loadUrl(videoUrl, function(err) {
-        expect(err).toEqual(null);
-        setTimeout(done, 5000);
-      })
-    });
-
-    it('pause', function(done) {
-      chromecast.pause(function(err) {
-        expect(err).toEqual(null);
-        setTimeout(done, 2000);
-      })
-    });
-
-    it('play', function(done) {
-      chromecast.play(function(err) {
-        expect(err).toEqual(null);
-        setTimeout(done, 2000);
-      })
-    });
-
-    it('setVolume', function(done) {
-      chromecast.setVolume(0.5, function(err) {
-        expect(err).toEqual(null);
-        setTimeout(done, 1000);
-      });
-    });
-
-    xit('getVolume', function(done) {
-      chromecast.setVolume(0.2, function(err) {
-        expect(err).toEqual(null);
-        setTimeout(function() {
-          chromecast.getVolume(function(err, volume) {
-            expect(err).toEqual(null);
-            expect(volume).toEqual(0.2);
-            done(); 
+          var request = new chrome.cast.media.VolumeRequest(new chrome.cast.Volume(null, false));
+          _currentMedia.setVolume(request, function() {
+            done();
+          }, function(err) {
+            expect(err).toBeNull();
           });
-        }, 500);
+
+        }, function(err) {
+          expect(err).toBeNull();
+        });
+
+      }, function(err) {
+        expect(err).toBeNull();
+      });
+
+    });
+
+
+    it('stopping the video', function(done) {
+      _currentMedia.stop(null, function() {
+        setTimeout(done, 1000);
+      }, function(err) {
+        expect(err).toBeNull();
       });
     });
 
-    it('seek', function(done) {
-      chromecast.seek(15, function(err) {
-        expect(err).toEqual(null);
-        setTimeout(done, 2000);
-      });
-    });
-
-    it('kill', function(done) {
-      chromecast.kill(function(err) {
-        expect(err).toEqual(null);
+    it('unloading the session', function(done) {
+      _session.stop(function() {
         done();
+      }, function(err) {
+        expect(err).toBeNull();
       });
     });
-
+    
   });
 };
 
