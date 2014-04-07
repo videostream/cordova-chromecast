@@ -3,6 +3,7 @@ package acidhax.cordova.chromecast;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.List;
 
 import com.google.android.gms.cast.*;
 
@@ -14,9 +15,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.support.v7.media.MediaRouter;
 import android.support.v7.media.MediaRouteSelector;
 import android.support.v7.media.MediaRouter.RouteInfo;
+import android.widget.ArrayAdapter;
 
 public class Chromecast extends CordovaPlugin {
 	
@@ -233,22 +237,6 @@ public class Chromecast extends CordovaPlugin {
     	return true;
     }
     
-	
-	protected void onRouteAdded(MediaRouter router, final RouteInfo route) {
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(500);
-                    Chromecast.this.webView.sendJavascript("chromecast.emit('device', '"+route.getId()+"', '" + route.getName() + "')");
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            
-        }).start();
-    }
 
 
     /* NEW APIS **/
@@ -303,11 +291,48 @@ public class Chromecast extends CordovaPlugin {
      * THIS IS WHAT LAUNCHES THE CHROMECAST PICKER
      * @param  callbackContext
      */
-    public boolean requestSession (CallbackContext callbackContext) {
-        callbackContext.error("not_implemented");
+    public boolean requestSession (final CallbackContext callbackContext) {
+    	final Activity activity = cordova.getActivity();
+        activity.runOnUiThread(new Runnable() {
+            public void run() {
+                mMediaRouter = MediaRouter.getInstance(activity.getApplicationContext());
+                final List<RouteInfo> routeList = mMediaRouter.getRoutes();
+                
+                AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+            	builder.setTitle("Choose a Chromecast");
+            	CharSequence[] seq = new CharSequence[routeList.size() -1];
+            	for (int n = 1; n < routeList.size(); n++) {
+            		RouteInfo route = routeList.get(n);
+            		if (!route.getName().equals("Phone")) {
+            			seq[n-1] = route.getName();
+            		}
+            	}
+            	
+            	builder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        callbackContext.error("cancel");
+                    }
+                });
+            	builder.setItems(seq, new DialogInterface.OnClickListener() {
+				    @Override
+				    public void onClick(DialogInterface dialog, int which) {
+				        RouteInfo selectedRoute = routeList.get(which);
+				        Chromecast.this.createSession(selectedRoute, callbackContext);
+				    }
+                });
+                builder.show();
+            }
+        });
+        
         return true;
     }
 
+    private void createSession(RouteInfo routeInfo, CallbackContext callbackContext) {
+    	// DO IT
+    }
+    
     /**
      * Set the volume level on the receiver - this is a Chromecast volume, not a Media volume
      * @param  newLevel
@@ -362,11 +387,29 @@ public class Chromecast extends CordovaPlugin {
         return true;
     }
 
+    
+    private void checkReceiverAvailable() {
+    	final Activity activity = cordova.getActivity();
+        activity.runOnUiThread(new Runnable() {
+            public void run() {
+                mMediaRouter = MediaRouter.getInstance(activity.getApplicationContext());
+                List<RouteInfo> routeList = mMediaRouter.getRoutes();
+                
+                if (routeList.size() > 0) {
+                	Chromecast.this.webView.sendJavascript("chrome.cast._.receiverAvailable()");
+                } else {
+                	Chromecast.this.webView.sendJavascript("chrome.cast._.receiverUnavailable()");
+                }
+            }
+        });
+    }
 
-
+    protected void onRouteAdded(MediaRouter router, final RouteInfo route) {
+       this.checkReceiverAvailable();
+    }
 
 	protected void onRouteRemoved(MediaRouter router, RouteInfo route) {
-		this.webView.sendJavascript("chromecast.emit('deviceRemoved', '"+route.getId()+"', '" + route.getName() + "')");
+		this.checkReceiverAvailable();
 	}
 
 	protected void onRouteSelected(MediaRouter router, RouteInfo route) {
