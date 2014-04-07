@@ -40,7 +40,7 @@ public class Chromecast extends CordovaPlugin {
     			if (method.getName().equals(action)) {
     				Type[] types = method.getGenericParameterTypes();
     				if (args.length() + 1 == types.length) { // +1 is the cbContext
-    					boolean isValid = false;
+    					boolean isValid = true;
         				for (int i = 0; i < args.length(); i++) {
             				Class arg = args.get(i).getClass();
             				if (types[i] == arg) {
