@@ -187,17 +187,6 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
         return true;
     }
     
-    /**
-     * Execute function - Loads a URL in an app that supports the Chromecast MediaReceiver
-     * @param args
-     * @param cbContext
-     * @return
-     * @throws JSONException
-     */
-    public boolean loadUrl(String url, final CallbackContext callbackContext) throws JSONException {
-    	return this.currentSession.loadUrl(url, genericCallback(callbackContext));
-    }
-    
 
 
     /* NEW APIS **/
@@ -539,8 +528,12 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
 	}
 
 	@Override
-	public void onSessionUpdated() {
-		this.webView.sendJavascript("chrome.cast._.sessionUpdated();");
+	public void onSessionUpdated(boolean isAlive, JSONObject session) {
+		if (isAlive) {
+			this.webView.sendJavascript("chrome.cast._.sessionUpdated(true, " + session.toString() + ");");
+		} else {
+			this.webView.sendJavascript("chrome.cast._.sessionUpdated(false);");
+		}
 	}
 }
 

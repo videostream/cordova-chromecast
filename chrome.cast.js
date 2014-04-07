@@ -752,6 +752,7 @@ chrome.cast.Session.prototype.removeMediaListener = function (listener) {
  * @property {chrome.cast.media.PlayerState} 	playerState 	The player state.
  * @property {chrome.cast.media.MediaCommand[]} supportedMediaCommands The media commands supported by the media player.
  * @property {chrome.cast.Volume} 				volume 			The media stream volume.
+ * @property {string} 							idleReason 		Reason for idling
  */
 chrome.cast.media.Media = function(sessionId, mediaSessionId) {
 	this.sessionId = sessionId;

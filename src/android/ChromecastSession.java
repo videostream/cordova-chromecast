@@ -13,6 +13,7 @@ import com.google.android.gms.cast.Cast;
 import com.google.android.gms.cast.Cast.ApplicationConnectionResult;
 import com.google.android.gms.cast.CastDevice;
 import com.google.android.gms.cast.MediaInfo;
+import com.google.android.gms.cast.MediaStatus;
 import com.google.android.gms.cast.RemoteMediaPlayer;
 import com.google.android.gms.cast.RemoteMediaPlayer.MediaChannelResult;
 import com.google.android.gms.cast.RemoteMediaPlayer.OnMetadataUpdatedListener;
@@ -89,36 +90,6 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 		Cast.CastApi.stopApplication(mApiClient);
 	}
 	
-	public boolean loadUrl(String url, final ChromecastSessionCallback callback) {
-		try {
-			MediaInfo mediaInfo = null;  //chromecastMediaController.createLoadUrlRequest(url);
-			
-			mRemoteMediaPlayer.load(mApiClient, mediaInfo, true)
-				.setResultCallback(new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
-					@Override
-					public void onResult(MediaChannelResult result) {
-						if (result.getStatus().isSuccess()) {
-							System.out.println("Media loaded successfully");
-							callback.onSuccess();
-						} else {
-							callback.onError("Unable to load");
-						}
-				    }
-				});
-    	} catch (IllegalStateException e) {
-    		e.printStackTrace();
-    		System.out.println("Problem occurred with media during loading");
-    		callback.onError("Problem occurred with media during loading");
-    		return false;
-    	} catch (Exception e) {
-    		e.printStackTrace();
-    		callback.onError("Problem opening media during loading");
-    		System.out.println("Problem opening media during loading");
-    		return false;
-    	}
-    	return true;
-	}
-	
 	public boolean loadMedia(String contentId, String contentType, long duration, String streamType, boolean autoPlay, double currentTime, final ChromecastSessionCallback callback) {
 		try {
 			MediaInfo mediaInfo = chromecastMediaController.createLoadUrlRequest(contentId, contentType, duration, streamType, autoPlay, currentTime);
@@ -130,13 +101,7 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 						if (result.getStatus().isSuccess()) {
 							System.out.println("Media loaded successfully");
 							
-							try {
-								JSONObject out = new JSONObject();
-								out.put("mediaSessionId", 1);
-								callback.onSuccess(out);
-							} catch (JSONException e) {
-								callback.onError("session_error");
-							}
+							callback.onSuccess(ChromecastSession.this.createMediaObject());
 						
 						} else {
 							callback.onError("session_error");
@@ -235,34 +200,7 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 			
 			if (status.isSuccess()) {
 				try {
-					
-					try {
-						ChromecastSession that = ChromecastSession.this;
-						
-						JSONObject out = new JSONObject();
-						out.put("appId", that.appId);
-						
-						JSONArray appImages = new JSONArray();
-						for(WebImage o : that.appImages) {
-							appImages.put(o.toString());
-						}
-						
-						out.put("appImages", appImages);
-						out.put("sessionId", that.sessionId);
-						out.put("displayName", that.displayName);
-						
-						JSONObject receiver = new JSONObject();
-						receiver.put("friendlyName", that.device.getFriendlyName());
-						receiver.put("label", that.device.getDeviceId());
-						
-						out.put("receiver", receiver);
-						
-						that.launchCallback.onSuccess(out);
-						
-					} catch(JSONException e) {
-						ChromecastSession.this.launchCallback.onError("Error");
-					}
-					
+					ChromecastSession.this.launchCallback.onSuccess(createSessionObject());
 					connectRemoteMediaPlayer();
 				} catch (IllegalStateException e) {
 					e.printStackTrace();
@@ -289,6 +227,103 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 			}
 		}
 	};
+	
+	private JSONObject createSessionObject() {		
+		JSONObject out = new JSONObject();
+		try {
+			out.put("appId", this.appId);
+		
+		
+			JSONArray appImages = new JSONArray();
+			for(WebImage o : this.appImages) {
+				appImages.put(o.toString());
+			}
+			
+			out.put("appImages", appImages);
+			out.put("sessionId", this.sessionId);
+			out.put("displayName", this.displayName);
+			
+			JSONObject receiver = new JSONObject();
+			receiver.put("friendlyName", this.device.getFriendlyName());
+			receiver.put("label", this.device.getDeviceId());
+			
+			JSONObject volume = new JSONObject();
+			receiver.put("level", Cast.CastApi.getVolume(mApiClient));
+			receiver.put("muted", Cast.CastApi.isMute(mApiClient));
+			
+			receiver.put("volume", volume);
+			
+			out.put("receiver", receiver);
+			
+		} catch(JSONException e) {
+			
+		}
+		
+		return out;
+	}
+	
+	private JSONObject createMediaObject() {
+		JSONObject out = new JSONObject();
+		JSONObject objInfo = new JSONObject();
+		
+		MediaStatus mediaStatus = mRemoteMediaPlayer.getMediaStatus();
+		MediaInfo mediaInfo = mediaStatus.getMediaInfo();
+		try {
+			out.put("media", objInfo);
+			out.put("mediaSessionId", 1);
+			out.put("currentTime", mediaStatus.getStreamPosition() / 1000);
+			out.put("playbackRate", mediaStatus.getPlaybackRate());
+			out.put("customData", mediaStatus.getCustomData());
+			
+			switch(mediaStatus.getPlayerState()) {
+				case MediaStatus.PLAYER_STATE_BUFFERING:
+					out.put("playerState", "BUFFERING"); break;
+				case MediaStatus.PLAYER_STATE_IDLE:
+					out.put("playerState", "IDLE"); break;
+				case MediaStatus.PLAYER_STATE_PAUSED:
+					out.put("playerState", "PAUSED"); break;
+				case MediaStatus.PLAYER_STATE_PLAYING:
+					out.put("playerState", "PLAYING"); break;
+				case MediaStatus.PLAYER_STATE_UNKNOWN:
+					out.put("playerState", "UNKNOWN"); break;
+			}
+			
+			switch(mediaStatus.getIdleReason()) {
+				case MediaStatus.IDLE_REASON_CANCELED:
+					out.put("idleReason", "canceled"); break;
+				case MediaStatus.IDLE_REASON_ERROR:
+					out.put("idleReason", "error"); break;
+				case MediaStatus.IDLE_REASON_FINISHED:
+					out.put("idleReason", "finished"); break;
+				case MediaStatus.IDLE_REASON_INTERRUPTED:
+					out.put("idleReason", "iterrupted"); break;
+				case MediaStatus.IDLE_REASON_NONE:
+					out.put("idleReason", "none"); break;
+			}
+			
+			JSONObject volume = new JSONObject();
+			volume.put("level", mediaStatus.getStreamVolume());
+			volume.put("muted", mediaStatus.isMute());
+			
+			out.put("volume", volume);
+			
+			objInfo.put("duration", mediaInfo.getStreamDuration() / 1000);
+			
+			switch(mediaInfo.getStreamType()) {
+				case MediaInfo.STREAM_TYPE_BUFFERED:
+					objInfo.put("streamType", "buffered"); break;
+				case MediaInfo.STREAM_TYPE_LIVE:
+					objInfo.put("streamType", "live"); break;
+				case MediaInfo.STREAM_TYPE_NONE:
+					objInfo.put("streamType", "other"); break;
+			}
+			
+		} catch(JSONException e) {
+			
+		}
+		
+		return out;
+	}
 	
 	
 
@@ -330,7 +365,7 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 	 */
 	@Override
 	public void onApplicationStatusChanged() {
-		this.onSessionUpdatedListener.onSessionUpdated();
+		this.onSessionUpdatedListener.onSessionUpdated(true, createSessionObject());
 	}
 	
 	/**
@@ -339,7 +374,7 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 	 */
 	@Override
 	public void onVolumeChanged() {
-		
+		this.onSessionUpdatedListener.onSessionUpdated(true, createSessionObject());
 	}
 	
 	/**
@@ -348,7 +383,7 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 	 */
 	@Override
 	public void onApplicationDisconnected(int errorCode) {
-		
+		this.onSessionUpdatedListener.onSessionUpdated(false, null);
 	}
 
 
