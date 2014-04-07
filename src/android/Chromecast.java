@@ -27,6 +27,7 @@ public class Chromecast extends CordovaPlugin {
     private MediaRouter mMediaRouter;
     private MediaRouteSelector mMediaRouteSelector;
     private volatile ChromecastMediaRouterCallback mMediaRouterCallback = new ChromecastMediaRouterCallback();
+    private String appId;
     
     private ChromecastSession currentSession;
     
@@ -269,6 +270,7 @@ public class Chromecast extends CordovaPlugin {
     public boolean initialize (final String appId, String autoJoinPolicy, String defaultActionPolicy, final CallbackContext callbackContext) {
         final Activity activity = cordova.getActivity();
         final Chromecast that = this;
+        this.appId = appId;
         activity.runOnUiThread(new Runnable() {
             public void run() {
                 mMediaRouter = MediaRouter.getInstance(activity.getApplicationContext());
@@ -318,7 +320,7 @@ public class Chromecast extends CordovaPlugin {
             	builder.setItems(seq, new DialogInterface.OnClickListener() {
 				    @Override
 				    public void onClick(DialogInterface dialog, int which) {
-				        RouteInfo selectedRoute = routeList.get(which);
+				        RouteInfo selectedRoute = routeList.get(which + 1);
 				        Chromecast.this.createSession(selectedRoute, callbackContext);
 				    }
                 });
@@ -329,8 +331,17 @@ public class Chromecast extends CordovaPlugin {
         return true;
     }
 
+	/**
+	 * Helper for the creating of a session! The user-selected RouteInfo needs to be passed to a new ChromecastSession 
+	 * @param routeInfo
+	 * @param callbackContext
+	 */
     private void createSession(RouteInfo routeInfo, CallbackContext callbackContext) {
-    	// DO IT
+    	Chromecast.this.currentSession = new ChromecastSession(routeInfo, this.cordova);
+        
+        // Launch the app.
+        // TODO: Create a callback interface so we don't have to throw around the CallbackContext
+        Chromecast.this.currentSession.launch(this.appId, callbackContext);
     }
     
     /**

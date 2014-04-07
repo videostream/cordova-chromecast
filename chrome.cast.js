@@ -505,7 +505,7 @@ chrome.cast.requestSession = function (successCallback, errorCallback, opt_sessi
 			// var displayName = obj.displayName;
 			// var appImages = [];
 			// var receiver = new chrome.cast.Receiver(obj.label, obj.friendlyName, obj.capabilities || [], obj.volume);
-			var session = "hi";
+			var session = {receiver: {}};
 			successCallback(session);
 			_sessionListener(session);
 		} else {
