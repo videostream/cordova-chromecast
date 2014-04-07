@@ -15,6 +15,8 @@ import com.google.android.gms.cast.CastDevice;
 import com.google.android.gms.cast.MediaInfo;
 import com.google.android.gms.cast.RemoteMediaPlayer;
 import com.google.android.gms.cast.RemoteMediaPlayer.MediaChannelResult;
+import com.google.android.gms.cast.RemoteMediaPlayer.OnMetadataUpdatedListener;
+import com.google.android.gms.cast.RemoteMediaPlayer.OnStatusUpdatedListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
@@ -27,7 +29,7 @@ import android.support.v7.media.MediaRouter.RouteInfo;
 /*
  * All of the Chromecast session specific functions should start here. 
  */
-public class ChromecastSession extends Cast.Listener implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class ChromecastSession extends Cast.Listener implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, OnMetadataUpdatedListener, OnStatusUpdatedListener {
 	private String id = null;
 	private String name = null;
 	private String sessionId = null;
@@ -37,6 +39,8 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 	private CordovaInterface cordova = null;
 	private CastDevice device = null;
 	private ChromecastMediaController chromecastMediaController = new ChromecastMediaController(mRemoteMediaPlayer);
+	private ChromecastOnMediaUpdatedListener onMediaUpdatedListener;
+	private ChromecastOnSessionUpdatedListener onSessionUpdatedListener;
 	
 	private String appId;
 	private String displayName;
@@ -44,13 +48,17 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 	
 	private ChromecastSessionCallback launchCallback;
 	
-	public ChromecastSession(RouteInfo routeInfo, CordovaInterface cordovaInterface) {
+	public ChromecastSession(RouteInfo routeInfo, CordovaInterface cordovaInterface, 
+			ChromecastOnMediaUpdatedListener onMediaUpdatedListener, ChromecastOnSessionUpdatedListener onSessionUpdatedListener) {
 		this.cordova = cordovaInterface;
-        
+        this.onMediaUpdatedListener = onMediaUpdatedListener;
+        this.onSessionUpdatedListener = onSessionUpdatedListener;
         this.routeInfo = routeInfo;
 		this.device = CastDevice.getFromBundle(this.routeInfo.getExtras());
 		
 		this.mRemoteMediaPlayer = new RemoteMediaPlayer();
+		this.mRemoteMediaPlayer.setOnMetadataUpdatedListener(this);
+		this.mRemoteMediaPlayer.setOnStatusUpdatedListener(this);
 	}
 
 	
@@ -189,8 +197,7 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 //	}
 	
 	private void connectToDevice() {
-		Cast.CastOptions.Builder apiOptionsBuilder = Cast.CastOptions
-                .builder(this.device, this);
+		Cast.CastOptions.Builder apiOptionsBuilder = Cast.CastOptions.builder(this.device, this);
 		this.mApiClient = new GoogleApiClient.Builder(this.cordova.getActivity().getApplicationContext())
 			.addApi(Cast.API, apiOptionsBuilder.build())
 	        .addConnectionCallbacks(this)
@@ -218,7 +225,7 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 	private ResultCallback<Cast.ApplicationConnectionResult> launchApplicationResultCallback = new ResultCallback<Cast.ApplicationConnectionResult>() {
 		@Override
 		public void onResult(ApplicationConnectionResult result) {
-
+			
 			ApplicationMetadata metadata = result.getApplicationMetadata();
 			ChromecastSession.this.sessionId = result.getSessionId();
 			ChromecastSession.this.displayName = metadata.getName();
@@ -255,8 +262,6 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 					} catch(JSONException e) {
 						ChromecastSession.this.launchCallback.onError("Error");
 					}
-					
-					
 					
 					connectRemoteMediaPlayer();
 				} catch (IllegalStateException e) {
@@ -325,7 +330,7 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 	 */
 	@Override
 	public void onApplicationStatusChanged() {
-		
+		this.onSessionUpdatedListener.onSessionUpdated();
 	}
 	
 	/**
@@ -344,5 +349,19 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 	@Override
 	public void onApplicationDisconnected(int errorCode) {
 		
+	}
+
+
+	@Override
+	public void onMetadataUpdated() {
+		// On Media metadata updated
+		this.onMediaUpdatedListener.onMediaUpdated();
+	}
+
+
+	@Override
+	public void onStatusUpdated() {
+		// On Media status updated()
+		this.onMediaUpdatedListener.onMediaUpdated();
 	}
 }

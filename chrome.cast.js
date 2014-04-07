@@ -935,6 +935,12 @@ chrome.cast._ = {
 	receiverAvailable: function() {
 		_receiverListener(chrome.cast.ReceiverAvailability.AVAILABLE);
 		_receiverAvailable = true;
+	},
+	sessionUpdated: function() {
+		console.log('SESSION UPDATED', arguments);
+	},
+	mediaUpdated: function() {
+		console.log('MEDIA UPDATED', arguments);
 	}
 }
 

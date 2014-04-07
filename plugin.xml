@@ -32,6 +32,9 @@
     <source-file src="src/android/ChromecastMediaController.java" target-dir="src/acidhax/cordova/chromecast" />
     <source-file src="src/android/ChromecastMediaRouterCallback.java" target-dir="src/acidhax/cordova/chromecast" />
     <source-file src="src/android/ChromecastSession.java" target-dir="src/acidhax/cordova/chromecast" />
+    <source-file src="src/android/ChromecastSessionCallback.java" target-dir="src/acidhax/cordova/chromecast" />
+    <source-file src="src/android/ChromecastOnMediaUpdatedListener.java" target-dir="src/acidhax/cordova/chromecast" />
+    <source-file src="src/android/ChromecastOnSessionUpdatedListener.java" target-dir="src/acidhax/cordova/chromecast" />
     <source-file src="src/android/ChromecastException.java" target-dir="src/acidhax/cordova/chromecast" />
 
     <config-file target="res/xml/config.xml" parent="/widget">

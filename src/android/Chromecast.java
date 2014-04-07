@@ -23,7 +23,7 @@ import android.support.v7.media.MediaRouteSelector;
 import android.support.v7.media.MediaRouter.RouteInfo;
 import android.widget.ArrayAdapter;
 
-public class Chromecast extends CordovaPlugin {
+public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdatedListener, ChromecastOnSessionUpdatedListener {
 	
     private MediaRouter mMediaRouter;
     private MediaRouteSelector mMediaRouteSelector;
@@ -170,7 +170,7 @@ public class Chromecast extends CordovaPlugin {
         
                 if (Chromecast.this.currentSession == null) {
                     if (info != null) {
-                        Chromecast.this.currentSession = new ChromecastSession(info, Chromecast.this.cordova);
+                        Chromecast.this.currentSession = new ChromecastSession(info, Chromecast.this.cordova, Chromecast.this, Chromecast.this);
                         
                         // Launch the app.
                         // TODO: Create a callback interface so we don't have to throw around the CallbackContext
@@ -297,7 +297,7 @@ public class Chromecast extends CordovaPlugin {
 	 * @param callbackContext
 	 */
     private void createSession(RouteInfo routeInfo, final CallbackContext callbackContext) {
-    	this.currentSession = new ChromecastSession(routeInfo, this.cordova);
+    	this.currentSession = new ChromecastSession(routeInfo, this.cordova, this, this);
         
         // Launch the app.
         this.currentSession.launch(this.appId, new ChromecastSessionCallback() {
@@ -526,11 +526,21 @@ public class Chromecast extends CordovaPlugin {
 	}
 
 	protected void onRouteSelected(MediaRouter router, RouteInfo route) {
-		this.webView.sendJavascript("chromecast.emit('routeSelected', '"+route.getId()+"', '" + route.getName() + "')");
+//		this.webView.sendJavascript("chromecast.emit('routeSelected', '"+route.getId()+"', '" + route.getName() + "')");
 	}
 
 	protected void onRouteUnselected(MediaRouter router, RouteInfo route) {
-		this.webView.sendJavascript("chromecast.emit('routeUnselected', '"+route.getId()+"', '" + route.getName() + "')");
+//		this.webView.sendJavascript("chromecast.emit('routeUnselected', '"+route.getId()+"', '" + route.getName() + "')");
+	}
+
+	@Override
+	public void onMediaUpdated() {
+		this.webView.sendJavascript("chrome.cast._.mediaUpdated();");
+	}
+
+	@Override
+	public void onSessionUpdated() {
+		this.webView.sendJavascript("chrome.cast._.sessionUpdated();");
 	}
 }
 
