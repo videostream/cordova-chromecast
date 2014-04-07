@@ -12,7 +12,9 @@ exports.init = function() {
 
     var _session = null;
     var _receiverAvailability = null;
-    var _currentMedia = null;
+    var _sessionUpdatedFired = false;
+    var _mediaUpdatedFired = false;
+    // var _currentMedia = null;
 
     it('should contain definitions', function(done) {
       setTimeout(function() {
@@ -129,6 +131,15 @@ exports.init = function() {
         expect(session.displayName).toBeDefined();
         expect(session.receiver).toBeDefined();
         expect(session.receiver.friendlyName).toBeDefined();
+        expect(session.addUpdateListener).toBeDefined();
+        expect(session.removeUpdateListener).toBeDefined();
+
+        var updateListener = function(isAlive) {
+          _sessionUpdatedFired = true;
+          session.removeUpdateListener(updateListener);
+        };
+
+        session.addUpdateListener(updateListener);
         done();
       }, function(err) {
         console.log('request session error');
@@ -142,10 +153,21 @@ exports.init = function() {
       var request = new chrome.cast.media.LoadRequest(mediaInfo);
       expect(_session).not.toBeNull()
       _session.loadMedia(request, function(media) {
-        console.log('loadRequest success');
+        console.log('loadRequest success', media);
         _currentMedia = media;
         // expect(_currentMedia instanceof chrome.cast.media.Media).toBe(true);
+        
         expect(_currentMedia.sessionId).toEqual(_session.sessionId);
+        expect(_currentMedia.addUpdateListener).toBeDefined();
+        expect(_currentMedia.removeUpdateListener).toBeDefined();
+
+        var updateListener = function() {
+          _mediaUpdatedFired = true;
+          _currentMedia.removeUpdateListener(updateListener);
+        };
+
+        _currentMedia.addUpdateListener(updateListener);
+
         done();
       }, function(err) {
         console.log('loadRequest error', err);
@@ -193,6 +215,16 @@ exports.init = function() {
           done();
         });
       }, 1000);
+    });
+
+    it('session updateListener', function(done) {
+      expect(_sessionUpdatedFired).toEqual(true);
+      done();
+    });
+
+    it('media updateListener', function(done) {
+      expect(_mediaUpdatedFired).toEqual(true);
+      done();
     });
 
     it('volume and muting', function(done) {

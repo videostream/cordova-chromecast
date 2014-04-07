@@ -37,17 +37,17 @@ public class ChromecastMediaController {
     	return mediaInfo;
 	}
 	
-	public void play(GoogleApiClient apiClient, final ChromecastSessionCallback callback) {
+	public void play(GoogleApiClient apiClient, ChromecastSessionCallback callback) {
 		PendingResult<MediaChannelResult> res = this.remote.play(apiClient);
 		res.setResultCallback(this.createMediaCallback(callback));
 	}
 	
-	public void pause(GoogleApiClient apiClient, final ChromecastSessionCallback callback) {
+	public void pause(GoogleApiClient apiClient, ChromecastSessionCallback callback) {
 		PendingResult<MediaChannelResult> res = this.remote.pause(apiClient);
 		res.setResultCallback(this.createMediaCallback(callback));
 	}
 	
-	public void stop(GoogleApiClient apiClient, final ChromecastSessionCallback callback) {
+	public void stop(GoogleApiClient apiClient, ChromecastSessionCallback callback) {
 		PendingResult<MediaChannelResult> res = this.remote.stop(apiClient);
 		res.setResultCallback(this.createMediaCallback(callback));
 	}

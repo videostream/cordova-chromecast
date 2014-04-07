@@ -452,6 +452,9 @@ var _receiverListener = null;
 var _sessionListener = null;
 var _sessionRequest = null;
 
+var _sessions = {};
+var _currentMedia = null;
+
 var _receiverAvailable = false;
 
 /**
@@ -509,7 +512,7 @@ chrome.cast.requestSession = function (successCallback, errorCallback, opt_sessi
 			var appImages = obj.appImages || [];
 			var receiver = new chrome.cast.Receiver(obj.receiver.label, obj.receiver.friendlyName, obj.receiver.capabilities || [], obj.volume || null);
 
-			var session = new chrome.cast.Session(sessionId, appId, displayName, appImages, receiver);
+			var session = _sessions[sessionId] = new chrome.cast.Session(sessionId, appId, displayName, appImages, receiver);
 			successCallback(session);
 			_sessionListener(session);
 		} else {
@@ -551,12 +554,14 @@ chrome.cast.setCustomReceivers = function (receivers, successCallback, errorCall
  * @property {string}							statusText 	Descriptive text for the current application content, for example “My Wedding Slideshow”.
  */
 chrome.cast.Session = function(sessionId, appId, displayName, appImages, receiver) {
+	EventEmitter.call(this);
 	this.sessionId = sessionId;
 	this.appId = appId;
 	this.displayName = displayName;
 	this.appImages = appImages || [];
 	this.receiver = receiver;
 };
+chrome.cast.Session.prototype = Object.create(EventEmitter.prototype);
 
 /**
  * Sets the receiver volume.
@@ -662,12 +667,12 @@ chrome.cast.Session.prototype.loadMedia = function (loadRequest, successCallback
 	var mediaInfo = loadRequest.media;
 	execute('loadMedia', mediaInfo.contentId, mediaInfo.contentType, mediaInfo.duration || 0.0, mediaInfo.streamType, loadRequest.autoPlay || false, loadRequest.currentTime || 0, function(err, obj) {
 		if (!err) {
-			var media = new chrome.cast.media.Media(self.sessionId, obj.mediaSessionId);
-			media.media = mediaInfo;
+			_currentMedia = new chrome.cast.media.Media(self.sessionId, obj.mediaSessionId);
+			_currentMedia.media = mediaInfo;
 
 			// TODO: Fill in the rest of the media properties
 			
-			successCallback(media);
+			successCallback(_currentMedia);
 
 		} else {
 			handleError(err, errorCallback);
@@ -683,8 +688,7 @@ chrome.cast.Session.prototype.loadMedia = function (loadRequest, successCallback
  * @param {function} listener The listener to add.
  */
 chrome.cast.Session.prototype.addUpdateListener = function (listener) {
-	// TODO: Implement
-	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
+	this.on('_sessionUpdated', listener);
 };
 
 /**
@@ -692,8 +696,7 @@ chrome.cast.Session.prototype.addUpdateListener = function (listener) {
  * @param  {function} listener The listener to remove.
  */
 chrome.cast.Session.prototype.removeUpdateListener = function (listener) {
-	// TODO: Implement
-	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
+	this.removeListener('_sessionUpdated', listener);
 };
 
 /**
@@ -736,6 +739,12 @@ chrome.cast.Session.prototype.removeMediaListener = function (listener) {
 };
 
 
+chrome.cast.Session.prototype._update = function(isAlive, obj) {
+	// TODO: Update properties
+	this.emit('_sessionUpdated', isAlive);
+};
+
+
 
 
 
@@ -755,6 +764,7 @@ chrome.cast.Session.prototype.removeMediaListener = function (listener) {
  * @property {string} 							idleReason 		Reason for idling
  */
 chrome.cast.media.Media = function(sessionId, mediaSessionId) {
+	EventEmitter.call(this);
 	this.sessionId = sessionId;
 	this.mediaSessionId = mediaSessionId;
 	this.currentTime = 0;
@@ -768,6 +778,7 @@ chrome.cast.media.Media = function(sessionId, mediaSessionId) {
 	];
 	this.volume = new chrome.cast.Volume(1, false);
 };
+chrome.cast.media.Media.prototype = Object.create(EventEmitter.prototype);
 
 /**
  * Plays the media item.
@@ -913,8 +924,7 @@ chrome.cast.media.Media.prototype.getEstimatedTime = function () {
  * @param {function} listener The listener to add. The parameter indicates whether the Media object is still alive.
  */
 chrome.cast.media.Media.prototype.addUpdateListener = function (listener) {
-	// TODO: Implement
-	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
+	this.on('_mediaUpdated', listener);
 };
 
 /**
@@ -922,8 +932,12 @@ chrome.cast.media.Media.prototype.addUpdateListener = function (listener) {
  * @param {function} listener The listener to remove.
  */
 chrome.cast.media.Media.prototype.removeUpdateListener = function (listener) {
-	// TODO: Implement
-	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
+	this.removeListener('_mediaUpdated', listener);
+};
+
+chrome.cast.media.Media.prototype._update = function(obj) {
+	// TODO: Update properties
+	this.emit('_mediaUpdated');
 };
 
 
@@ -937,11 +951,16 @@ chrome.cast._ = {
 		_receiverListener(chrome.cast.ReceiverAvailability.AVAILABLE);
 		_receiverAvailable = true;
 	},
-	sessionUpdated: function() {
-		console.log('SESSION UPDATED', arguments);
+	sessionUpdated: function(isAlive, session) {
+		if (session && session.sessionId && _sessions[session.sessionId]) {
+			console.log('SESSION UPDATED', arguments);
+			_sessions[session.sessionId]._update(isAlive, session);
+		}
 	},
-	mediaUpdated: function() {
-		console.log('MEDIA UPDATED', arguments);
+	mediaUpdated: function(media) {
+		if (media && media.mediaSessionId !== undefined && _currentMedia) {
+			console.log('MEDIA UPDATED', arguments);
+		}
 	}
 }
 

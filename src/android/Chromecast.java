@@ -403,8 +403,22 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
      * @param callbackContext
      * @return
      */
-    public boolean mediaPause(CallbackContext callbackContext) {
-    	currentSession.mediaPause(genericCallback(callbackContext));
+    public boolean mediaPause(final CallbackContext callbackContext) {
+    	currentSession.mediaPause(new ChromecastSessionCallback() {
+
+			@Override
+			void onSuccess(Object object) {
+				// TODO Auto-generated method stub
+				callbackContext.success();
+			}
+
+			@Override
+			void onError(String reason) {
+				// TODO Auto-generated method stub
+				callbackContext.error(reason);
+			}
+    		
+    	});
     	return true;
     }
     
@@ -417,7 +431,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
      * @return
      */
     public boolean mediaSeek(Integer seekTime, String resumeState, CallbackContext callbackContext) {
-    	currentSession.mediaSeek(seekTime.longValue(), resumeState, genericCallback(callbackContext));
+    	currentSession.mediaSeek(seekTime.longValue() * 1000, resumeState, genericCallback(callbackContext));
     	return true;
     }
     
@@ -523,8 +537,8 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
 	}
 
 	@Override
-	public void onMediaUpdated() {
-		this.webView.sendJavascript("chrome.cast._.mediaUpdated();");
+	public void onMediaUpdated(JSONObject media) {
+		this.webView.sendJavascript("chrome.cast._.mediaUpdated(" + media.toString() +");");
 	}
 
 	@Override

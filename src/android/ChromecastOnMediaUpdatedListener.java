@@ -1,5 +1,7 @@
 package acidhax.cordova.chromecast;
 
+import org.json.JSONObject;
+
 public interface ChromecastOnMediaUpdatedListener {
-	void onMediaUpdated();
+	void onMediaUpdated(JSONObject media);
 }

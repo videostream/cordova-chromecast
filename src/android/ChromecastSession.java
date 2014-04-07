@@ -31,21 +31,20 @@ import android.support.v7.media.MediaRouter.RouteInfo;
  * All of the Chromecast session specific functions should start here. 
  */
 public class ChromecastSession extends Cast.Listener implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, OnMetadataUpdatedListener, OnStatusUpdatedListener {
-	private String id = null;
-	private String name = null;
-	private String sessionId = null;
+
 	private RouteInfo routeInfo = null;
-	private GoogleApiClient mApiClient = null;	
-	private RemoteMediaPlayer mRemoteMediaPlayer;
+	private volatile GoogleApiClient mApiClient = null;	
+	private volatile RemoteMediaPlayer mRemoteMediaPlayer;
 	private CordovaInterface cordova = null;
 	private CastDevice device = null;
-	private ChromecastMediaController chromecastMediaController = new ChromecastMediaController(mRemoteMediaPlayer);
+	private ChromecastMediaController chromecastMediaController;
 	private ChromecastOnMediaUpdatedListener onMediaUpdatedListener;
 	private ChromecastOnSessionUpdatedListener onSessionUpdatedListener;
 	
-	private String appId;
-	private String displayName;
-	private List<WebImage> appImages;
+	private volatile String appId;
+	private volatile String displayName;
+	private volatile List<WebImage> appImages;
+	private volatile String sessionId = null;
 	
 	private ChromecastSessionCallback launchCallback;
 	
@@ -60,6 +59,8 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 		this.mRemoteMediaPlayer = new RemoteMediaPlayer();
 		this.mRemoteMediaPlayer.setOnMetadataUpdatedListener(this);
 		this.mRemoteMediaPlayer.setOnStatusUpdatedListener(this);
+		
+		this.chromecastMediaController = new ChromecastMediaController(mRemoteMediaPlayer);
 	}
 
 	
@@ -100,7 +101,7 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 					public void onResult(MediaChannelResult result) {
 						if (result.getStatus().isSuccess()) {
 							System.out.println("Media loaded successfully");
-							
+
 							callback.onSuccess(ChromecastSession.this.createMediaObject());
 						
 						} else {
@@ -233,10 +234,11 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 		try {
 			out.put("appId", this.appId);
 		
-		
-			JSONArray appImages = new JSONArray();
-			for(WebImage o : this.appImages) {
-				appImages.put(o.toString());
+			if (this.appImages != null) {
+				JSONArray appImages = new JSONArray();
+				for(WebImage o : this.appImages) {
+					appImages.put(o.toString());
+				}
 			}
 			
 			out.put("appImages", appImages);
@@ -248,8 +250,8 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 			receiver.put("label", this.device.getDeviceId());
 			
 			JSONObject volume = new JSONObject();
-			receiver.put("level", Cast.CastApi.getVolume(mApiClient));
-			receiver.put("muted", Cast.CastApi.isMute(mApiClient));
+			volume.put("level", Cast.CastApi.getVolume(mApiClient));
+			volume.put("muted", Cast.CastApi.isMute(mApiClient));
 			
 			receiver.put("volume", volume);
 			
@@ -267,11 +269,15 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 		JSONObject objInfo = new JSONObject();
 		
 		MediaStatus mediaStatus = mRemoteMediaPlayer.getMediaStatus();
+		if (mediaStatus == null) {
+			return out;
+		}
+		
 		MediaInfo mediaInfo = mediaStatus.getMediaInfo();
 		try {
 			out.put("media", objInfo);
 			out.put("mediaSessionId", 1);
-			out.put("currentTime", mediaStatus.getStreamPosition() / 1000);
+			out.put("currentTime", mediaStatus.getStreamPosition() / 1000.0);
 			out.put("playbackRate", mediaStatus.getPlaybackRate());
 			out.put("customData", mediaStatus.getCustomData());
 			
@@ -307,7 +313,7 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 			
 			out.put("volume", volume);
 			
-			objInfo.put("duration", mediaInfo.getStreamDuration() / 1000);
+			objInfo.put("duration", mediaInfo.getStreamDuration() / 1000.0);
 			
 			switch(mediaInfo.getStreamType()) {
 				case MediaInfo.STREAM_TYPE_BUFFERED:
@@ -390,13 +396,13 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 	@Override
 	public void onMetadataUpdated() {
 		// On Media metadata updated
-		this.onMediaUpdatedListener.onMediaUpdated();
+		this.onMediaUpdatedListener.onMediaUpdated(this.createMediaObject());
 	}
 
 
 	@Override
 	public void onStatusUpdated() {
 		// On Media status updated()
-		this.onMediaUpdatedListener.onMediaUpdated();
+		this.onMediaUpdatedListener.onMediaUpdated(this.createMediaObject());
 	}
 }
