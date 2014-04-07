@@ -13,6 +13,7 @@ import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -299,7 +300,27 @@ public class Chromecast extends CordovaPlugin {
     	this.currentSession = new ChromecastSession(routeInfo, this.cordova);
         
         // Launch the app.
-        this.currentSession.launch(this.appId, genericCallback(callbackContext));
+        this.currentSession.launch(this.appId, new ChromecastSessionCallback() {
+
+			@Override
+			void onSuccess(Object object) {
+				if (object == null) {
+					onError("unknown");
+				} else {
+					callbackContext.success((JSONObject) object);
+				}
+			}
+
+			@Override
+			void onError(String reason) {
+				if (reason != null) {
+					callbackContext.error(reason);
+				} else {
+					callbackContext.error("unknown");
+				}
+			}
+        	
+        });
     }
     
     /**
@@ -351,10 +372,27 @@ public class Chromecast extends CordovaPlugin {
      * @param  loadReuqest.currentTime Where to begin playing from
      * @param  callbackContext 
      */
-    public boolean loadMedia (String contentId, String contentType, Integer duration, String streamType, Boolean autoPlay, Integer currentTime, CallbackContext callbackContext) {
+    public boolean loadMedia (String contentId, String contentType, Integer duration, String streamType, Boolean autoPlay, Integer currentTime, final CallbackContext callbackContext) {
         
     	if (this.currentSession != null) {
-    		return this.currentSession.loadMedia(contentId, contentType, duration, streamType, autoPlay, currentTime, genericCallback(callbackContext));
+    		return this.currentSession.loadMedia(contentId, contentType, duration, streamType, autoPlay, currentTime, 
+    				new ChromecastSessionCallback() {
+
+						@Override
+						void onSuccess(Object object) {
+							if (object == null) {
+								onError("unknown");
+							} else {
+								callbackContext.success((JSONObject) object);
+							}
+						}
+
+						@Override
+						void onError(String reason) {
+							callbackContext.error(reason);
+						}
+    			
+    		});
     	} else {
     		callbackContext.error("session_error");
     		return false;
