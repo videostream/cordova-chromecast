@@ -654,10 +654,12 @@ chrome.cast.Session.prototype.loadMedia = function (loadRequest, successCallback
 		return;
 	}
 
+	var self = this;
+	
 	var mediaInfo = loadRequest.media;
 	execute('loadMedia', mediaInfo.contentId, mediaInfo.contentType, mediaInfo.duration || 0.0, mediaInfo.streamType, loadRequest.autoPlay || false, loadRequest.currentTime || 0, function(err, obj) {
 		if (!err) {
-			var media = new chrome.cast.media.Media(session.sessionId, obj.mediaSessionId);
+			var media = new chrome.cast.media.Media(self.sessionId, obj.mediaSessionId);
 			media.media = mediaInfo;
 
 			// TODO: Fill in the rest of the media properties

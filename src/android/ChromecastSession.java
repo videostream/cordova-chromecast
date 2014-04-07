@@ -115,7 +115,15 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 					public void onResult(MediaChannelResult result) {
 						if (result.getStatus().isSuccess()) {
 							System.out.println("Media loaded successfully");
-							callbackContext.success();
+							
+							try {
+								JSONObject out = new JSONObject();
+								out.put("mediaSessionId", 1);
+								callbackContext.success(out);
+							} catch (JSONException e) {
+								callbackContext.error("session_error");
+							}
+						
 						} else {
 							callbackContext.error("session_error");
 						}
