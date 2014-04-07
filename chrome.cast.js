@@ -740,7 +740,22 @@ chrome.cast.Session.prototype.removeMediaListener = function (listener) {
 
 
 chrome.cast.Session.prototype._update = function(isAlive, obj) {
-	// TODO: Update properties
+	
+	this.appId = obj.appId;
+	this.appImages = obj.appImages;
+	this.displayName = obj.displayName;
+	if (obj.receiver) {
+		if (!this.receiver) {
+			this.receiver = new chrome.cast.Receiver(null, null, null, null);
+		}
+		this.receiver.friendlyName = obj.receiver.friendlyName;
+		this.receiver.label = obj.receiver.label;
+
+		if (obj.receiver.volume) {
+			this.receiver.volume = new chrome.cast.Volume(obj.receiver.volume.level, obj.receiver.volume.muted);
+		}
+	}
+
 	this.emit('_sessionUpdated', isAlive);
 };
 
@@ -953,7 +968,6 @@ chrome.cast._ = {
 	},
 	sessionUpdated: function(isAlive, session) {
 		if (session && session.sessionId && _sessions[session.sessionId]) {
-			console.log('SESSION UPDATED', arguments);
 			_sessions[session.sessionId]._update(isAlive, session);
 		}
 	},
