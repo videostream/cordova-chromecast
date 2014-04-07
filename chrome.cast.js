@@ -655,7 +655,7 @@ chrome.cast.Session.prototype.loadMedia = function (loadRequest, successCallback
 	}
 
 	var self = this;
-	
+
 	var mediaInfo = loadRequest.media;
 	execute('loadMedia', mediaInfo.contentId, mediaInfo.contentType, mediaInfo.duration || 0.0, mediaInfo.streamType, loadRequest.autoPlay || false, loadRequest.currentTime || 0, function(err, obj) {
 		if (!err) {
@@ -772,8 +772,18 @@ chrome.cast.media.Media = function(sessionId, mediaSessionId) {
  * @param  {function} 						errorCallback   Invoked on error. The possible errors are TIMEOUT, API_NOT_INITIALIZED, INVALID_PARAMETER, CHANNEL_ERROR, SESSION_ERROR, and EXTENSION_MISSING.
  */
 chrome.cast.media.Media.prototype.play = function (playRequest, successCallback, errorCallback) {
-	// TODO: Implement
-	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
+	if (chrome.cast.isAvailable === false) {
+		errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.API_NOT_INITIALIZED), 'The API is not initialized.', {});
+		return;
+	}
+
+	execute('mediaPlay', function(err) {
+		if (!err) {
+			successCallback();
+		} else {
+			handleError(err, errorCallback);
+		}
+	});
 };
 
 /**
@@ -783,8 +793,18 @@ chrome.cast.media.Media.prototype.play = function (playRequest, successCallback,
  * @param  {function} 						errorCallback   Invoked on error. The possible errors are TIMEOUT, API_NOT_INITIALIZED, INVALID_PARAMETER, CHANNEL_ERROR, SESSION_ERROR, and EXTENSION_MISSING.
  */
 chrome.cast.media.Media.prototype.pause = function (pauseRequest, successCallback, errorCallback) {
-	// TODO: Implement
-	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
+	if (chrome.cast.isAvailable === false) {
+		errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.API_NOT_INITIALIZED), 'The API is not initialized.', {});
+		return;
+	}
+
+	execute('mediaPause', function(err) {
+		if (!err) {
+			successCallback();
+		} else {
+			handleError(err, errorCallback);
+		}
+	});
 };
 
 /**
@@ -794,8 +814,18 @@ chrome.cast.media.Media.prototype.pause = function (pauseRequest, successCallbac
  * @param  {function} 						errorCallback   Invoked on error. The possible errors are TIMEOUT, API_NOT_INITIALIZED, INVALID_PARAMETER, CHANNEL_ERROR, SESSION_ERROR, and EXTENSION_MISSING.
  */
 chrome.cast.media.Media.prototype.seek = function (seekRequest, successCallback, errorCallback) {
-	// TODO: Implement
-	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
+	if (chrome.cast.isAvailable === false) {
+		errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.API_NOT_INITIALIZED), 'The API is not initialized.', {});
+		return;
+	}
+
+	execute('mediaSeek', seekRequest.currentTime, seekRequest.resumeState || "", function(err) {
+		if (!err) {
+			successCallback();
+		} else {
+			handleError(err, errorCallback);
+		}
+	})
 };
 
 /**

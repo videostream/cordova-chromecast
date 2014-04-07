@@ -143,20 +143,20 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
     	return true;
 	}
 	
-	public void play(CallbackContext callbackContext) {
+	public void mediaPlay(CallbackContext callbackContext) {
 		chromecastMediaController.play(mApiClient, callbackContext);
 	}
 	
-	public void pause(CallbackContext callbackContext) {
+	public void mediaPause(CallbackContext callbackContext) {
 		chromecastMediaController.pause(mApiClient, callbackContext);
+	}
+	
+	public void mediaSeek(long seekPosition, String resumeState, CallbackContext callbackContext) {
+		chromecastMediaController.seek(seekPosition, resumeState, mApiClient, callbackContext);
 	}
 	
 	public void stop(CallbackContext callbackContext) {
 		chromecastMediaController.stop(mApiClient, callbackContext);
-	}
-	
-	public void seek(long seekPosition, CallbackContext callbackContext) {
-		chromecastMediaController.seek(seekPosition, mApiClient, callbackContext);
 	}
 	
 	public void setVolume(double volume, CallbackContext callbackContext) {

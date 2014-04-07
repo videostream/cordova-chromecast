@@ -54,8 +54,22 @@ public class ChromecastMediaController {
 		res.setResultCallback(this.createMediaCallback(callbackContext));
 	}
 	
-	public void seek(long seekPosition, GoogleApiClient apiClient, final CallbackContext callbackContext) {
-		PendingResult<MediaChannelResult> res = this.remote.seek(apiClient, seekPosition);
+	public void seek(long seekPosition, String resumeState, GoogleApiClient apiClient, final CallbackContext callbackContext) {
+		PendingResult<MediaChannelResult> res = null;
+		if (resumeState != null && !resumeState.equals("")) {
+			if (resumeState.equals("PLAYBACK_PAUSE")) {
+				res = this.remote.seek(apiClient, seekPosition, RemoteMediaPlayer.RESUME_STATE_PAUSE);
+			} else if (resumeState.equals("PLAYBACK_START")) {
+				res = this.remote.seek(apiClient, seekPosition, RemoteMediaPlayer.RESUME_STATE_PLAY);
+			} else {
+				res = this.remote.seek(apiClient, seekPosition, RemoteMediaPlayer.RESUME_STATE_UNCHANGED);
+			}
+		}
+		
+		if (res == null) {
+			res = this.remote.seek(apiClient, seekPosition);
+		}
+		
 		res.setResultCallback(this.createMediaCallback(callbackContext));
 	}
 	
@@ -74,10 +88,9 @@ public class ChromecastMediaController {
 		    @Override
 		    public void onResult(MediaChannelResult result) {
 				if (result.getStatus().isSuccess()) {
-					System.out.println("Media loaded successfully");
 					callbackContext.success();
 				} else {
-					callbackContext.error("request failed");
+					callbackContext.error("channel_error");
 				}
 		    }
 		};

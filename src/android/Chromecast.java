@@ -212,27 +212,6 @@ public class Chromecast extends CordovaPlugin {
     	return this.currentSession.loadUrl(url, callbackContext);
     }
     
-    
-    public boolean play(CallbackContext callbackContext) {
-    	currentSession.play(callbackContext);
-    	return true;
-    }
-    
-    public boolean pause(CallbackContext callbackContext) {
-    	currentSession.pause(callbackContext);
-    	return true;
-    }
-    
-    public boolean stop(CallbackContext callbackContext) {
-    	currentSession.stop(callbackContext);
-    	return true;
-    }
-    
-    public boolean seek(long seekTime, CallbackContext callbackContext) throws JSONException {
-    	currentSession.seek(seekTime, callbackContext);
-    	return true;
-    }
-    
     public boolean setVolume(double volume, CallbackContext callbackContext) throws JSONException {
     	currentSession.setVolume(volume, callbackContext);
     	return true;
@@ -401,6 +380,22 @@ public class Chromecast extends CordovaPlugin {
     		callbackContext.error("session_error");
     		return false;
     	}
+    }
+    
+    
+    public boolean mediaPlay(CallbackContext callbackContext) {
+    	currentSession.mediaPlay(callbackContext);
+    	return true;
+    }
+    
+    public boolean mediaPause(CallbackContext callbackContext) {
+    	currentSession.mediaPause(callbackContext);
+    	return true;
+    }
+    
+    public boolean mediaSeek(Integer seekTime, String resumeState, CallbackContext callbackContext) {
+    	currentSession.mediaSeek(seekTime.longValue(), resumeState, callbackContext);
+    	return true;
     }
 
     

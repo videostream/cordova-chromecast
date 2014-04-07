@@ -213,14 +213,17 @@ exports.init = function() {
             done();
           }, function(err) {
             expect(err).toBeNull();
+            done();
           });
 
         }, function(err) {
           expect(err).toBeNull();
+          done();
         });
 
       }, function(err) {
         expect(err).toBeNull();
+        done();
       });
 
     });
@@ -231,6 +234,7 @@ exports.init = function() {
         setTimeout(done, 1000);
       }, function(err) {
         expect(err).toBeNull();
+        done();
       });
     });
 
@@ -239,6 +243,7 @@ exports.init = function() {
         done();
       }, function(err) {
         expect(err).toBeNull();
+        done();
       });
     });
     
