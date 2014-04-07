@@ -78,7 +78,7 @@ public class ChromecastMediaController {
 		res.setResultCallback(this.createMediaCallback(callbackContext));
 	}
 	
-	public void setMute(boolean muted, GoogleApiClient apiClient, final CallbackContext callbackContext) {
+	public void setMuted(boolean muted, GoogleApiClient apiClient, final CallbackContext callbackContext) {
 		PendingResult<MediaChannelResult> res = this.remote.setStreamMute(apiClient, muted);
 		res.setResultCallback(this.createMediaCallback(callbackContext));
 	}

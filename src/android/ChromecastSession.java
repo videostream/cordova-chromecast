@@ -67,8 +67,13 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 		this.mRemoteMediaPlayer.stop(mApiClient).setResultCallback(new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
 			@Override
 			public void onResult(MediaChannelResult result) {
-				Cast.CastApi.stopApplication(mApiClient);
-				mApiClient.disconnect();
+				try {
+					Cast.CastApi.stopApplication(mApiClient);
+					mApiClient.disconnect();
+				} catch(Exception e) {
+					
+				}
+				
 				killContext.success();
 			}
 		});
@@ -155,24 +160,32 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 		chromecastMediaController.seek(seekPosition, resumeState, mApiClient, callbackContext);
 	}
 	
-	public void stop(CallbackContext callbackContext) {
+	public void mediaSetVolume(double level, CallbackContext callbackContext) {
+		chromecastMediaController.setVolume(level, mApiClient, callbackContext);
+	}
+	
+	public void mediaSetMuted(boolean muted, CallbackContext callbackContext) {
+		chromecastMediaController.setMuted(muted, mApiClient, callbackContext);
+	}
+	
+	public void mediaStop(CallbackContext callbackContext) {
 		chromecastMediaController.stop(mApiClient, callbackContext);
 	}
 	
-	public void setVolume(double volume, CallbackContext callbackContext) {
-		// chromecastMediaController.setVolume(volume, mApiClient, callbackContext);
-		try {
-			Cast.CastApi.setVolume(mApiClient, volume);
-			callbackContext.success();
-		} catch (Exception e) {
-			e.printStackTrace();
-			callbackContext.error("Failure");
-		}
-	}
-	
-	public void setMute(boolean muted, CallbackContext callbackContext) {
-		chromecastMediaController.setMute(muted, mApiClient, callbackContext);
-	}
+//	public void setVolume(double volume, CallbackContext callbackContext) {
+//		// chromecastMediaController.setVolume(volume, mApiClient, callbackContext);
+//		try {
+//			Cast.CastApi.setVolume(mApiClient, volume);
+//			callbackContext.success();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			callbackContext.error("Failure");
+//		}
+//	}
+//	
+//	public void setMute(boolean muted, CallbackContext callbackContext) {
+//		chromecastMediaController.setMute(muted, mApiClient, callbackContext);
+//	}
 	
 	private void connectToDevice() {
 		Cast.CastOptions.Builder apiOptionsBuilder = Cast.CastOptions

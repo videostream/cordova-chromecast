@@ -210,7 +210,10 @@ chrome.cast = {
 	 */
 	Volume: function (level, muted) {
 		this.level = level || null;
-		this.muted = muted ? !!muted : null;
+		this.muted = null;
+		if (muted === true || muted === false) {
+			this.muted = muted;
+		}
 	},
 
 
@@ -609,9 +612,9 @@ chrome.cast.Session.prototype.stop = function (successCallback, errorCallback) {
 		return;
 	}
 
-	execute('stopSession', function(err) {
+	execute('sessionStop', function(err) {
 		if (!err) {
-			success && successCallback();
+			successCallback && successCallback();
 		} else {
 			handleError(err, errorCallback);
 		}
@@ -835,8 +838,18 @@ chrome.cast.media.Media.prototype.seek = function (seekRequest, successCallback,
  * @param  {function} 						errorCallback   Invoked on error. The possible errors are TIMEOUT, API_NOT_INITIALIZED, INVALID_PARAMETER, CHANNEL_ERROR, SESSION_ERROR, and EXTENSION_MISSING.
  */
 chrome.cast.media.Media.prototype.stop = function (stopRequest, successCallback, errorCallback) {
-	// TODO: Implement
-	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
+	if (chrome.cast.isAvailable === false) {
+		errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.API_NOT_INITIALIZED), 'The API is not initialized.', {});
+		return;
+	}
+
+	execute('mediaStop', function(err) {
+		if (!err) {
+			successCallback();
+		} else {
+			handleError(err, errorCallback);
+		}
+	})
 };
 
 /**
@@ -846,8 +859,33 @@ chrome.cast.media.Media.prototype.stop = function (stopRequest, successCallback,
  * @param {function} errorCallback   Invoked on error. The possible errors are TIMEOUT, API_NOT_INITIALIZED, INVALID_PARAMETER, CHANNEL_ERROR, SESSION_ERROR, and EXTENSION_MISSING.
  */
 chrome.cast.media.Media.prototype.setVolume = function (volumeRequest, successCallback, errorCallback) {
-	// TODO: Implement
-	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
+	if (chrome.cast.isAvailable === false) {
+		errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.API_NOT_INITIALIZED), 'The API is not initialized.', {});
+		return;
+	}
+	var args = [];
+
+	if (volumeRequest.volume.level !== null) {
+		args.push('setMediaVolume');
+		args.push(volumeRequest.volume.level);
+	} else if (volumeRequest.volume.muted !== null) {
+		args.push('setMediaMuted');
+		args.push(volumeRequest.volume.muted);
+	}
+
+	if (args.length < 2) {
+		errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.INVALID_PARAMETER), 'Invalid request.', {});
+	} else {
+		args.push(function(err) {
+			if (!err) {
+				successCallback();
+			} else {
+				handleError(err, errorCallback);
+			}
+		});
+
+		execute.apply(null, args);
+	}
 };
 
 /**

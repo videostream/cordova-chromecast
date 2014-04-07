@@ -187,21 +187,6 @@ public class Chromecast extends CordovaPlugin {
     }
     
     /**
-     * Kill the session. Stops as well.
-     * @param args
-     * @param callbackContext
-     * @return
-     */
-    public boolean kill (CallbackContext callbackContext) {
-    	if (this.currentSession != null) {
-    		this.currentSession.kill(callbackContext);
-    		this.currentSession = null;
-            callbackContext.success();
-    	}
-    	return true;
-    }
-    
-    /**
      * Execute function - Loads a URL in an app that supports the Chromecast MediaReceiver
      * @param args
      * @param cbContext
@@ -210,11 +195,6 @@ public class Chromecast extends CordovaPlugin {
      */
     public boolean loadUrl(String url, final CallbackContext callbackContext) throws JSONException {
     	return this.currentSession.loadUrl(url, callbackContext);
-    }
-    
-    public boolean setVolume(double volume, CallbackContext callbackContext) throws JSONException {
-    	currentSession.setVolume(volume, callbackContext);
-    	return true;
     }
     
 
@@ -382,19 +362,88 @@ public class Chromecast extends CordovaPlugin {
     	}
     }
     
-    
+    /**
+     * Play on the current media in the current session
+     * @param callbackContext
+     * @return
+     */
     public boolean mediaPlay(CallbackContext callbackContext) {
     	currentSession.mediaPlay(callbackContext);
     	return true;
     }
     
+    /**
+     * Pause on the current media in the current session
+     * @param callbackContext
+     * @return
+     */
     public boolean mediaPause(CallbackContext callbackContext) {
     	currentSession.mediaPause(callbackContext);
     	return true;
     }
     
+    
+    /**
+     * Seeks the current media in the current session
+     * @param seekTime
+     * @param resumeState
+     * @param callbackContext
+     * @return
+     */
     public boolean mediaSeek(Integer seekTime, String resumeState, CallbackContext callbackContext) {
     	currentSession.mediaSeek(seekTime.longValue(), resumeState, callbackContext);
+    	return true;
+    }
+    
+    
+    /**
+     * Set the volume on the media
+     * @param level
+     * @param callbackContext
+     * @return
+     */
+    public boolean setMediaVolume(Double level, CallbackContext callbackContext) {
+    	currentSession.mediaSetVolume(level, callbackContext);
+    	
+    	return true;
+    }
+    
+    /**
+     * Set the muted on the media
+     * @param muted
+     * @param callbackContext
+     * @return
+     */
+    public boolean setMediaMuted(Boolean muted, CallbackContext callbackContext) {
+    	currentSession.mediaSetMuted(muted, callbackContext);
+    	
+    	return true;
+    }
+    
+    /**
+     * Stops the current media!
+     * @param callbackContext
+     * @return
+     */
+    public boolean mediaStop(CallbackContext callbackContext) {
+    	currentSession.mediaStop(callbackContext);
+    	
+    	return true;
+    }
+    
+    /**
+     * Stops the session
+     * @param callbackContext
+     * @return
+     */
+    public boolean sessionStop (CallbackContext callbackContext) {
+    	if (this.currentSession != null) {
+    		this.currentSession.kill(callbackContext);
+    		this.currentSession = null;
+    	} else {
+    		callbackContext.success();
+    	}
+    	
     	return true;
     }
 
