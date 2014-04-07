@@ -3,7 +3,6 @@ package acidhax.cordova.chromecast;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,7 +33,7 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 	private String sessionId = null;
 	private RouteInfo routeInfo = null;
 	private GoogleApiClient mApiClient = null;	
-	private RemoteMediaPlayer mRemoteMediaPlayer = new RemoteMediaPlayer();
+	private RemoteMediaPlayer mRemoteMediaPlayer;
 	private CordovaInterface cordova = null;
 	private CastDevice device = null;
 	private ChromecastMediaController chromecastMediaController = new ChromecastMediaController(mRemoteMediaPlayer);
@@ -43,13 +42,15 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 	private String displayName;
 	private List<WebImage> appImages;
 	
-	private CallbackContext launchContext;
+	private ChromecastSessionCallback launchCallback;
 	
 	public ChromecastSession(RouteInfo routeInfo, CordovaInterface cordovaInterface) {
 		this.cordova = cordovaInterface;
         
         this.routeInfo = routeInfo;
 		this.device = CastDevice.getFromBundle(this.routeInfo.getExtras());
+		
+		this.mRemoteMediaPlayer = new RemoteMediaPlayer();
 	}
 
 	
@@ -57,13 +58,13 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 	 * Sets the wheels in motion - connects to the Chromecast and launches the given app
 	 * @param appId
 	 */
-	public void launch(String appId, CallbackContext launchContext) {
+	public void launch(String appId, ChromecastSessionCallback launchCallback) {
 		this.appId = appId;
-		this.launchContext = launchContext;
+		this.launchCallback = launchCallback;
 		this.connectToDevice();
 	}
 	
-	public void kill (final CallbackContext killContext) {
+	public void kill (final ChromecastSessionCallback callback) {
 		this.mRemoteMediaPlayer.stop(mApiClient).setResultCallback(new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
 			@Override
 			public void onResult(MediaChannelResult result) {
@@ -74,13 +75,13 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 					
 				}
 				
-				killContext.success();
+				callback.onSuccess();
 			}
 		});
 		Cast.CastApi.stopApplication(mApiClient);
 	}
 	
-	public boolean loadUrl(String url, final CallbackContext loadUrlContext) {
+	public boolean loadUrl(String url, final ChromecastSessionCallback callback) {
 		try {
 			MediaInfo mediaInfo = null;  //chromecastMediaController.createLoadUrlRequest(url);
 			
@@ -90,27 +91,27 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 					public void onResult(MediaChannelResult result) {
 						if (result.getStatus().isSuccess()) {
 							System.out.println("Media loaded successfully");
-							loadUrlContext.success();
+							callback.onSuccess();
 						} else {
-							loadUrlContext.error("Unable to load");
+							callback.onError("Unable to load");
 						}
 				    }
 				});
     	} catch (IllegalStateException e) {
     		e.printStackTrace();
     		System.out.println("Problem occurred with media during loading");
-    		loadUrlContext.error("Problem occurred with media during loading");
+    		callback.onError("Problem occurred with media during loading");
     		return false;
     	} catch (Exception e) {
     		e.printStackTrace();
-    		loadUrlContext.error("Problem opening media during loading");
+    		callback.onError("Problem opening media during loading");
     		System.out.println("Problem opening media during loading");
     		return false;
     	}
     	return true;
 	}
 	
-	public boolean loadMedia(String contentId, String contentType, long duration, String streamType, boolean autoPlay, double currentTime, final CallbackContext callbackContext) {
+	public boolean loadMedia(String contentId, String contentType, long duration, String streamType, boolean autoPlay, double currentTime, final ChromecastSessionCallback callback) {
 		try {
 			MediaInfo mediaInfo = chromecastMediaController.createLoadUrlRequest(contentId, contentType, duration, streamType, autoPlay, currentTime);
 			
@@ -124,52 +125,52 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 							try {
 								JSONObject out = new JSONObject();
 								out.put("mediaSessionId", 1);
-								callbackContext.success(out);
+								callback.onSuccess(out);
 							} catch (JSONException e) {
-								callbackContext.error("session_error");
+								callback.onError("session_error");
 							}
 						
 						} else {
-							callbackContext.error("session_error");
+							callback.onError("session_error");
 						}
 				    }
 				});
     	} catch (IllegalStateException e) {
     		e.printStackTrace();
     		System.out.println("Problem occurred with media during loading");
-    		callbackContext.error("session_error");
+    		callback.onError("session_error");
     		return false;
     	} catch (Exception e) {
     		e.printStackTrace();
-    		callbackContext.error("session_error");
+    		callback.onError("session_error");
     		System.out.println("Problem opening media during loading");
     		return false;
     	}
     	return true;
 	}
 	
-	public void mediaPlay(CallbackContext callbackContext) {
-		chromecastMediaController.play(mApiClient, callbackContext);
+	public void mediaPlay(ChromecastSessionCallback callback) {
+		chromecastMediaController.play(mApiClient, callback);
 	}
 	
-	public void mediaPause(CallbackContext callbackContext) {
-		chromecastMediaController.pause(mApiClient, callbackContext);
+	public void mediaPause(ChromecastSessionCallback callback) {
+		chromecastMediaController.pause(mApiClient, callback);
 	}
 	
-	public void mediaSeek(long seekPosition, String resumeState, CallbackContext callbackContext) {
-		chromecastMediaController.seek(seekPosition, resumeState, mApiClient, callbackContext);
+	public void mediaSeek(long seekPosition, String resumeState, ChromecastSessionCallback callback) {
+		chromecastMediaController.seek(seekPosition, resumeState, mApiClient, callback);
 	}
 	
-	public void mediaSetVolume(double level, CallbackContext callbackContext) {
-		chromecastMediaController.setVolume(level, mApiClient, callbackContext);
+	public void mediaSetVolume(double level, ChromecastSessionCallback callback) {
+		chromecastMediaController.setVolume(level, mApiClient, callback);
 	}
 	
-	public void mediaSetMuted(boolean muted, CallbackContext callbackContext) {
-		chromecastMediaController.setMuted(muted, mApiClient, callbackContext);
+	public void mediaSetMuted(boolean muted, ChromecastSessionCallback callback) {
+		chromecastMediaController.setMuted(muted, mApiClient, callback);
 	}
 	
-	public void mediaStop(CallbackContext callbackContext) {
-		chromecastMediaController.stop(mApiClient, callbackContext);
+	public void mediaStop(ChromecastSessionCallback callback) {
+		chromecastMediaController.stop(mApiClient, callback);
 	}
 	
 //	public void setVolume(double volume, CallbackContext callbackContext) {
@@ -249,10 +250,10 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 						
 						out.put("receiver", receiver);
 						
-						that.launchContext.success(out);
+						that.launchCallback.onSuccess(out);
 						
 					} catch(JSONException e) {
-						ChromecastSession.this.launchContext.error("Error");
+						ChromecastSession.this.launchCallback.onError("Error");
 					}
 					
 					
@@ -315,7 +316,7 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 	 */
 	@Override
 	public void onConnectionFailed(ConnectionResult result) {
-		this.launchContext.error("Connection failed to Chromecast");
+		this.launchCallback.onError("channel_error");
 	}
 	
 	/**

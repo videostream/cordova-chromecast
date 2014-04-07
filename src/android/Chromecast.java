@@ -173,7 +173,7 @@ public class Chromecast extends CordovaPlugin {
                         
                         // Launch the app.
                         // TODO: Create a callback interface so we don't have to throw around the CallbackContext
-                        Chromecast.this.currentSession.launch(appId, callbackContext);
+                        Chromecast.this.currentSession.launch(appId, genericCallback(callbackContext));
                     } else {
                         callbackContext.error("No route found by that ID");
                     }
@@ -194,7 +194,7 @@ public class Chromecast extends CordovaPlugin {
      * @throws JSONException
      */
     public boolean loadUrl(String url, final CallbackContext callbackContext) throws JSONException {
-    	return this.currentSession.loadUrl(url, callbackContext);
+    	return this.currentSession.loadUrl(url, genericCallback(callbackContext));
     }
     
 
@@ -295,12 +295,11 @@ public class Chromecast extends CordovaPlugin {
 	 * @param routeInfo
 	 * @param callbackContext
 	 */
-    private void createSession(RouteInfo routeInfo, CallbackContext callbackContext) {
-    	Chromecast.this.currentSession = new ChromecastSession(routeInfo, this.cordova);
+    private void createSession(RouteInfo routeInfo, final CallbackContext callbackContext) {
+    	this.currentSession = new ChromecastSession(routeInfo, this.cordova);
         
         // Launch the app.
-        // TODO: Create a callback interface so we don't have to throw around the CallbackContext
-        Chromecast.this.currentSession.launch(this.appId, callbackContext);
+        this.currentSession.launch(this.appId, genericCallback(callbackContext));
     }
     
     /**
@@ -355,7 +354,7 @@ public class Chromecast extends CordovaPlugin {
     public boolean loadMedia (String contentId, String contentType, Integer duration, String streamType, Boolean autoPlay, Integer currentTime, CallbackContext callbackContext) {
         
     	if (this.currentSession != null) {
-    		return this.currentSession.loadMedia(contentId, contentType, duration, streamType, autoPlay, currentTime, callbackContext);
+    		return this.currentSession.loadMedia(contentId, contentType, duration, streamType, autoPlay, currentTime, genericCallback(callbackContext));
     	} else {
     		callbackContext.error("session_error");
     		return false;
@@ -368,7 +367,7 @@ public class Chromecast extends CordovaPlugin {
      * @return
      */
     public boolean mediaPlay(CallbackContext callbackContext) {
-    	currentSession.mediaPlay(callbackContext);
+    	currentSession.mediaPlay(genericCallback(callbackContext));
     	return true;
     }
     
@@ -378,7 +377,7 @@ public class Chromecast extends CordovaPlugin {
      * @return
      */
     public boolean mediaPause(CallbackContext callbackContext) {
-    	currentSession.mediaPause(callbackContext);
+    	currentSession.mediaPause(genericCallback(callbackContext));
     	return true;
     }
     
@@ -391,7 +390,7 @@ public class Chromecast extends CordovaPlugin {
      * @return
      */
     public boolean mediaSeek(Integer seekTime, String resumeState, CallbackContext callbackContext) {
-    	currentSession.mediaSeek(seekTime.longValue(), resumeState, callbackContext);
+    	currentSession.mediaSeek(seekTime.longValue(), resumeState, genericCallback(callbackContext));
     	return true;
     }
     
@@ -403,7 +402,7 @@ public class Chromecast extends CordovaPlugin {
      * @return
      */
     public boolean setMediaVolume(Double level, CallbackContext callbackContext) {
-    	currentSession.mediaSetVolume(level, callbackContext);
+    	currentSession.mediaSetVolume(level, genericCallback(callbackContext));
     	
     	return true;
     }
@@ -415,7 +414,7 @@ public class Chromecast extends CordovaPlugin {
      * @return
      */
     public boolean setMediaMuted(Boolean muted, CallbackContext callbackContext) {
-    	currentSession.mediaSetMuted(muted, callbackContext);
+    	currentSession.mediaSetMuted(muted, genericCallback(callbackContext));
     	
     	return true;
     }
@@ -426,7 +425,7 @@ public class Chromecast extends CordovaPlugin {
      * @return
      */
     public boolean mediaStop(CallbackContext callbackContext) {
-    	currentSession.mediaStop(callbackContext);
+    	currentSession.mediaStop(genericCallback(callbackContext));
     	
     	return true;
     }
@@ -438,7 +437,7 @@ public class Chromecast extends CordovaPlugin {
      */
     public boolean sessionStop (CallbackContext callbackContext) {
     	if (this.currentSession != null) {
-    		this.currentSession.kill(callbackContext);
+    		this.currentSession.kill(genericCallback(callbackContext));
     		this.currentSession = null;
     	} else {
     		callbackContext.success();
@@ -463,6 +462,22 @@ public class Chromecast extends CordovaPlugin {
             }
         });
     }
+    
+    private ChromecastSessionCallback genericCallback (final CallbackContext callbackContext) {
+    	return new ChromecastSessionCallback() {
+
+			@Override
+			public void onSuccess(Object object) {
+				callbackContext.success();
+			}
+
+			@Override
+			public void onError(String reason) {
+				callbackContext.error(reason);
+			}
+    		
+    	};
+    };
 
     protected void onRouteAdded(MediaRouter router, final RouteInfo route) {
        this.checkReceiverAvailable();
