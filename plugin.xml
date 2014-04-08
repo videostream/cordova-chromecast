@@ -9,10 +9,6 @@
 
   <name>Cordova ChromeCast</name>
 
-  <js-module src="Chromecast.js" name="Chromecast">
-    <clobbers target="chromecast" />
-  </js-module>
-
   <js-module src="chrome.cast.js" name="ChromecastApi">
     <clobbers target="chrome.cast" />
   </js-module>

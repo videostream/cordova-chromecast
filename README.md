@@ -1,7 +1,7 @@
 cordova-chromecast
 ==================
 
-Chromecast in Cordova - The Beginning
+Chromecast in Cordova
 
 ##Installation
 For now, add the plugin from this repository, we'll publish soon with more progress.
@@ -9,8 +9,6 @@ For now, add the plugin from this repository, we'll publish soon with more progr
 ```
 cordova plugin add https://github.com/acidhax/cordova-chromecast.git
 ```
-
-The module will be on the window, no need to require it!
 
 You will need to import the following projects as Library Projects in order for this plugin to work:
 
@@ -20,32 +18,32 @@ You will need to import the following projects as Library Projects in order for 
 
 ##Usage
 
-Use the global `chromecast` object. All callback functions should be implemented with the 
-style of `function(err, obj) {}`
+This project attempts to implement the official Google Cast SDK for Chrome... in Cordova. We've made a lot of progress in making this possible, check out the offical docs for examles: https://developers.google.com/cast/docs/chrome_sender
 
-```javascript
-chromecast.getDevices(appId); // This will begin the probing for possible Chromecast devices
-chromecast.launch(chromecastId, appId, callback); // Launches an app on the given Chromecast
-```
 
-If your Chromecast app uses the MediaReceiver functionality - you may use these as well:
-```javascript
-chromecast.loadUrl(url, callback); // Starts playing a file on your Chromecast at the given URL
-chromecast.play(callback); // Resumes playback on the Chromecast
-chromecast.pause(callback); // Pauses playback on the Chromecast
-chromecast.stop(callback); // Stops and unloads the current video on the Chromecast
-chromecast.seek(seekPosition, callback); // Seeks to the given number of seconds
-chromecast.setVolume(volumePercentage, callback); // Sets the volume, a value from 0 to 1
-```
+##Supported API Bits and Bites
 
-##Events
-```javascript
-chromecast.on("device", function (deviceId, deviceName) {}); // When a device is found
-chromecast.on("deviceRemoved", function (deviceId, deviceName) {}); // When a device is lost
-chromecast.on("volumeChanged", function (volume) {}); // When the MediaReceiver volume changes
-chromecast.on("applicationStatusChanged", function (status) {}); // When the loaded app's status changes
-chromecast.on("disconnect", function () {}); // When the app is disconnected
-chromecast.on("message", function (namespace, message) {}); // When the app responds with a message
+Static and class things
+- `chrome.cast.SessionRequest`
+- `chrome.cast.apiConfig`
+- `chrome.cast.initialize`
+- `chrome.cast.requestSession`
+- `chrome.cast.media.MediaInfo`
+- `chrome.cast.media.LoadRequest`
+- `chrome.cast.Volume`
+- `chrome.cast.media.VolumeRequest`
 
-```
+`chrome.cast.Session` things
+- `.addUpdateListener`
+- `.removeUpdateListener`
+- `.loadMedia`
+- `.stop`
 
+`chrome.cast.media.Media` things
+- `.addUpdateListener`
+- `.removeUpdateListener`
+- `.pause`
+- `.play`
+- `.seek`
+- `.setVolume`
+- `.stop`
