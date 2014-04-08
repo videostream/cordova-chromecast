@@ -951,7 +951,20 @@ chrome.cast.media.Media.prototype.removeUpdateListener = function (listener) {
 };
 
 chrome.cast.media.Media.prototype._update = function(obj) {
-	// TODO: Update properties
+	this.currentTime = obj.currentTime || this.currentTime;
+	this.idleReason = obj.idleReason || this.idleReason;
+	this.mediaSessionId = obj.mediaSessionId || this.mediaSessionId;
+	this.playbackRate = obj.playbackRate || this.playbackRate;
+	this.playerState = obj.playerState || this.playerState;
+
+	if (obj.media && obj.media.duration) {
+		this.media.duration = obj.media.duration || this.media.duration;
+		this.media.streamType = obj.media.streamType || this.media.streamType;
+	}
+
+	this.volume.level = obj.volume.level;
+	this.volume.muted = obj.volume.muted;
+
 	this.emit('_mediaUpdated');
 };
 
@@ -973,7 +986,7 @@ chrome.cast._ = {
 	},
 	mediaUpdated: function(media) {
 		if (media && media.mediaSessionId !== undefined && _currentMedia) {
-			console.log('MEDIA UPDATED', arguments);
+			_currentMedia._update(media);
 		}
 	}
 }

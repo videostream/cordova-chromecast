@@ -277,6 +277,7 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 		try {
 			out.put("media", objInfo);
 			out.put("mediaSessionId", 1);
+			out.put("sessionId", this.sessionId);
 			out.put("currentTime", mediaStatus.getStreamPosition() / 1000.0);
 			out.put("playbackRate", mediaStatus.getPlaybackRate());
 			out.put("customData", mediaStatus.getCustomData());
@@ -313,7 +314,11 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 			
 			out.put("volume", volume);
 			
-			objInfo.put("duration", mediaInfo.getStreamDuration() / 1000.0);
+			try {
+				objInfo.put("duration", mediaInfo.getStreamDuration() / 1000.0);
+			} catch (Exception e) {
+				
+			}
 			
 			switch(mediaInfo.getStreamType()) {
 				case MediaInfo.STREAM_TYPE_BUFFERED:
