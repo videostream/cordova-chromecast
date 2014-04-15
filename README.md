@@ -18,7 +18,7 @@ You will need to import the following projects as Library Projects in order for 
 
 ##Usage
 
-This project attempts to implement the official Google Cast SDK for Chrome... in Cordova. We've made a lot of progress in making this possible, check out the offical docs for examles: https://developers.google.com/cast/docs/chrome_sender
+This project attempts to implement the official Google Cast SDK for Chrome... in Cordova. We've made a lot of progress in making this possible, check out the offical docs for examples: https://developers.google.com/cast/docs/chrome_sender
 
 
 ##Supported API Bits and Bites
