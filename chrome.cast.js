@@ -560,6 +560,7 @@ chrome.cast.Session = function(sessionId, appId, displayName, appImages, receive
 	this.displayName = displayName;
 	this.appImages = appImages || [];
 	this.receiver = receiver;
+	this.media = [];
 };
 chrome.cast.Session.prototype = Object.create(EventEmitter.prototype);
 
@@ -725,8 +726,7 @@ chrome.cast.Session.prototype.removeMessageListener = function (namespace, liste
  * @param {function} listener The listener to add.
  */
 chrome.cast.Session.prototype.addMediaListener = function (listener) {
-	// TODO: Implement
-	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
+	this.on('_mediaListener', listener);
 };
 
 /**
@@ -734,8 +734,7 @@ chrome.cast.Session.prototype.addMediaListener = function (listener) {
  * @param  {function} listener The listener to remove.
  */
 chrome.cast.Session.prototype.removeMediaListener = function (listener) {
-	// TODO: Implement
-	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
+	this.removeListener('_mediaListener', listener);
 };
 
 
@@ -987,6 +986,17 @@ chrome.cast._ = {
 	mediaUpdated: function(media) {
 		if (media && media.mediaSessionId !== undefined && _currentMedia) {
 			_currentMedia._update(media);
+		}
+	},
+	mediaLoaded: function(media) {
+		if (_sessions[media.sessionId]) {
+			console.log('mediaLoaded');
+			_currentMedia = new chrome.cast.media.Media(media.sessionId, media.mediaSessionId);
+			_currentMedia._update(media);
+
+			_sessions[media.sessionId]._mediaUpdated(_currentMedia);
+		} else {
+			console.log('mediaLoaded --- but there is no session tied to it', media);
 		}
 	}
 }

@@ -163,14 +163,19 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 //	}
 	
 	private void connectToDevice() {
-		Cast.CastOptions.Builder apiOptionsBuilder = Cast.CastOptions.builder(this.device, this);
-		this.mApiClient = new GoogleApiClient.Builder(this.cordova.getActivity().getApplicationContext())
-			.addApi(Cast.API, apiOptionsBuilder.build())
-	        .addConnectionCallbacks(this)
-	        .addOnConnectionFailedListener(this)
-	        .build();
-		
-		this.mApiClient.connect();
+		try {
+			Cast.CastOptions.Builder apiOptionsBuilder = Cast.CastOptions.builder(this.device, this);
+			
+			this.mApiClient = new GoogleApiClient.Builder(this.cordova.getActivity().getApplicationContext())
+				.addApi(Cast.API, apiOptionsBuilder.build())
+		        .addConnectionCallbacks(this)
+		        .addOnConnectionFailedListener(this)
+		        .build();
+			
+			this.mApiClient.connect();
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
 	private void launchApplication() {

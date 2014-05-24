@@ -240,6 +240,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
     /**
      * Request the session for the previously sent appId
      * THIS IS WHAT LAUNCHES THE CHROMECAST PICKER
+     * NOTE: Make a request session that is automatic - it'll do most of this code - refactor will be required
      * @param  callbackContext
      */
     public boolean requestSession (final CallbackContext callbackContext) {
