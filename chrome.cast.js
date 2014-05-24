@@ -791,6 +791,7 @@ chrome.cast.media.Media = function(sessionId, mediaSessionId) {
 		chrome.cast.media.MediaCommand.STREAM_MUTE 
 	];
 	this.volume = new chrome.cast.Volume(1, false);
+	this._lastUpdatedTime = Date.now();
 };
 chrome.cast.media.Media.prototype = Object.create(EventEmitter.prototype);
 
@@ -928,8 +929,14 @@ chrome.cast.media.Media.prototype.supportsCommand = function (command) {
  * @returns {number} number An estimate of the current playback position in seconds since the start of the media.
  */
 chrome.cast.media.Media.prototype.getEstimatedTime = function () {
-	// TODO: Implement
-	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
+	if (this.playerState === chrome.cast.media.PlayerState.PLAYING) {
+		var elapsed = (Date.now() - this._lastUpdatedTime) / 1000;
+		var estimatedTime = this.currentTime + elapsed;
+
+		return estimatedTime;
+	} else {
+		return this.currentTime;
+	}
 };
 
 /**
@@ -963,6 +970,8 @@ chrome.cast.media.Media.prototype._update = function(obj) {
 
 	this.volume.level = obj.volume.level;
 	this.volume.muted = obj.volume.muted;
+
+	this._lastUpdatedTime = Date.now();
 
 	this.emit('_mediaUpdated');
 };
