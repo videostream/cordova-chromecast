@@ -178,6 +178,8 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
     		return true;
     	}
     	
+    	this.setLastSessionId("");
+    	
     	final Activity activity = cordova.getActivity();
         activity.runOnUiThread(new Runnable() {
             public void run() {
@@ -205,7 +207,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
 				    @Override
 				    public void onClick(DialogInterface dialog, int which) {
 				        RouteInfo selectedRoute = routeList.get(which + 1);
-				        Chromecast.this.createSession(selectedRoute, callbackContext);
+				        Chromecast.this.mMediaRouter.selectRoute(selectedRoute);
 				    }
                 });
                 builder.show();
@@ -233,7 +235,12 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
 					onError("unknown");
 				} else if (session == Chromecast.this.currentSession){
 					Chromecast.this.setLastSessionId(Chromecast.this.currentSession.getSessionId());
-					callbackContext.success(session.createSessionObject());
+					
+					if (callbackContext != null) {
+						callbackContext.success(session.createSessionObject());
+					} else {
+						Chromecast.this.webView.sendJavascript("chrome.cast._.sessionJoined(" + Chromecast.this.currentSession.createSessionObject().toString() + ");");
+					}
 				}
 			}
 
@@ -241,9 +248,13 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
 			void onError(String reason) {
 				if (reason != null) {
 					Chromecast.this.log("createSession onError " + reason);
-					callbackContext.error(reason);
+					if (callbackContext != null) {
+						callbackContext.error(reason);
+					}
 				} else {
-					callbackContext.error("unknown");
+					if (callbackContext != null) {
+						callbackContext.error("unknown");
+					}
 				}
 			}
         	
@@ -499,8 +510,8 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
 		this.checkReceiverAvailable();
 	}
 
-	protected void onRouteSelected(MediaRouter router, RouteInfo route) {
-//		this.webView.sendJavascript("chromecast.emit('routeSelected', '"+route.getId()+"', '" + route.getName() + "')");
+	protected void onRouteSelected(MediaRouter router, RouteInfo route) {	
+		this.createSession(route, null);
 	}
 
 	protected void onRouteUnselected(MediaRouter router, RouteInfo route) {

@@ -370,17 +370,16 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 			
 			try {
 				objInfo.put("duration", mediaInfo.getStreamDuration() / 1000.0);
+				switch(mediaInfo.getStreamType()) {
+					case MediaInfo.STREAM_TYPE_BUFFERED:
+						objInfo.put("streamType", "buffered"); break;
+					case MediaInfo.STREAM_TYPE_LIVE:
+						objInfo.put("streamType", "live"); break;
+					case MediaInfo.STREAM_TYPE_NONE:
+						objInfo.put("streamType", "other"); break;
+				}
 			} catch (Exception e) {
 				
-			}
-			
-			switch(mediaInfo.getStreamType()) {
-				case MediaInfo.STREAM_TYPE_BUFFERED:
-					objInfo.put("streamType", "buffered"); break;
-				case MediaInfo.STREAM_TYPE_LIVE:
-					objInfo.put("streamType", "live"); break;
-				case MediaInfo.STREAM_TYPE_NONE:
-					objInfo.put("streamType", "other"); break;
 			}
 			
 		} catch(JSONException e) {
