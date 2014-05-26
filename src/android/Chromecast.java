@@ -41,7 +41,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
     private SharedPreferences settings;
    
     
-    private ChromecastSession currentSession;
+    private volatile ChromecastSession currentSession;
     
     private void log(String s) {
     	this.webView.sendJavascript("console.log('" + s + "');");
@@ -112,6 +112,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
     }
     
     private void setLastSessionId(String sessionId) {
+    	this.lastSessionId = sessionId;
     	this.settings.edit().putString("lastSessionId", sessionId).apply();
     }
     
@@ -220,24 +221,26 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
 	 * @param callbackContext
 	 */
     private void createSession(RouteInfo routeInfo, final CallbackContext callbackContext) {
-    	this.currentSession = new ChromecastSession(routeInfo, this.cordova, this, this, false);
+    	this.currentSession = new ChromecastSession(routeInfo, this.cordova, this, this);
         
         // Launch the app.
         this.currentSession.launch(this.appId, new ChromecastSessionCallback() {
 
 			@Override
 			void onSuccess(Object object) {
+				ChromecastSession session = (ChromecastSession) object;
 				if (object == null) {
 					onError("unknown");
-				} else {
+				} else if (session == Chromecast.this.currentSession){
 					Chromecast.this.setLastSessionId(Chromecast.this.currentSession.getSessionId());
-					callbackContext.success((JSONObject) object);
+					callbackContext.success(session.createSessionObject());
 				}
 			}
 
 			@Override
 			void onError(String reason) {
 				if (reason != null) {
+					Chromecast.this.log("createSession onError " + reason);
 					callbackContext.error(reason);
 				} else {
 					callbackContext.error("unknown");
@@ -248,7 +251,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
     }
     
     private void joinSession(RouteInfo routeInfo) {
-    	ChromecastSession sessionJoinAttempt = new ChromecastSession(routeInfo, this.cordova, this, this, false);
+    	ChromecastSession sessionJoinAttempt = new ChromecastSession(routeInfo, this.cordova, this, this);
     	sessionJoinAttempt.join(this.appId, this.lastSessionId, new ChromecastSessionCallback() {
 
 			@Override
@@ -266,7 +269,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
 
 			@Override
 			void onError(String reason) {
-				
+				log("sessionJoinAttempt error " +reason);
 			}
     		
     	});
@@ -459,6 +462,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
                 if (routeList.size() > 0) {
                 	Chromecast.this.webView.sendJavascript("chrome.cast._.receiverAvailable()");
                 } else {
+                	Chromecast.this.log("unavailable?????" + routeList.size());
                 	Chromecast.this.webView.sendJavascript("chrome.cast._.receiverUnavailable()");
                 }
             }
@@ -513,7 +517,9 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
 		if (isAlive) {
 			this.webView.sendJavascript("chrome.cast._.sessionUpdated(true, " + session.toString() + ");");
 		} else {
-			this.webView.sendJavascript("chrome.cast._.sessionUpdated(false);");
+			log("SESSION DESTROYYYY");
+			this.webView.sendJavascript("chrome.cast._.sessionUpdated(false, " + session.toString() + ");");
+			this.currentSession = null;
 		}
 	}
 }

@@ -1017,7 +1017,7 @@ chrome.cast._ = {
 
 		var session = _sessions[sessionId] = new chrome.cast.Session(sessionId, appId, displayName, appImages, receiver);
 
-		_receiverListener && _receiverListener(session);
+		_sessionListener && _sessionListener(session);
 	}
 }
 

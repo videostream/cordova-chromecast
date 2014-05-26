@@ -53,8 +53,7 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 	private boolean joinInsteadOfConnecting = false;
 	
 	public ChromecastSession(RouteInfo routeInfo, CordovaInterface cordovaInterface, 
-			ChromecastOnMediaUpdatedListener onMediaUpdatedListener, ChromecastOnSessionUpdatedListener onSessionUpdatedListener,
-			boolean joinInsteadOfLunch) {
+			ChromecastOnMediaUpdatedListener onMediaUpdatedListener, ChromecastOnSessionUpdatedListener onSessionUpdatedListener) {
 		this.cordova = cordovaInterface;
         this.onMediaUpdatedListener = onMediaUpdatedListener;
         this.onSessionUpdatedListener = onSessionUpdatedListener;
@@ -224,7 +223,7 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 			
 			if (status.isSuccess()) {
 				try {
-					ChromecastSession.this.launchCallback.onSuccess(createSessionObject());
+					ChromecastSession.this.launchCallback.onSuccess(ChromecastSession.this);
 					connectRemoteMediaPlayer();
 				} catch (IllegalStateException e) {
 					e.printStackTrace();
@@ -261,7 +260,7 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 					e.printStackTrace();
 				}
 			} else {
-				
+				ChromecastSession.this.joinSessionCallback.onError(status.toString());
 			}
 		}
 	};
@@ -301,8 +300,12 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 			receiver.put("label", this.device.getDeviceId());
 			
 			JSONObject volume = new JSONObject();
-			volume.put("level", Cast.CastApi.getVolume(mApiClient));
-			volume.put("muted", Cast.CastApi.isMute(mApiClient));
+			try {
+				volume.put("level", Cast.CastApi.getVolume(mApiClient));
+				volume.put("muted", Cast.CastApi.isMute(mApiClient));
+			} catch(Exception e) {
+				
+			}
 			
 			receiver.put("volume", volume);
 			
@@ -410,7 +413,7 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 	 */
 	@Override
 	public void onConnectionSuspended(int cause) {
-		
+		this.onSessionUpdatedListener.onSessionUpdated(false, this.createSessionObject());
 	}
 	
 	/*
@@ -448,7 +451,7 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 	 */
 	@Override
 	public void onApplicationDisconnected(int errorCode) {
-		this.onSessionUpdatedListener.onSessionUpdated(false, null);
+		this.onSessionUpdatedListener.onSessionUpdated(false, this.createSessionObject());
 	}
 
 
