@@ -3,6 +3,7 @@ package acidhax.cordova.chromecast;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.List;
 
 import com.google.android.gms.cast.*;
@@ -18,6 +19,7 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.support.v7.media.MediaRouter;
 import android.support.v7.media.MediaRouteSelector;
 import android.support.v7.media.MediaRouter.RouteInfo;
@@ -25,16 +27,33 @@ import android.widget.ArrayAdapter;
 
 public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdatedListener, ChromecastOnSessionUpdatedListener {
 	
+	private static final String SETTINGS_NAME= "CordovaChromecastSettings";
+	
     private MediaRouter mMediaRouter;
     private MediaRouteSelector mMediaRouteSelector;
     private volatile ChromecastMediaRouterCallback mMediaRouterCallback = new ChromecastMediaRouterCallback();
     private String appId;
     
+    private boolean autoConnect = false;
+    private String lastSessionId = null;
+    private String lastAppId = null;
+    
+    private SharedPreferences settings;
+   
+    
     private ChromecastSession currentSession;
     
+    private void log(String s) {
+    	this.webView.sendJavascript("console.log('" + s + "');");
+    }
 
     public void initialize(final CordovaInterface cordova, CordovaWebView webView) {
     	super.initialize(cordova, webView);
+    	
+    	// Restore preferences
+        this.settings = this.cordova.getActivity().getSharedPreferences(SETTINGS_NAME, 0);
+        this.lastSessionId = settings.getString("lastSessionId", "");
+        this.lastAppId = settings.getString("lastAppId", "");
     }
     
     @Override
@@ -92,111 +111,10 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
         }
     }
     
-    /**
-     * Execute function - Just echos - yay test
-     * @param args
-     * @param cbContext
-     * @return
-     * @throws JSONException
-     */
-    public boolean echo (String echo, CallbackContext cbContext) throws JSONException {
-    	cbContext.success(echo);
-    	return true;
+    private void setLastSessionId(String sessionId) {
+    	this.settings.edit().putString("lastSessionId", sessionId).apply();
     }
     
-    /**
-     * Execute function - Begins populating available Chromecast devices for a given appId 
-     * @param args
-     * @param cbContext
-     * @return
-     */
-    public boolean getDevices (final String appId, final CallbackContext cbContext) throws JSONException {
-    	final Activity activity = cordova.getActivity();
-        final Chromecast that = this;
-        activity.runOnUiThread(new Runnable() {
-        	public void run() {
-        		mMediaRouter = MediaRouter.getInstance(activity.getApplicationContext());
-        		mMediaRouteSelector = new MediaRouteSelector.Builder()
-        		.addControlCategory(CastMediaControlIntent.categoryForCast(appId))
-        		.build();
-        		mMediaRouterCallback.registerCallbacks(that);
-        		mMediaRouter.addCallback(mMediaRouteSelector, mMediaRouterCallback, MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY);
-        		cbContext.success();
-        	}
-        });
-        for (RouteInfo route : mMediaRouterCallback.getRoutes()) {
-            that.webView.sendJavascript("chromecast.emit('device', '"+route.getId()+"', '" + route.getName() + "')");
-        }
-        return true;
-    }
-    
-    /**
-     * Execute function - Returns more information on a specific Chromecast device
-     * TODO: Make it work
-     * @param args
-     * @param cbContext
-     * @throws JSONException
-     */
-    public boolean getRoute(final String index, final CallbackContext cbContext) throws JSONException {
-    	final Activity activity = cordova.getActivity();
-
-        activity.runOnUiThread(new Runnable() {
-        	public void run() {
-            	RouteInfo info = mMediaRouterCallback.getRoute(index);
-                if (info != null) {
-                    cbContext.success(info.getName());    
-                } else {
-                    cbContext.error("No route found in " + mMediaRouterCallback.getRoutes().size() + " route(s)");
-                }
-        	}
-        });
-    	
-        return true;
-    }
-    
-    /**
-     * Execute function - Launches a specific AppId on a Chromecast device
-     * @param args
-     * @param cbContext
-     * @return
-     * @throws JSONException
-     */
-    public boolean launch (final String deviceId, final String appId, final CallbackContext callbackContext) throws JSONException {
-    	final Activity activity = cordova.getActivity();
-        
-        activity.runOnUiThread(new Runnable() {
-            public void run() {
-                RouteInfo info = mMediaRouterCallback.getRoute(deviceId);
-        
-                if (Chromecast.this.currentSession == null) {
-                    if (info != null) {
-                        Chromecast.this.currentSession = new ChromecastSession(info, Chromecast.this.cordova, Chromecast.this, Chromecast.this);
-                        
-                        // Launch the app.
-                        // TODO: Create a callback interface so we don't have to throw around the CallbackContext
-                        Chromecast.this.currentSession.launch(appId, genericCallback(callbackContext));
-                    } else {
-                        callbackContext.error("No route found by that ID");
-                    }
-                } else {
-                    callbackContext.error("Already have a session, disconnect first");
-                }
-            }
-        });
-                
-        return true;
-    }
-    
-
-
-    /* NEW APIS **/
-    /*   _   _                          _____ _____     
-        | \ | |                   /\   |  __ \_   _|    
-        |  \| | _____      __    /  \  | |__) || |  ___ 
-        | . ` |/ _ \ \ /\ / /   / /\ \ |  ___/ | | / __|
-        | |\  |  __/\ V  V /   / ____ \| |    _| |_\__ \
-        |_| \_|\___| \_/\_/   /_/    \_\_|   |_____|___/
-    */
    
    /**
     * Do everything you need to for "setup" - calling back sets the isAvailable and lets every function on the
@@ -220,6 +138,16 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
         final Activity activity = cordova.getActivity();
         final Chromecast that = this;
         this.appId = appId;
+        
+        log("initialize " + autoJoinPolicy + " " + appId + " " + this.lastAppId);
+        if (autoJoinPolicy.equals("origin_scoped") && appId.equals(this.lastAppId)) {
+        	log("lastAppId " + lastAppId);
+        	autoConnect = true;
+        } else if (autoJoinPolicy.equals("origin_scoped")) {
+        	log("setting lastAppId " + lastAppId);
+        	this.settings.edit().putString("lastAppId", appId).apply();
+        }
+        
         activity.runOnUiThread(new Runnable() {
             public void run() {
                 mMediaRouter = MediaRouter.getInstance(activity.getApplicationContext());
@@ -232,7 +160,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
             }
         });
         for (RouteInfo route : mMediaRouterCallback.getRoutes()) {
-            that.webView.sendJavascript("chromecast.emit('device', '"+route.getId()+"', '" + route.getName() + "')");
+//            that.webView.sendJavascript("chromecast.emit('device', '"+route.getId()+"', '" + route.getName() + "')");
         }
         return true;
     }
@@ -244,6 +172,11 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
      * @param  callbackContext
      */
     public boolean requestSession (final CallbackContext callbackContext) {
+    	if (this.currentSession != null) {
+    		callbackContext.success(this.currentSession.createSessionObject());
+    		return true;
+    	}
+    	
     	final Activity activity = cordova.getActivity();
         activity.runOnUiThread(new Runnable() {
             public void run() {
@@ -287,7 +220,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
 	 * @param callbackContext
 	 */
     private void createSession(RouteInfo routeInfo, final CallbackContext callbackContext) {
-    	this.currentSession = new ChromecastSession(routeInfo, this.cordova, this, this);
+    	this.currentSession = new ChromecastSession(routeInfo, this.cordova, this, this, false);
         
         // Launch the app.
         this.currentSession.launch(this.appId, new ChromecastSessionCallback() {
@@ -297,6 +230,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
 				if (object == null) {
 					onError("unknown");
 				} else {
+					Chromecast.this.setLastSessionId(Chromecast.this.currentSession.getSessionId());
 					callbackContext.success((JSONObject) object);
 				}
 			}
@@ -311,6 +245,31 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
 			}
         	
         });
+    }
+    
+    private void joinSession(RouteInfo routeInfo) {
+    	ChromecastSession sessionJoinAttempt = new ChromecastSession(routeInfo, this.cordova, this, this, false);
+    	sessionJoinAttempt.join(this.appId, this.lastSessionId, new ChromecastSessionCallback() {
+
+			@Override
+			void onSuccess(Object object) {
+				if (Chromecast.this.currentSession == null) {
+					try {
+						Chromecast.this.currentSession = (ChromecastSession) object;
+						Chromecast.this.setLastSessionId(Chromecast.this.currentSession.getSessionId());
+						Chromecast.this.webView.sendJavascript("chrome.cast._.sessionJoined(" + Chromecast.this.currentSession.createSessionObject().toString() + ");");
+					} catch (Exception e) {
+						log("wut.... " + e.getMessage() + e.getStackTrace());
+					}
+				}
+			}
+
+			@Override
+			void onError(String reason) {
+				
+			}
+    		
+    	});
     }
     
     /**
@@ -491,6 +450,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
     
     private void checkReceiverAvailable() {
     	final Activity activity = cordova.getActivity();
+    	
         activity.runOnUiThread(new Runnable() {
             public void run() {
                 mMediaRouter = MediaRouter.getInstance(activity.getApplicationContext());
@@ -520,9 +480,15 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
     		
     	};
     };
-
+    
     protected void onRouteAdded(MediaRouter router, final RouteInfo route) {
-       this.checkReceiverAvailable();
+    	if (this.autoConnect && this.currentSession == null && !route.getName().equals("Phone")) {
+    		log("Attempting to join route " + route.getName());
+    		this.joinSession(route);
+    	} else {
+    		log("For some reason, not attempting to join route " + route.getName() + ", " + this.currentSession + ", " + this.autoConnect);
+    	}
+    	this.checkReceiverAvailable();
     }
 
 	protected void onRouteRemoved(MediaRouter router, RouteInfo route) {

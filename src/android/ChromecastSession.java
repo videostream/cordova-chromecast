@@ -45,11 +45,16 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 	private volatile String displayName;
 	private volatile List<WebImage> appImages;
 	private volatile String sessionId = null;
+	private volatile String lastSessionId = null;
 	
 	private ChromecastSessionCallback launchCallback;
+	private ChromecastSessionCallback joinSessionCallback; 
+	
+	private boolean joinInsteadOfConnecting = false;
 	
 	public ChromecastSession(RouteInfo routeInfo, CordovaInterface cordovaInterface, 
-			ChromecastOnMediaUpdatedListener onMediaUpdatedListener, ChromecastOnSessionUpdatedListener onSessionUpdatedListener) {
+			ChromecastOnMediaUpdatedListener onMediaUpdatedListener, ChromecastOnSessionUpdatedListener onSessionUpdatedListener,
+			boolean joinInsteadOfLunch) {
 		this.cordova = cordovaInterface;
         this.onMediaUpdatedListener = onMediaUpdatedListener;
         this.onSessionUpdatedListener = onSessionUpdatedListener;
@@ -71,6 +76,14 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 	public void launch(String appId, ChromecastSessionCallback launchCallback) {
 		this.appId = appId;
 		this.launchCallback = launchCallback;
+		this.connectToDevice();
+	}
+	
+	public void join (String appId, String sessionId, ChromecastSessionCallback joinSessionCallback) {
+		this.appId = appId;
+		this.joinSessionCallback = joinSessionCallback;
+		this.joinInsteadOfConnecting = true;
+		this.lastSessionId = sessionId;
 		this.connectToDevice();
 	}
 	
@@ -180,7 +193,12 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 	
 	private void launchApplication() {
 		Cast.CastApi.launchApplication(mApiClient, this.appId, false)
-		.setResultCallback(launchApplicationResultCallback);
+			.setResultCallback(launchApplicationResultCallback);
+	}
+	
+	private void joinApplication() {
+		Cast.CastApi.joinApplication(this.mApiClient, this.appId, this.lastSessionId)
+			.setResultCallback(joinApplicationResultCallback);
 	}
 	
 	private void connectRemoteMediaPlayer() throws IllegalStateException, IOException {
@@ -217,7 +235,35 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 				
 			}
 		}
+	};
+	
+	/**
+	 * joinApplication callback
+	 */
+	private ResultCallback<Cast.ApplicationConnectionResult> joinApplicationResultCallback = new ResultCallback<Cast.ApplicationConnectionResult>() {
+		@Override
+		public void onResult(ApplicationConnectionResult result) {
 		
+			Status status = result.getStatus();
+			
+			if (status.isSuccess()) {
+				try {
+					ApplicationMetadata metadata = result.getApplicationMetadata();
+					ChromecastSession.this.sessionId = result.getSessionId();
+					ChromecastSession.this.displayName = metadata.getName();
+					ChromecastSession.this.appImages = metadata.getImages();
+					
+					ChromecastSession.this.joinSessionCallback.onSuccess(ChromecastSession.this);
+					connectRemoteMediaPlayer();
+				} catch (IllegalStateException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			} else {
+				
+			}
+		}
 	};
 	
 	/**
@@ -234,7 +280,7 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 		}
 	};
 	
-	private JSONObject createSessionObject() {		
+	public JSONObject createSessionObject() {		
 		JSONObject out = new JSONObject();
 		try {
 			out.put("appId", this.appId);
@@ -350,8 +396,11 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 	 */
 	@Override
 	public void onConnected(Bundle connectionHint) {
-		this.launchApplication();
-		//		this.launchContext.success();
+		if (this.joinInsteadOfConnecting) {
+			this.joinApplication();
+		} else {
+			this.launchApplication();
+		}
 	}
 	
 	
@@ -414,5 +463,11 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 	public void onStatusUpdated() {
 		// On Media status updated()
 		this.onMediaUpdatedListener.onMediaUpdated(this.createMediaObject());
+	}
+	
+	
+	/// GETTERS
+	public String getSessionId() {
+		return this.sessionId;
 	}
 }

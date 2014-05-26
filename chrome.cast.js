@@ -1007,6 +1007,17 @@ chrome.cast._ = {
 		} else {
 			console.log('mediaLoaded --- but there is no session tied to it', media);
 		}
+	},
+	sessionJoined: function(obj) {
+		var sessionId = obj.sessionId;
+		var appId = obj.appId;
+		var displayName = obj.displayName;
+		var appImages = obj.appImages || [];
+		var receiver = new chrome.cast.Receiver(obj.receiver.label, obj.receiver.friendlyName, obj.receiver.capabilities || [], obj.volume || null);
+
+		var session = _sessions[sessionId] = new chrome.cast.Session(sessionId, appId, displayName, appImages, receiver);
+
+		_receiverListener && _receiverListener(session);
 	}
 }
 
