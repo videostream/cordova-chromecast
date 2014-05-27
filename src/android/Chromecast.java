@@ -533,5 +533,10 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
 			this.currentSession = null;
 		}
 	}
+
+	@Override
+	public void onMediaLoaded(JSONObject media) {
+		this.webView.sendJavascript("chrome.cast._.mediaLoaded(" + media.toString() +");");
+	}
 }
 

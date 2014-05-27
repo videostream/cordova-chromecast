@@ -272,7 +272,7 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 		@Override
 		public void onResult(MediaChannelResult result) {
 			if (result.getStatus().isSuccess()) {
-				ChromecastSession.this.onMediaUpdatedListener.onMediaUpdated(ChromecastSession.this.createMediaObject());
+				ChromecastSession.this.onMediaUpdatedListener.onMediaLoaded(ChromecastSession.this.createMediaObject());
 			} else {
 				System.out.println("Failed to request status.");
 			}
