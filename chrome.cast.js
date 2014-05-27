@@ -792,6 +792,7 @@ chrome.cast.media.Media = function(sessionId, mediaSessionId) {
 	];
 	this.volume = new chrome.cast.Volume(1, false);
 	this._lastUpdatedTime = Date.now();
+	this.media = {};
 };
 chrome.cast.media.Media.prototype = Object.create(EventEmitter.prototype);
 
