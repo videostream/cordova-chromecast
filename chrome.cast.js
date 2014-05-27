@@ -454,6 +454,9 @@ var _sessionRequest = null;
 
 var _sessions = {};
 var _currentMedia = null;
+var _routeListEl = document.createElement('ul');
+_routeListEl.classList.add('route-list');
+var _routeList = {};
 
 var _receiverAvailable = false;
 
@@ -978,6 +981,60 @@ chrome.cast.media.Media.prototype._update = function(obj) {
 };
 
 
+function createRouteElement(route) {
+	var el = document.createElement('li');
+	el.classList.add('route');
+	el.addEventListener('touchstart', onRouteClick);
+	el.textContent = route.name;
+	el.setAttribute('data-routeid', route.id);
+	return el;
+};
+
+function onRouteClick() {
+	var id = this.getAttribute('data-routeid');
+
+	if (id) {
+		try {
+			chrome.cast._emitConnecting();
+		} catch(e) {
+			console.error('Error in connectingListener', e);
+		}
+
+		execute('selectRoute', id, function(err, obj) {
+			var sessionId = obj.sessionId;
+			var appId = obj.appId;
+			var displayName = obj.displayName;
+			var appImages = obj.appImages || [];
+			var receiver = new chrome.cast.Receiver(obj.receiver.label, obj.receiver.friendlyName, obj.receiver.capabilities || [], obj.volume || null);
+
+			var session = _sessions[sessionId] = new chrome.cast.Session(sessionId, appId, displayName, appImages, receiver);
+
+			_sessionListener && _sessionListener(session);
+		});
+	}
+};
+
+chrome.cast.getRouteListElement = function() {
+	return _routeListEl;
+};
+
+
+var _connectingListeners = [];
+chrome.cast.addConnectingListener = function(cb) {
+	_connectingListeners.push(cb);
+};
+
+chrome.cast.removeConnectingListener = function(cb) {
+	if (_connectingListeners.indexOf(cb) > -1) {
+		_connectingListeners.splice(_connectingListeners.indexOf(cb), 1);
+	}
+};
+
+chrome.cast._emitConnecting = function() {
+	for (var n = 0; n < _connectingListeners.length; n++) {
+		_connectingListeners[n]();
+	}
+};
 
 chrome.cast._ = {
 	receiverUnavailable: function() {
@@ -987,6 +1044,20 @@ chrome.cast._ = {
 	receiverAvailable: function() {
 		_receiverListener(chrome.cast.ReceiverAvailability.AVAILABLE);
 		_receiverAvailable = true;
+	},
+	routeAdded: function(route) {
+		if (!_routeList[route.id]) {
+			route.el = createRouteElement(route);
+			_routeList[route.id] = route;
+
+			_routeListEl.appendChild(route.el);
+		}
+	},
+	routeRemoved: function(route) {
+		if (_routeList[route.id]) {
+			_routeList[route.id].el.remove();
+			delete _routeList[route.id];
+		}
 	},
 	sessionUpdated: function(isAlive, session) {
 		if (session && session.sessionId && _sessions[session.sessionId]) {

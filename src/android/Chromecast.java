@@ -160,9 +160,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
                 callbackContext.success();
             }
         });
-        for (RouteInfo route : mMediaRouterCallback.getRoutes()) {
-//            that.webView.sendJavascript("chromecast.emit('device', '"+route.getId()+"', '" + route.getName() + "')");
-        }
+       
         return true;
     }
 
@@ -207,10 +205,46 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
 				    @Override
 				    public void onClick(DialogInterface dialog, int which) {
 				        RouteInfo selectedRoute = routeList.get(which + 1);
-				        Chromecast.this.mMediaRouter.selectRoute(selectedRoute);
+				        Chromecast.this.createSession(selectedRoute, callbackContext);
 				    }
                 });
                 builder.show();
+            }
+        });
+        
+        return true;
+    }
+
+    
+    /**
+     * Selects a route by its id
+     * @param routeId
+     * @param callbackContext
+     * @return
+     */
+    public boolean selectRoute (final String routeId, final CallbackContext callbackContext) {
+    	if (this.currentSession != null) {
+    		callbackContext.success(this.currentSession.createSessionObject());
+    		return true;
+    	}
+    	
+    	this.setLastSessionId("");
+    	
+    	final Activity activity = cordova.getActivity();
+        activity.runOnUiThread(new Runnable() {
+            public void run() {
+                mMediaRouter = MediaRouter.getInstance(activity.getApplicationContext());
+                final List<RouteInfo> routeList = mMediaRouter.getRoutes();
+                
+                for (RouteInfo route : routeList) {
+                	if (route.getId().equals(routeId)) {
+                		Chromecast.this.createSession(route, callbackContext);
+                		return;
+                	}
+                }
+                
+                callbackContext.error("No route found");
+                
             }
         });
         
@@ -454,6 +488,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
     	if (this.currentSession != null) {
     		this.currentSession.kill(genericCallback(callbackContext));
     		this.currentSession = null;
+    		this.setLastSessionId("");
     	} else {
     		callbackContext.success();
     	}
@@ -503,11 +538,17 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
     	} else {
     		log("For some reason, not attempting to join route " + route.getName() + ", " + this.currentSession + ", " + this.autoConnect);
     	}
+    	if (!route.getName().equals("Phone")) {
+			this.webView.sendJavascript("chrome.cast._.routeAdded(" + routeToJSON(route) + ")");
+		}
     	this.checkReceiverAvailable();
     }
 
 	protected void onRouteRemoved(MediaRouter router, RouteInfo route) {
 		this.checkReceiverAvailable();
+		if (!route.getName().equals("Phone")) {
+			this.webView.sendJavascript("chrome.cast._.routeRemoved(" + routeToJSON(route) + ")");
+		}
 	}
 
 	protected void onRouteSelected(MediaRouter router, RouteInfo route) {	
@@ -516,6 +557,19 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
 
 	protected void onRouteUnselected(MediaRouter router, RouteInfo route) {
 //		this.webView.sendJavascript("chromecast.emit('routeUnselected', '"+route.getId()+"', '" + route.getName() + "')");
+	}
+	
+	private JSONObject routeToJSON(RouteInfo route) {
+		JSONObject obj = new JSONObject();
+		
+		try {
+			obj.put("name", route.getName());
+			obj.put("id", route.getId());
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		
+		return obj;
 	}
 
 	@Override
