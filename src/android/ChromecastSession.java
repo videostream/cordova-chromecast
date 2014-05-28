@@ -102,6 +102,12 @@ public class ChromecastSession
 		}
 	}
 	
+	/**
+	 * Sends a message to a specified namespace
+	 * @param namespace
+	 * @param message
+	 * @param callback
+	 */
 	public void sendMessage(String namespace, String message, final ChromecastSessionCallback callback) {
 		try {
 			Cast.CastApi.sendMessage(mApiClient, namespace, message).setResultCallback(new ResultCallback<Status>() {
@@ -115,7 +121,7 @@ public class ChromecastSession
 		        }
 		      });
 		} catch(Exception e) {
-			
+			callback.onError(e.getMessage());
 		}
 	}
 	
@@ -133,6 +139,10 @@ public class ChromecastSession
 		this.connectToDevice();
 	}
 	
+	/**
+	 * Kills a session and it's underlying media player
+	 * @param callback
+	 */
 	public void kill (final ChromecastSessionCallback callback) {
 		this.mRemoteMediaPlayer.stop(mApiClient).setResultCallback(new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
 			@Override
@@ -150,6 +160,18 @@ public class ChromecastSession
 		Cast.CastApi.stopApplication(mApiClient);
 	}
 	
+	
+	/**
+	 * Loads media over the media API
+	 * @param contentId - The URL of the content
+	 * @param contentType - The MIME type of the content
+	 * @param duration - The length of the video (if known)
+	 * @param streamType
+	 * @param autoPlay - Whether or not to start the video playing or not
+	 * @param currentTime - Where in the video to begin playing from
+	 * @param callback
+	 * @return
+	 */
 	public boolean loadMedia(String contentId, String contentType, long duration, String streamType, boolean autoPlay, double currentTime, final ChromecastSessionCallback callback) {
 		try {
 			MediaInfo mediaInfo = chromecastMediaController.createLoadUrlRequest(contentId, contentType, duration, streamType);
@@ -182,26 +204,54 @@ public class ChromecastSession
     	return true;
 	}
 	
+	/**
+	 * Media API - Calls play on the current media
+	 * @param callback
+	 */
 	public void mediaPlay(ChromecastSessionCallback callback) {
 		chromecastMediaController.play(mApiClient, callback);
 	}
 	
+	/**
+	 * Media API - Calls pause on the current media
+	 * @param callback
+	 */
 	public void mediaPause(ChromecastSessionCallback callback) {
 		chromecastMediaController.pause(mApiClient, callback);
 	}
 	
+	/**
+	 * Media API - Seeks the current playing media
+	 * @param seekPosition - Seconds to seek to
+	 * @param resumeState - Resume state once seeking is complete: PLAYBACK_PAUSE or PLAYBACK_START
+	 * @param callback
+	 */
 	public void mediaSeek(long seekPosition, String resumeState, ChromecastSessionCallback callback) {
 		chromecastMediaController.seek(seekPosition, resumeState, mApiClient, callback);
 	}
 	
+	/**
+	 * Media API - Sets the volume on the current playing media object NOT ON THE CHROMECAST DIRECTLY
+	 * @param level
+	 * @param callback
+	 */
 	public void mediaSetVolume(double level, ChromecastSessionCallback callback) {
 		chromecastMediaController.setVolume(level, mApiClient, callback);
 	}
 	
+	/**
+	 * Media API - Sets the muted state on the current playing media NOT THE CHROMECAST DIRECTLY
+	 * @param muted
+	 * @param callback
+	 */
 	public void mediaSetMuted(boolean muted, ChromecastSessionCallback callback) {
 		chromecastMediaController.setMuted(muted, mApiClient, callback);
 	}
 	
+	/**
+	 * Media API - Stops and unloads the current playing media
+	 * @param callback
+	 */
 	public void mediaStop(ChromecastSessionCallback callback) {
 		chromecastMediaController.stop(mApiClient, callback);
 	}
@@ -221,6 +271,10 @@ public class ChromecastSession
 //		chromecastMediaController.setMute(muted, mApiClient, callbackContext);
 //	}
 	
+	
+	/**
+	 * Connects to the device with all callbacks and things
+	 */
 	private void connectToDevice() {
 		try {
 			Cast.CastOptions.Builder apiOptionsBuilder = Cast.CastOptions.builder(this.device, this);
@@ -237,16 +291,27 @@ public class ChromecastSession
 		}
 	}
 	
+	/**
+	 * Launches the application and gets a new session
+	 */
 	private void launchApplication() {
 		Cast.CastApi.launchApplication(mApiClient, this.appId, false)
 			.setResultCallback(launchApplicationResultCallback);
 	}
 	
+	/**
+	 * Attemps to join an already running session
+	 */
 	private void joinApplication() {
 		Cast.CastApi.joinApplication(this.mApiClient, this.appId, this.lastSessionId)
 			.setResultCallback(joinApplicationResultCallback);
 	}
 	
+	/**
+	 * Connects to the remote media player on the receiver
+	 * @throws IllegalStateException
+	 * @throws IOException
+	 */
 	private void connectRemoteMediaPlayer() throws IllegalStateException, IOException {
 		Cast.CastApi.setMessageReceivedCallbacks(mApiClient, mRemoteMediaPlayer.getNamespace(), mRemoteMediaPlayer);
 		mRemoteMediaPlayer.requestStatus(mApiClient)
@@ -326,6 +391,10 @@ public class ChromecastSession
 		}
 	};
 	
+	/**
+	 * Creates a JSON representation of this session
+	 * @return
+	 */
 	public JSONObject createSessionObject() {		
 		JSONObject out = new JSONObject();
 		try {
@@ -365,6 +434,10 @@ public class ChromecastSession
 		return out;
 	}
 	
+	/**
+	 * Creates a JSON representation of the current playing media
+	 * @return
+	 */
 	private JSONObject createMediaObject() {
 		JSONObject out = new JSONObject();
 		JSONObject objInfo = new JSONObject();
