@@ -436,7 +436,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
     	}
     }
     public boolean loadMedia (String contentId, String contentType, Integer duration, String streamType, Boolean autoPlay, Integer currentTime, final CallbackContext callbackContext) {
-    	return this.loadMedia (contentId, contentType, duration, streamType, autoPlay, currentTime, callbackContext);
+    	return this.loadMedia (contentId, contentType, duration, streamType, autoPlay, new Double(currentTime.doubleValue()), callbackContext);
     }
     
     /**
