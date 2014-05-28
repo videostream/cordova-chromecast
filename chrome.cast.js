@@ -710,8 +710,8 @@ chrome.cast.Session.prototype.removeUpdateListener = function (listener) {
  * @param {function} listener  The listener to add.
  */
 chrome.cast.Session.prototype.addMessageListener = function (namespace, listener) {
-	// TODO: Implement
-	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
+	execute('addListener', namespace);
+	this.on('message:' + namespace, listener);
 };
 
 /**
@@ -720,8 +720,7 @@ chrome.cast.Session.prototype.addMessageListener = function (namespace, listener
  * @param  {function} listener  The listener to remove.
  */
 chrome.cast.Session.prototype.removeMessageListener = function (namespace, listener) {
-	// TODO: Implement
-	errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.NOT_IMPLEMENTED, 'Not implemented yet', null));
+	this.removeListener('message:' + namespace, listener);
 };
 
 /**
@@ -1090,6 +1089,11 @@ chrome.cast._ = {
 		var session = _sessions[sessionId] = new chrome.cast.Session(sessionId, appId, displayName, appImages, receiver);
 
 		_sessionListener && _sessionListener(session);
+	},
+	onMessage: function(sessionId, namespace, message) {
+		if (_sessions[sessionId]) {
+			_sessions[sessionId].emit('message:' + namespace, message);
+		}
 	}
 }
 

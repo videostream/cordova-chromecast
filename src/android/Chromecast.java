@@ -358,9 +358,30 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
      * @param  message         
      * @param  callbackContext
      */
-    public boolean sendMessage (String namespace, String message, CallbackContext callbackContext) {
-        callbackContext.error("not_implemented");
+    public boolean sendMessage (String namespace, String message, final CallbackContext callbackContext) {
+        if (this.currentSession != null) {
+        	this.currentSession.sendMessage(namespace, message, new ChromecastSessionCallback() {
+
+				@Override
+				void onSuccess(Object object) {
+					callbackContext.success();
+				}
+
+				@Override
+				void onError(String reason) {
+					callbackContext.error(reason);					
+				}
+        	});
+        }
         return true;
+    }
+    
+    public boolean addMessageListener(String namespace, CallbackContext callbackContext) {
+    	if (this.currentSession != null) {
+    		this.currentSession.addMessageListener(namespace);
+    		callbackContext.success();
+    	}
+    	return true;
     }
 
     /**
@@ -611,6 +632,11 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
 	@Override
 	public void onMediaLoaded(JSONObject media) {
 		this.webView.sendJavascript("chrome.cast._.mediaLoaded(" + media.toString() +");");
+	}
+
+	@Override
+	public void onMessage(ChromecastSession session, String namespace, String message) {
+		this.webView.sendJavascript("chrome.cast._.onMessage('" + session.getSessionId() +"', '" + namespace + "', '" + message  + "')");
 	}
 }
 

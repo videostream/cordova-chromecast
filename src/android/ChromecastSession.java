@@ -1,6 +1,7 @@
 package acidhax.cordova.chromecast;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 
 import org.apache.cordova.CordovaInterface;
@@ -30,7 +31,14 @@ import android.support.v7.media.MediaRouter.RouteInfo;
 /*
  * All of the Chromecast session specific functions should start here. 
  */
-public class ChromecastSession extends Cast.Listener implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, OnMetadataUpdatedListener, OnStatusUpdatedListener {
+public class ChromecastSession 
+	extends Cast.Listener 
+	implements 
+		GoogleApiClient.ConnectionCallbacks, 
+		GoogleApiClient.OnConnectionFailedListener, 
+		OnMetadataUpdatedListener, 
+		OnStatusUpdatedListener,
+		Cast.MessageReceivedCallback {
 
 	private RouteInfo routeInfo = null;
 	private volatile GoogleApiClient mApiClient = null;	
@@ -51,6 +59,7 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 	private ChromecastSessionCallback joinSessionCallback; 
 	
 	private boolean joinInsteadOfConnecting = false;
+	private HashSet<String> messageNamespaces = new HashSet<String>();
 	
 	public ChromecastSession(RouteInfo routeInfo, CordovaInterface cordovaInterface, 
 			ChromecastOnMediaUpdatedListener onMediaUpdatedListener, ChromecastOnSessionUpdatedListener onSessionUpdatedListener) {
@@ -78,6 +87,44 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 		this.connectToDevice();
 	}
 	
+	/**
+	 * Adds a message listener if one does not already exist
+	 * @param namespace
+	 */
+	public void addMessageListener(String namespace) {
+		if (messageNamespaces.contains(namespace) == false) {
+			try {
+				 Cast.CastApi.setMessageReceivedCallbacks(mApiClient, namespace, this);
+				 messageNamespaces.add(namespace);
+			} catch(Exception e) {
+				
+			}
+		}
+	}
+	
+	public void sendMessage(String namespace, String message, final ChromecastSessionCallback callback) {
+		try {
+			Cast.CastApi.sendMessage(mApiClient, namespace, message).setResultCallback(new ResultCallback<Status>() {
+		        @Override
+		        public void onResult(Status result) {
+		          if (!result.isSuccess()) {
+		        	  callback.onSuccess();
+		          } else {
+		        	  callback.onError(result.toString());
+		          }
+		        }
+		      });
+		} catch(Exception e) {
+			
+		}
+	}
+	
+	/**
+	 * Join a currently running app with an appId and a session
+	 * @param appId
+	 * @param sessionId
+	 * @param joinSessionCallback
+	 */
 	public void join (String appId, String sessionId, ChromecastSessionCallback joinSessionCallback) {
 		this.appId = appId;
 		this.joinSessionCallback = joinSessionCallback;
@@ -471,5 +518,11 @@ public class ChromecastSession extends Cast.Listener implements GoogleApiClient.
 	/// GETTERS
 	public String getSessionId() {
 		return this.sessionId;
+	}
+
+
+	@Override
+	public void onMessageReceived(CastDevice castDevice, String namespace, String message) {
+		this.onSessionUpdatedListener.onMessage(this, namespace, message);
 	}
 }
