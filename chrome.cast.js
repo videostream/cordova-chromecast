@@ -813,7 +813,7 @@ chrome.cast.media.Media.prototype.play = function (playRequest, successCallback,
 
 	execute('mediaPlay', function(err) {
 		if (!err) {
-			successCallback();
+			successCallback && successCallback();
 		} else {
 			handleError(err, errorCallback);
 		}
@@ -834,7 +834,7 @@ chrome.cast.media.Media.prototype.pause = function (pauseRequest, successCallbac
 
 	execute('mediaPause', function(err) {
 		if (!err) {
-			successCallback();
+			successCallback && successCallback();
 		} else {
 			handleError(err, errorCallback);
 		}
@@ -855,7 +855,7 @@ chrome.cast.media.Media.prototype.seek = function (seekRequest, successCallback,
 
 	execute('mediaSeek', seekRequest.currentTime, seekRequest.resumeState || "", function(err) {
 		if (!err) {
-			successCallback();
+			successCallback && successCallback();
 		} else {
 			handleError(err, errorCallback);
 		}
@@ -876,7 +876,7 @@ chrome.cast.media.Media.prototype.stop = function (stopRequest, successCallback,
 
 	execute('mediaStop', function(err) {
 		if (!err) {
-			successCallback();
+			successCallback && successCallback();
 		} else {
 			handleError(err, errorCallback);
 		}
@@ -909,7 +909,7 @@ chrome.cast.media.Media.prototype.setVolume = function (volumeRequest, successCa
 	} else {
 		args.push(function(err) {
 			if (!err) {
-				successCallback();
+				successCallback && successCallback();
 			} else {
 				handleError(err, errorCallback);
 			}
