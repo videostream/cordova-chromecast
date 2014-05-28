@@ -14,7 +14,7 @@ public class ChromecastMediaController {
 		this.remote = mRemoteMediaPlayer;
 	}
 	
-	public MediaInfo createLoadUrlRequest(String contentId, String contentType, long duration, String streamType, boolean autoPlay, double currentTime) {
+	public MediaInfo createLoadUrlRequest(String contentId, String contentType, long duration, String streamType) {
 		MediaMetadata mediaMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
 //    	mediaMetadata.putString(MediaMetadata.KEY_TITLE, "My video");
 
