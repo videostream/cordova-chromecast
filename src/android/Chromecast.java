@@ -124,6 +124,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
     */
     public boolean setup (CallbackContext callbackContext) {
         callbackContext.success();
+        
         return true;
     }
 
@@ -158,6 +159,9 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
                 mMediaRouterCallback.registerCallbacks(that);
                 mMediaRouter.addCallback(mMediaRouteSelector, mMediaRouterCallback, MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY);
                 callbackContext.success();
+                
+                Chromecast.this.checkReceiverAvailable();
+                Chromecast.this.emitAllRoutes();
             }
         });
        
@@ -496,6 +500,22 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
     	return true;
     }
 
+    private void emitAllRoutes() {
+    	final Activity activity = cordova.getActivity();
+    	
+        activity.runOnUiThread(new Runnable() {
+            public void run() {
+                mMediaRouter = MediaRouter.getInstance(activity.getApplicationContext());
+                List<RouteInfo> routeList = mMediaRouter.getRoutes();
+                
+                for (RouteInfo route : routeList) {
+	                if (!route.getName().equals("Phone")) {
+	        			Chromecast.this.webView.sendJavascript("chrome.cast._.routeAdded(" + routeToJSON(route) + ")");
+	        		}
+                }
+            }
+        });
+    }
     
     private void checkReceiverAvailable() {
     	final Activity activity = cordova.getActivity();
