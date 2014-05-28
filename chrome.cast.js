@@ -285,7 +285,7 @@ chrome.cast = {
 		/**
 		 * A request to load new media into the player.
 		 * @param {chrome.cast.media.MediaInfo} 	media 		Media description.
-		 * @property {boolean} 						autoPlay 	Whether the media will automatically play.
+		 * @property {boolean} 						autoplay 	Whether the media will automatically play.
 		 * @property {number} 						currentTime Seconds from the beginning of the media to start playback.
 		 * @property {Object} 						customData 	Custom data for the receiver application.
 		 */
@@ -672,7 +672,7 @@ chrome.cast.Session.prototype.loadMedia = function (loadRequest, successCallback
 	var self = this;
 
 	var mediaInfo = loadRequest.media;
-	execute('loadMedia', mediaInfo.contentId, mediaInfo.contentType, mediaInfo.duration || 0.0, mediaInfo.streamType, loadRequest.autoPlay || false, loadRequest.currentTime || 0, function(err, obj) {
+	execute('loadMedia', mediaInfo.contentId, mediaInfo.contentType, mediaInfo.duration || 0.0, mediaInfo.streamType, loadRequest.autoplay || false, loadRequest.currentTime || 0, function(err, obj) {
 		if (!err) {
 			_currentMedia = new chrome.cast.media.Media(self.sessionId, obj.mediaSessionId);
 			_currentMedia.media = mediaInfo;
