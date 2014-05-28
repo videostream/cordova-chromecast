@@ -256,20 +256,36 @@ public class ChromecastSession
 		chromecastMediaController.stop(mApiClient, callback);
 	}
 	
-//	public void setVolume(double volume, CallbackContext callbackContext) {
-//		// chromecastMediaController.setVolume(volume, mApiClient, callbackContext);
-//		try {
-//			Cast.CastApi.setVolume(mApiClient, volume);
-//			callbackContext.success();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			callbackContext.error("Failure");
-//		}
-//	}
-//	
-//	public void setMute(boolean muted, CallbackContext callbackContext) {
-//		chromecastMediaController.setMute(muted, mApiClient, callbackContext);
-//	}
+	
+	/**
+	 * Sets the receiver volume level
+	 * @param volume
+	 * @param callback
+	 */
+	public void setVolume(double volume, ChromecastSessionCallback callback) {
+		try {
+			Cast.CastApi.setVolume(mApiClient, volume);
+			callback.onSuccess();
+		} catch (Exception e) {
+			e.printStackTrace();
+			callback.onError(e.getMessage());
+		}
+	}
+	
+	/**
+	 * Mutes the receiver
+	 * @param muted
+	 * @param callback
+	 */
+	public void setMute(boolean muted, ChromecastSessionCallback callback) {
+		try{
+			Cast.CastApi.setMute(mApiClient, muted);
+			callback.onSuccess();
+		} catch (Exception e) {
+			e.printStackTrace();
+			callback.onError(e.getMessage());
+		}
+	}
 	
 	
 	/**

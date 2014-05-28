@@ -329,7 +329,11 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
      * @param  newLevel
      */
     public boolean setReceiverVolumeLevel (double newLevel, CallbackContext callbackContext) {
-        callbackContext.error("not_implemented");
+    	if (this.currentSession != null) {
+        	this.currentSession.setVolume(newLevel, genericCallback(callbackContext));
+        } else {
+        	callbackContext.error("session_error");
+        }
         return true;
     }
 
@@ -339,7 +343,11 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
      * @param  callbackContext 
      */
     public boolean setReceiverMuted (boolean muted, CallbackContext callbackContext) {
-        callbackContext.error("not_implemented");
+        if (this.currentSession != null) {
+        	this.currentSession.setMute(muted, genericCallback(callbackContext));
+        } else {
+        	callbackContext.error("session_error");
+        }
         return true;
     }
 
@@ -376,6 +384,13 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
         return true;
     }
     
+    
+    /**
+     * Adds a listener to a specific namespace
+     * @param namespace
+     * @param callbackContext
+     * @return
+     */
     public boolean addMessageListener(String namespace, CallbackContext callbackContext) {
     	if (this.currentSession != null) {
     		this.currentSession.addMessageListener(namespace);
@@ -385,7 +400,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
     }
 
     /**
-     * Paramaters galore! Ignore most of these - we really just need the contentId (the URL of the media) for now
+     * Loads some media on the Chromecast using the media APIs
      * @param  contentId               The URL of the media item
      * @param  contentType             MIME type of the content
      * @param  duration                Duration of the content
@@ -427,7 +442,11 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
      * @return
      */
     public boolean mediaPlay(CallbackContext callbackContext) {
-    	currentSession.mediaPlay(genericCallback(callbackContext));
+    	if (currentSession != null) {
+    		currentSession.mediaPlay(genericCallback(callbackContext));
+    	} else {
+    		callbackContext.error("session_error");
+    	}
     	return true;
     }
     
@@ -436,22 +455,12 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
      * @param callbackContext
      * @return
      */
-    public boolean mediaPause(final CallbackContext callbackContext) {
-    	currentSession.mediaPause(new ChromecastSessionCallback() {
-
-			@Override
-			void onSuccess(Object object) {
-				// TODO Auto-generated method stub
-				callbackContext.success();
-			}
-
-			@Override
-			void onError(String reason) {
-				// TODO Auto-generated method stub
-				callbackContext.error(reason);
-			}
-    		
-    	});
+    public boolean mediaPause(CallbackContext callbackContext) {
+    	if (currentSession != null) {
+    		currentSession.mediaPause(genericCallback(callbackContext));
+    	} else {
+    		callbackContext.error("session_error");
+    	}
     	return true;
     }
     
@@ -464,7 +473,11 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
      * @return
      */
     public boolean mediaSeek(Integer seekTime, String resumeState, CallbackContext callbackContext) {
-    	currentSession.mediaSeek(seekTime.longValue() * 1000, resumeState, genericCallback(callbackContext));
+    	if (currentSession != null) {
+    		currentSession.mediaSeek(seekTime.longValue() * 1000, resumeState, genericCallback(callbackContext));
+    	} else {
+    		callbackContext.error("session_error");
+    	}
     	return true;
     }
     
@@ -476,7 +489,11 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
      * @return
      */
     public boolean setMediaVolume(Double level, CallbackContext callbackContext) {
-    	currentSession.mediaSetVolume(level, genericCallback(callbackContext));
+    	if (currentSession != null) {
+    		currentSession.mediaSetVolume(level, genericCallback(callbackContext));
+    	} else {
+    		callbackContext.error("session_error");
+    	}
     	
     	return true;
     }
@@ -488,7 +505,11 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
      * @return
      */
     public boolean setMediaMuted(Boolean muted, CallbackContext callbackContext) {
-    	currentSession.mediaSetMuted(muted, genericCallback(callbackContext));
+    	if (currentSession != null) {
+    		currentSession.mediaSetMuted(muted, genericCallback(callbackContext));
+    	} else {
+    		callbackContext.error("session_error");
+    	}
     	
     	return true;
     }
@@ -499,7 +520,11 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
      * @return
      */
     public boolean mediaStop(CallbackContext callbackContext) {
-    	currentSession.mediaStop(genericCallback(callbackContext));
+    	if (currentSession != null) {
+    		currentSession.mediaStop(genericCallback(callbackContext));
+    	} else {
+    		callbackContext.error("session_error");
+    	}
     	
     	return true;
     }
@@ -538,6 +563,9 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
         });
     }
     
+    /**
+     * Checks to see how many receivers are available - emits the receiver status down to Javascript
+     */
     private void checkReceiverAvailable() {
     	final Activity activity = cordova.getActivity();
     	
@@ -549,13 +577,17 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
                 if (routeList.size() > 0) {
                 	Chromecast.this.webView.sendJavascript("chrome.cast._.receiverAvailable()");
                 } else {
-                	Chromecast.this.log("unavailable?????" + routeList.size());
                 	Chromecast.this.webView.sendJavascript("chrome.cast._.receiverUnavailable()");
                 }
             }
         });
     }
     
+    /**
+     * Creates a ChromecastSessionCallback that's generic for a CallbackContext 
+     * @param callbackContext
+     * @return
+     */
     private ChromecastSessionCallback genericCallback (final CallbackContext callbackContext) {
     	return new ChromecastSessionCallback() {
 
@@ -572,6 +604,11 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
     	};
     };
     
+    /**
+     * Called when a route is discovered
+     * @param router
+     * @param route
+     */
     protected void onRouteAdded(MediaRouter router, final RouteInfo route) {
     	if (this.autoConnect && this.currentSession == null && !route.getName().equals("Phone")) {
     		log("Attempting to join route " + route.getName());
@@ -585,6 +622,11 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
     	this.checkReceiverAvailable();
     }
 
+    /**
+     * Called when a discovered route is lost
+     * @param router
+     * @param route
+     */
 	protected void onRouteRemoved(MediaRouter router, RouteInfo route) {
 		this.checkReceiverAvailable();
 		if (!route.getName().equals("Phone")) {
@@ -592,14 +634,27 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
 		}
 	}
 
+	/**
+	 * Called when a route is selected through the MediaRouter
+	 * @param router
+	 * @param route
+	 */
 	protected void onRouteSelected(MediaRouter router, RouteInfo route) {	
 		this.createSession(route, null);
 	}
 
-	protected void onRouteUnselected(MediaRouter router, RouteInfo route) {
-//		this.webView.sendJavascript("chromecast.emit('routeUnselected', '"+route.getId()+"', '" + route.getName() + "')");
-	}
+	/**
+	 * Called when a route is unselected through the MediaRouter
+	 * @param router
+	 * @param route
+	 */
+	protected void onRouteUnselected(MediaRouter router, RouteInfo route) {}
 	
+	/**
+	 * Simple helper to convert a route to JSON for passing down to the javascript side
+	 * @param route
+	 * @return
+	 */
 	private JSONObject routeToJSON(RouteInfo route) {
 		JSONObject obj = new JSONObject();
 		
