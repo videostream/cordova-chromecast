@@ -176,7 +176,7 @@ public class ChromecastSession
 		try {
 			MediaInfo mediaInfo = chromecastMediaController.createLoadUrlRequest(contentId, contentType, duration, streamType);
 			
-			mRemoteMediaPlayer.load(mApiClient, mediaInfo, autoPlay, (long) currentTime)
+			mRemoteMediaPlayer.load(mApiClient, mediaInfo, autoPlay, (long)(currentTime * 1000))
 				.setResultCallback(new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
 					@Override
 					public void onResult(MediaChannelResult result) {
