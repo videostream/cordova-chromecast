@@ -645,6 +645,9 @@ chrome.cast.Session.prototype.sendMessage = function (namespace, message, succes
 		return;
 	}
 
+	if (typeof message === 'object') {
+		message = JSON.stringify(message);
+	}
 	execute('sendMessage', namespace, message, function(err) {
 		if (!err) {
 			successCallback && successCallback();
