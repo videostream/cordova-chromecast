@@ -581,7 +581,7 @@ chrome.cast.Session.prototype.setReceiverVolumeLevel = function (newLevel, succe
 
 	execute('setReceiverVolumeLevel', newLevel, function(err) {
 		if (!err) {
-			success && successCallback();
+			successCallback && successCallback();
 		} else {
 			handleError(err, errorCallback);
 		}
@@ -603,7 +603,7 @@ chrome.cast.Session.prototype.setReceiverMuted = function (muted, successCallbac
 
 	execute('setReceiverMuted', muted, function(err) {
 		if (!err) {
-			success && successCallback();
+			successCallback && successCallback();
 		} else {
 			handleError(err, errorCallback);
 		}
@@ -647,7 +647,7 @@ chrome.cast.Session.prototype.sendMessage = function (namespace, message, succes
 
 	execute('sendMessage', namespace, message, function(err) {
 		if (!err) {
-			success && successCallback();
+			successCallback && successCallback();
 		} else {
 			handleError(err, errorCallback);
 		}
