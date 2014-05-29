@@ -548,7 +548,9 @@ public class ChromecastSession
 	 */
 	@Override
 	public void onConnectionSuspended(int cause) {
-		this.onSessionUpdatedListener.onSessionUpdated(false, this.createSessionObject());
+		if (this.onSessionUpdatedListener != null) {
+			this.onSessionUpdatedListener.onSessionUpdated(false, this.createSessionObject());
+		}
 	}
 	
 	/*
@@ -559,7 +561,9 @@ public class ChromecastSession
 	 */
 	@Override
 	public void onConnectionFailed(ConnectionResult result) {
-		this.launchCallback.onError("channel_error");
+		if (this.launchCallback != null) {
+			this.launchCallback.onError("channel_error");
+		}
 	}
 	
 	/**
@@ -568,7 +572,9 @@ public class ChromecastSession
 	 */
 	@Override
 	public void onApplicationStatusChanged() {
-		this.onSessionUpdatedListener.onSessionUpdated(true, createSessionObject());
+		if (this.onSessionUpdatedListener != null) {
+			this.onSessionUpdatedListener.onSessionUpdated(true, createSessionObject());
+		}
 	}
 	
 	/**
@@ -577,7 +583,9 @@ public class ChromecastSession
 	 */
 	@Override
 	public void onVolumeChanged() {
-		this.onSessionUpdatedListener.onSessionUpdated(true, createSessionObject());
+		if (this.onSessionUpdatedListener != null) {
+			this.onSessionUpdatedListener.onSessionUpdated(true, createSessionObject());
+		}
 	}
 	
 	/**
@@ -586,21 +594,25 @@ public class ChromecastSession
 	 */
 	@Override
 	public void onApplicationDisconnected(int errorCode) {
-		this.onSessionUpdatedListener.onSessionUpdated(false, this.createSessionObject());
+		if (this.onSessionUpdatedListener != null) {
+			this.onSessionUpdatedListener.onSessionUpdated(false, this.createSessionObject());
+		}
 	}
 
 
 	@Override
 	public void onMetadataUpdated() {
-		// On Media metadata updated
-		this.onMediaUpdatedListener.onMediaUpdated(this.createMediaObject());
+		if (this.onMediaUpdatedListener != null) {
+			this.onMediaUpdatedListener.onMediaUpdated(this.createMediaObject());
+		}
 	}
 
 
 	@Override
 	public void onStatusUpdated() {
-		// On Media status updated()
-		this.onMediaUpdatedListener.onMediaUpdated(this.createMediaObject());
+		if (this.onMediaUpdatedListener != null) {
+			this.onMediaUpdatedListener.onMediaUpdated(this.createMediaObject());
+		}
 	}
 	
 	
@@ -612,6 +624,8 @@ public class ChromecastSession
 
 	@Override
 	public void onMessageReceived(CastDevice castDevice, String namespace, String message) {
-		this.onSessionUpdatedListener.onMessage(this, namespace, message);
+		if (this.onSessionUpdatedListener != null) {
+			this.onSessionUpdatedListener.onMessage(this, namespace, message);
+		}
 	}
 }
