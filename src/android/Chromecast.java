@@ -47,6 +47,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
     	this.webView.sendJavascript("console.log('" + s + "');");
     }
 
+    
     public void initialize(final CordovaInterface cordova, CordovaWebView webView) {
     	super.initialize(cordova, webView);
     	
@@ -54,6 +55,15 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
         this.settings = this.cordova.getActivity().getSharedPreferences(SETTINGS_NAME, 0);
         this.lastSessionId = settings.getString("lastSessionId", "");
         this.lastAppId = settings.getString("lastAppId", "");
+    }
+    
+    public void onDestroy() {
+    	if (this.currentSession != null) {
+    		this.currentSession.kill(new ChromecastSessionCallback() {
+				void onSuccess(Object object) {	}
+				void onError(String reason) {}
+    		});
+    	}
     }
     
     @Override
@@ -328,7 +338,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
      * Set the volume level on the receiver - this is a Chromecast volume, not a Media volume
      * @param  newLevel
      */
-    public boolean setReceiverVolumeLevel (double newLevel, CallbackContext callbackContext) {
+    public boolean setReceiverVolumeLevel (Double newLevel, CallbackContext callbackContext) {
     	if (this.currentSession != null) {
         	this.currentSession.setVolume(newLevel, genericCallback(callbackContext));
         } else {
@@ -336,13 +346,17 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
         }
         return true;
     }
+    
+    public boolean setReceiverVolumeLevel (Integer newLevel, CallbackContext callbackContext) {
+    	return this.setReceiverVolumeLevel(newLevel.doubleValue(), callbackContext);
+    }
 
     /**
      * Sets the muted boolean on the receiver - this is a Chromecast mute, not a Media mute
      * @param  muted           
      * @param  callbackContext 
      */
-    public boolean setReceiverMuted (boolean muted, CallbackContext callbackContext) {
+    public boolean setReceiverMuted (Boolean muted, CallbackContext callbackContext) {
         if (this.currentSession != null) {
         	this.currentSession.setMute(muted, genericCallback(callbackContext));
         } else {

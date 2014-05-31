@@ -157,7 +157,7 @@ public class ChromecastSession
 				callback.onSuccess();
 			}
 		});
-		Cast.CastApi.stopApplication(mApiClient);
+//		Cast.CastApi.stopApplication(mApiClient);
 	}
 	
 	
