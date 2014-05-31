@@ -144,19 +144,27 @@ public class ChromecastSession
 	 * @param callback
 	 */
 	public void kill (final ChromecastSessionCallback callback) {
-		this.mRemoteMediaPlayer.stop(mApiClient).setResultCallback(new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
-			@Override
-			public void onResult(MediaChannelResult result) {
-				try {
-					Cast.CastApi.stopApplication(mApiClient);
-					mApiClient.disconnect();
-				} catch(Exception e) {
-					
-				}
-				
-				callback.onSuccess();
-			}
-		});
+//		this.mRemoteMediaPlayer.stop(mApiClient).setResultCallback(new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
+//			@Override
+//			public void onResult(MediaChannelResult result) {
+//				try {
+//					Cast.CastApi.stopApplication(mApiClient);
+//					mApiClient.disconnect();
+//				} catch(Exception e) {
+//					
+//				}
+//				
+//				callback.onSuccess();
+//			}
+//		});
+		try {
+			Cast.CastApi.stopApplication(mApiClient);
+			mApiClient.disconnect();
+		} catch(Exception e) {
+			
+		}
+		
+		callback.onSuccess();
 //		Cast.CastApi.stopApplication(mApiClient);
 	}
 	

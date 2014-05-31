@@ -23,6 +23,7 @@ import android.content.SharedPreferences;
 import android.support.v7.media.MediaRouter;
 import android.support.v7.media.MediaRouteSelector;
 import android.support.v7.media.MediaRouter.RouteInfo;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 
 public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdatedListener, ChromecastOnSessionUpdatedListener {
@@ -58,11 +59,13 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
     }
     
     public void onDestroy() {
+    	super.onDestroy();
+    	
     	if (this.currentSession != null) {
-    		this.currentSession.kill(new ChromecastSessionCallback() {
-				void onSuccess(Object object) {	}
-				void onError(String reason) {}
-    		});
+//    		this.currentSession.kill(new ChromecastSessionCallback() {
+//				void onSuccess(Object object) {	}
+//				void onError(String reason) {}
+//    		});
     	}
     }
     
