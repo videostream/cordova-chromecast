@@ -170,7 +170,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
                 .addControlCategory(CastMediaControlIntent.categoryForCast(appId))
                 .build();
                 mMediaRouterCallback.registerCallbacks(that);
-                mMediaRouter.addCallback(mMediaRouteSelector, mMediaRouterCallback, MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY);
+                mMediaRouter.addCallback(mMediaRouteSelector, mMediaRouterCallback, MediaRouter.CALLBACK_FLAG_PERFORM_ACTIVE_SCAN);
                 callbackContext.success();
                 
                 Chromecast.this.checkReceiverAvailable();
@@ -206,7 +206,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
             	CharSequence[] seq = new CharSequence[routeList.size() -1];
             	for (int n = 1; n < routeList.size(); n++) {
             		RouteInfo route = routeList.get(n);
-            		if (!route.getName().equals("Phone")) {
+            		if (!route.getName().equals("Phone") && route.getId().indexOf("Cast") > -1) {
             			seq[n-1] = route.getName();
             		}
             	}
@@ -575,7 +575,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
                 List<RouteInfo> routeList = mMediaRouter.getRoutes();
                 
                 for (RouteInfo route : routeList) {
-	                if (!route.getName().equals("Phone")) {
+                	if (!route.getName().equals("Phone") && route.getId().indexOf("Cast") > -1) {
 	        			Chromecast.this.webView.sendJavascript("chrome.cast._.routeAdded(" + routeToJSON(route) + ")");
 	        		}
                 }
@@ -636,7 +636,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
     	} else {
     		log("For some reason, not attempting to join route " + route.getName() + ", " + this.currentSession + ", " + this.autoConnect);
     	}
-    	if (!route.getName().equals("Phone")) {
+    	if (!route.getName().equals("Phone") && route.getId().indexOf("Cast") > -1) {
 			this.webView.sendJavascript("chrome.cast._.routeAdded(" + routeToJSON(route) + ")");
 		}
     	this.checkReceiverAvailable();
@@ -649,7 +649,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
      */
 	protected void onRouteRemoved(MediaRouter router, RouteInfo route) {
 		this.checkReceiverAvailable();
-		if (!route.getName().equals("Phone")) {
+		if (!route.getName().equals("Phone") && route.getId().indexOf("Cast") > -1) {
 			this.webView.sendJavascript("chrome.cast._.routeRemoved(" + routeToJSON(route) + ")");
 		}
 	}
