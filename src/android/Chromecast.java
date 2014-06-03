@@ -593,8 +593,15 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
             public void run() {
                 mMediaRouter = MediaRouter.getInstance(activity.getApplicationContext());
                 List<RouteInfo> routeList = mMediaRouter.getRoutes();
+                boolean available = false;
                 
-                if (routeList.size() > 0) {
+                for (RouteInfo route: routeList) {
+                	if (!route.getName().equals("Phone") && route.getId().indexOf("Cast") > -1) {
+                		available = true;
+                		break;
+                	}
+                }
+                if (available) {
                 	Chromecast.this.webView.sendJavascript("chrome.cast._.receiverAvailable()");
                 } else {
                 	Chromecast.this.webView.sendJavascript("chrome.cast._.receiverUnavailable()");
