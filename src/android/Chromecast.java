@@ -601,7 +601,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
                 		break;
                 	}
                 }
-                if (available) {
+                if (available || (Chromecast.this.currentSession != null && Chromecast.this.currentSession.isConnected())) {
                 	Chromecast.this.webView.sendJavascript("chrome.cast._.receiverAvailable()");
                 } else {
                 	Chromecast.this.webView.sendJavascript("chrome.cast._.receiverUnavailable()");

@@ -54,6 +54,7 @@ public class ChromecastSession
 	private volatile List<WebImage> appImages;
 	private volatile String sessionId = null;
 	private volatile String lastSessionId = null;
+	private boolean isConnected = false;
 	
 	private ChromecastSessionCallback launchCallback;
 	private ChromecastSessionCallback joinSessionCallback; 
@@ -86,6 +87,8 @@ public class ChromecastSession
 		this.launchCallback = launchCallback;
 		this.connectToDevice();
 	}
+	
+	public boolean isConnected() { return this.isConnected; }
 	
 	/**
 	 * Adds a message listener if one does not already exist
@@ -361,13 +364,14 @@ public class ChromecastSession
 				try {
 					ChromecastSession.this.launchCallback.onSuccess(ChromecastSession.this);
 					connectRemoteMediaPlayer();
+					ChromecastSession.this.isConnected = true;
 				} catch (IllegalStateException e) {
 					e.printStackTrace();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			} else {
-				
+				ChromecastSession.this.isConnected = false;
 			}
 		}
 	};
@@ -390,6 +394,7 @@ public class ChromecastSession
 					
 					ChromecastSession.this.joinSessionCallback.onSuccess(ChromecastSession.this);
 					connectRemoteMediaPlayer();
+					ChromecastSession.this.isConnected = true;
 				} catch (IllegalStateException e) {
 					e.printStackTrace();
 				} catch (IOException e) {
@@ -397,6 +402,7 @@ public class ChromecastSession
 				}
 			} else {
 				ChromecastSession.this.joinSessionCallback.onError(status.toString());
+				ChromecastSession.this.isConnected = false;
 			}
 		}
 	};
@@ -557,6 +563,7 @@ public class ChromecastSession
 	@Override
 	public void onConnectionSuspended(int cause) {
 		if (this.onSessionUpdatedListener != null) {
+			this.isConnected = false;
 			this.onSessionUpdatedListener.onSessionUpdated(false, this.createSessionObject());
 		}
 	}
@@ -570,6 +577,7 @@ public class ChromecastSession
 	@Override
 	public void onConnectionFailed(ConnectionResult result) {
 		if (this.launchCallback != null) {
+			this.isConnected = false;
 			this.launchCallback.onError("channel_error");
 		}
 	}
@@ -581,6 +589,7 @@ public class ChromecastSession
 	@Override
 	public void onApplicationStatusChanged() {
 		if (this.onSessionUpdatedListener != null) {
+			ChromecastSession.this.isConnected = true;
 			this.onSessionUpdatedListener.onSessionUpdated(true, createSessionObject());
 		}
 	}
@@ -603,6 +612,7 @@ public class ChromecastSession
 	@Override
 	public void onApplicationDisconnected(int errorCode) {
 		if (this.onSessionUpdatedListener != null) {
+			this.isConnected = false;
 			this.onSessionUpdatedListener.onSessionUpdated(false, this.createSessionObject());
 		}
 	}
