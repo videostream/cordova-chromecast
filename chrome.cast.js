@@ -487,7 +487,7 @@ chrome.cast.initialize = function (apiConfig, successCallback, errorCallback) {
 
 			clearInterval(_routeRefreshInterval);
 			_routeRefreshInterval = setInterval(function() {
-				execute('emitAllRoutes', function() { console.log(arguments); });
+				execute('emitAllRoutes');
 			}, 15000);
 
 		} else {
