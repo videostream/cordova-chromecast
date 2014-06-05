@@ -174,7 +174,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
                 callbackContext.success();
                 
                 Chromecast.this.checkReceiverAvailable();
-                Chromecast.this.emitAllRoutes();
+                Chromecast.this.emitAllRoutes(null);
             }
         });
        
@@ -566,7 +566,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
     	return true;
     }
 
-    private void emitAllRoutes() {
+    public boolean emitAllRoutes(CallbackContext callbackContext) {
     	final Activity activity = cordova.getActivity();
     	
         activity.runOnUiThread(new Runnable() {
@@ -581,6 +581,12 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
                 }
             }
         });
+        
+        if (callbackContext != null) {
+        	callbackContext.success();
+        }
+        
+        return true;
     }
     
     /**

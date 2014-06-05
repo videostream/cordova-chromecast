@@ -457,6 +457,7 @@ var _currentMedia = null;
 var _routeListEl = document.createElement('ul');
 _routeListEl.classList.add('route-list');
 var _routeList = {};
+var _routeRefreshInterval = null;
 
 var _receiverAvailable = false;
 
@@ -483,6 +484,12 @@ chrome.cast.initialize = function (apiConfig, successCallback, errorCallback) {
 	execute('initialize', _sessionRequest.appId, _autoJoinPolicy, _defaultActionPolicy, function(err) {
 		if (!err) {
 			successCallback();
+
+			clearInterval(_routeRefreshInterval);
+			_routeRefreshInterval = setInterval(function() {
+				execute('emitAllRoutes', function() { console.log(arguments); });
+			}, 15000);
+
 		} else {
 			handleError(err, errorCallback);
 		}
