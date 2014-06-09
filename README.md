@@ -7,7 +7,7 @@ Chromecast in Cordova
 For now, add the plugin from this repository, we'll publish soon with more progress.
 
 ```
-cordova plugin add https://github.com/acidhax/cordova-chromecast.git
+cordova plugin add https://github.com/GetVideostream/cordova-chromecast.git
 ```
 
 You will need to import the following projects as Library Projects in order for this plugin to work:
@@ -20,30 +20,9 @@ You will need to import the following projects as Library Projects in order for 
 
 This project attempts to implement the official Google Cast SDK for Chrome... in Cordova. We've made a lot of progress in making this possible, check out the offical docs for examples: https://developers.google.com/cast/docs/chrome_sender
 
+When you call `chrome.cast.requestSession()` an ugly popup will be displayed to select a Chromecast. If you're not cool with this - you can call: `chrome.cast.getRouteListElement()` which will return a `<ul>` tag that contains the Chromecasts in a list. All you have to do is style that bad boy and you're off to the races!
 
-##Supported API Bits and Bites
 
-Static and class things
-- `chrome.cast.SessionRequest`
-- `chrome.cast.apiConfig`
-- `chrome.cast.initialize`
-- `chrome.cast.requestSession`
-- `chrome.cast.media.MediaInfo`
-- `chrome.cast.media.LoadRequest`
-- `chrome.cast.Volume`
-- `chrome.cast.media.VolumeRequest`
+##Status
 
-`chrome.cast.Session` things
-- `.addUpdateListener`
-- `.removeUpdateListener`
-- `.loadMedia`
-- `.stop`
-
-`chrome.cast.media.Media` things
-- `.addUpdateListener`
-- `.removeUpdateListener`
-- `.pause`
-- `.play`
-- `.seek`
-- `.setVolume`
-- `.stop`
+The project is now pretty much feature complete - the only things that probably break will be missing parameters. We haven't done any checking for optional paramaters. When using it, make sure your constructors and function calls have every parameter specified in the API.
