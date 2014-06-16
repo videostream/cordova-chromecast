@@ -219,6 +219,10 @@ chrome.cast = {
 
 	// media package
 	media: {
+		/**
+		* The default receiver app.
+		*/
+		DEFAULT_MEDIA_RECEIVER_APP_ID: 'CC1AD845',
 
 		/**
 		 * Possible states of the media player.
