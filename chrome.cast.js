@@ -724,7 +724,7 @@ chrome.cast.Session.prototype.removeUpdateListener = function (listener) {
  * @param {function} listener  The listener to add.
  */
 chrome.cast.Session.prototype.addMessageListener = function (namespace, listener) {
-	execute('addListener', namespace);
+	execute('addMessageListener', namespace);
 	this.on('message:' + namespace, listener);
 };
 
@@ -1106,7 +1106,7 @@ chrome.cast._ = {
 	},
 	onMessage: function(sessionId, namespace, message) {
 		if (_sessions[sessionId]) {
-			_sessions[sessionId].emit('message:' + namespace, message);
+			_sessions[sessionId].emit('message:' + namespace, namespace, message);
 		}
 	}
 }
