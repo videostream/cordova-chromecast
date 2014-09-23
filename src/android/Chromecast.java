@@ -188,47 +188,61 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
      * @param  callbackContext
      */
     public boolean requestSession (final CallbackContext callbackContext) {
-    	if (this.currentSession != null) {
-    		callbackContext.success(this.currentSession.createSessionObject());
-    		return true;
-    	}
-    	
-    	this.setLastSessionId("");
-    	
-    	final Activity activity = cordova.getActivity();
+        if (this.currentSession != null) {
+            callbackContext.success(this.currentSession.createSessionObject());
+            return true;
+        }
+
+        this.setLastSessionId("");
+
+        final Activity activity = cordova.getActivity();
         activity.runOnUiThread(new Runnable() {
             public void run() {
                 mMediaRouter = MediaRouter.getInstance(activity.getApplicationContext());
                 final List<RouteInfo> routeList = mMediaRouter.getRoutes();
-                
+
                 AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-            	builder.setTitle("Choose a Chromecast");
-            	CharSequence[] seq = new CharSequence[routeList.size() -1];
-            	for (int n = 1; n < routeList.size(); n++) {
-            		RouteInfo route = routeList.get(n);
-            		if (!route.getName().equals("Phone") && route.getId().indexOf("Cast") > -1) {
-            			seq[n-1] = route.getName();
-            		}
-            	}
-            	
-            	builder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                builder.setTitle("Choose a Chromecast");
+                //CharSequence[] seq = new CharSequence[routeList.size() -1];
+                ArrayList<String> seq_tmp1 = new ArrayList<String>();
+
+                final ArrayList<Integer> seq_tmp_cnt_final = new ArrayList<Integer>();
+
+                for (int n = 1; n < routeList.size(); n++) {
+                    RouteInfo route = routeList.get(n);
+                    if (!route.getName().equals("Phone") && route.getId().indexOf("Cast") > -1) {
+                            seq_tmp1.add(route.getName());
+                            seq_tmp_cnt_final.add(n);
+                            //seq[n-1] = route.getName();
+                    }
+                }
+
+                CharSequence[] seq;
+                seq = seq_tmp1.toArray(new CharSequence[seq_tmp1.size()]);
+
+                builder.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
                         callbackContext.error("cancel");
                     }
                 });
-            	builder.setItems(seq, new DialogInterface.OnClickListener() {
-				    @Override
-				    public void onClick(DialogInterface dialog, int which) {
-				        RouteInfo selectedRoute = routeList.get(which + 1);
-				        Chromecast.this.createSession(selectedRoute, callbackContext);
-				    }
+
+                builder.setItems(seq, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        which = seq_tmp_cnt_final.get(which);
+                        RouteInfo selectedRoute = routeList.get(which);
+                        //RouteInfo selectedRoute = routeList.get(which + 1);
+                        Chromecast.this.createSession(selectedRoute, callbackContext);
+                    }
                 });
+
                 builder.show();
+
             }
         });
-        
+
         return true;
     }
 
