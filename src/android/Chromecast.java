@@ -566,6 +566,23 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
     	return true;
     }
 
+    /**
+     * Stops the session
+     * @param callbackContext
+     * @return
+     */
+    public boolean sessionLeave (CallbackContext callbackContext) {
+        if (this.currentSession != null) {
+            this.currentSession.leave(genericCallback(callbackContext));
+            this.currentSession = null;
+            this.setLastSessionId("");
+        } else {
+            callbackContext.success();
+        }
+        
+        return true;
+    }
+
     public boolean emitAllRoutes(CallbackContext callbackContext) {
     	final Activity activity = cordova.getActivity();
     	

@@ -642,6 +642,26 @@ chrome.cast.Session.prototype.stop = function (successCallback, errorCallback) {
 };
 
 /**
+ * Leaves the current session.
+ * @param {function} successCallback 
+ * @param {function} errorCallback   The possible errors are TIMEOUT, API_NOT_INITIALIZED, CHANNEL_ERROR, and EXTENSION_MISSING.
+ */
+chrome.cast.Session.prototype.leave = function (successCallback, errorCallback) {
+	if (chrome.cast.isAvailable === false) {
+		errorCallback(new chrome.cast.Error(chrome.cast.ErrorCode.API_NOT_INITIALIZED), 'The API is not initialized.', {});
+		return;
+	}
+
+	execute('sessionLeave', function(err) {
+		if (!err) {
+			successCallback && successCallback();
+		} else {
+			handleError(err, errorCallback);
+		}
+	});
+};
+
+/**
  * Sends a message to the receiver application on the given namespace. 
  * The successCallback is invoked when the message has been submitted to the messaging channel. 
  * Delivery to the receiver application is best effort and not guaranteed.
