@@ -171,6 +171,19 @@ public class ChromecastSession
 //		Cast.CastApi.stopApplication(mApiClient);
 	}
 	
+	/**
+	 * Leaves the session.
+	 * @param callback
+	 */
+	public void leave (final ChromecastSessionCallback callback) {
+		try {
+			Cast.CastApi.leaveApplication(mApiClient);
+		} catch(Exception e) {
+			
+		}
+		
+		callback.onSuccess();
+	}	
 	
 	/**
 	 * Loads media over the media API
