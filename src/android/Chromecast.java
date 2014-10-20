@@ -441,10 +441,10 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
      * @param  loadReuqest.currentTime Where to begin playing from
      * @param  callbackContext 
      */
-    public boolean loadMedia (String contentId, String contentType, Integer duration, String streamType, Boolean autoPlay, Double currentTime, JSONObject metadata, final CallbackContext callbackContext) {
+    public boolean loadMedia (String contentId, String contentType, Integer duration, String streamType, Boolean autoPlay, Double currentTime, final CallbackContext callbackContext) {
         
     	if (this.currentSession != null) {
-    		return this.currentSession.loadMedia(contentId, contentType, duration, streamType, autoPlay, currentTime, metadata,
+    		return this.currentSession.loadMedia(contentId, contentType, duration, streamType, autoPlay, currentTime, 
     				new ChromecastSessionCallback() {
 
 						@Override
