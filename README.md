@@ -10,7 +10,11 @@ For now, add the plugin from this repository, we'll publish soon with more progr
 cordova plugin add https://github.com/GetVideostream/cordova-chromecast.git
 ```
 
-You will need to import the following projects as Library Projects in order for this plugin to work:
+If you have NodeJS installed, the dependencies should be automatically copied.
+
+- `http://nodejs.org/`
+
+If not you will need to import the following projects as Library Projects in order for this plugin to work:
 
 - `adt-bundle\sdk\extras\google\google_play_services\libproject\google-play-services_lib`
 - `adt-bundle\sdk\extras\android\support\v7\appcompat`
