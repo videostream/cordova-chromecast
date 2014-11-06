@@ -34,5 +34,8 @@
         <param name="android-package" value="acidhax.cordova.chromecast.Chromecast"/>
       </feature>
     </config-file>
+
+    <hook type="after_plugin_install" src="init-playservices-dependencies.js" />
+
   </platform>
 </plugin>
