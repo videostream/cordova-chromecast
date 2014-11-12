@@ -175,7 +175,7 @@ var writeAndroidVersion = function(projectPath, newVersion) {
     if( currentVersions != null && currentVersions.length > 0 ) {
         // there is a version set. replace it
         var currentVersion =  currentVersions[1];
-        projectProperties = projectProperties.replace("android-"+currentVersion, "android-"+newVersion);
+        projectProperties = projectProperties.replace("target=android-"+currentVersion, "target=android-"+newVersion);
     }
     else {
 
@@ -183,7 +183,7 @@ var writeAndroidVersion = function(projectPath, newVersion) {
         projectProperties += "\n\rtarget=android-"+newVersion;
     }
     fs.writeFileSync(projectPath+"/project.properties", projectProperties, "UTF-8",{'flags': 'w+'});
-    console.log("Setting android version "+currentVersion+" to "+projectPath);
+    console.log("Setting android version "+newVersion+" to "+projectPath);
 };
 
 
