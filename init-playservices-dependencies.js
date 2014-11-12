@@ -67,9 +67,11 @@ var execCommand = function(command, callback) {
 /**
  * Turns a project into an android "library project"
  * @param path The location of the project
+ * @param version the android version, e.g. 21
  */
-var prepareLibraryProject = function(path, callback) {
+var prepareLibraryProject = function(path, version, callback) {
 
+    writeAndroidVersion(path, version);
     execCommand(androidHome+"/tools/android update lib-project -p "+path, function() {
         execCommand("ant clean -f "+path+"/build.xml", function() {
             execCommand("ant release -f "+path+"/build.xml", function() {
@@ -148,6 +150,43 @@ var registerPlayServices = function() {
 };
 
 
+/**
+ * Reads the android version (e.g. 21) from a project's properties
+ */
+var readAndroidVersion = function(projectPath) {
+    var projectProperties = fs.readFileSync(projectPath+"/project.properties", 'utf8');
+    var results = projectProperties.match(/target=android-(\d+)/);
+    return results != null && results.length > 0 ? results[1] : null;
+};
+
+/**
+ * Sets the android version to a a project's properties
+ * @param projectPath The project's path
+ * @param newVersion The new version, e.g. 21
+ */
+var writeAndroidVersion = function(projectPath, newVersion) {
+
+    if( !newVersion ) {
+        return;
+    }
+
+    var projectProperties = fs.readFileSync(projectPath+"/project.properties", 'utf8');
+    var currentVersions = projectProperties.match(/target=android-(\d+)/);
+    if( currentVersions != null && currentVersions.length > 0 ) {
+        // there is a version set. replace it
+        var currentVersion =  currentVersions[1];
+        projectProperties = projectProperties.replace("android-"+currentVersion, "android-"+newVersion);
+    }
+    else {
+
+        // no version yet. add it.
+        projectProperties += "\n\rtarget=android-"+newVersion;
+    }
+    fs.writeFileSync(projectPath+"/project.properties", projectProperties, "UTF-8",{'flags': 'w+'});
+    console.log("Setting android version "+currentVersion+" to "+projectPath);
+};
+
+
 // -------------------------------
 
 
@@ -158,21 +197,25 @@ var mediaRouterLib  = './platforms/android/MediarouterLib';
 var playServicesLib = './platforms/android/PlayServicesLib';
 
 // HACK: avoid that the logic is executed for every plugin. TODO find something better.
-if (fs.existsSync(appCompatLib)) {
+if (fs.existsSync(playServicesLib)) {
+    console.info("Already fFound play services lib at "+playServicesLib+". Skipping initialization.");
     return;
 }
+
+var androidVersion = readAndroidVersion("./platforms/android");
+console.log("Detected project's android version: "+androidVersion);
 
 copyRecursiveSync(androidHome+"/extras/android/support/v7/appcompat/", appCompatLib+"/");
 copyRecursiveSync(androidHome+"/extras/android/support/v7/mediarouter/", mediaRouterLib+'/');
 copyRecursiveSync(androidHome+"/extras/google/google_play_services/libproject/google-play-services_lib/", playServicesLib+'/');
 
 // --- turn AppCompatLib into a library project
-prepareLibraryProject(appCompatLib, function() {
+prepareLibraryProject(appCompatLib, androidVersion, function() {
     // --- turn MediarouterLib into a library project (after adjusting dependencies)
     addLibraryReference(mediaRouterLib, ['../AppCompatLib'], function() {
-        prepareLibraryProject(mediaRouterLib, function() {
+        prepareLibraryProject(mediaRouterLib, androidVersion, function() {
             // --- turn PlayServicesLib into a library project
-            prepareLibraryProject(playServicesLib, function() {
+            prepareLibraryProject(playServicesLib, androidVersion, function() {
                 // add all three libraries to current project
                 addLibraryReference("./platforms/android", ['./AppCompatLib','./MediarouterLib','./PlayServicesLib'], function() {
 
