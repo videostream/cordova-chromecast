@@ -71,7 +71,7 @@ var execCommand = function(command, callback) {
  */
 var prepareLibraryProject = function(path, version, callback) {
 
-    writeAndroidVersion(path, version);
+    writeAndroidApiVersion(path, version);
     execCommand(androidHome+"/tools/android update lib-project -p "+path, function() {
         execCommand("ant clean -f "+path+"/build.xml", function() {
             execCommand("ant release -f "+path+"/build.xml", function() {
@@ -151,26 +151,28 @@ var registerPlayServices = function() {
 
 
 /**
- * Reads the android version (e.g. 21) from a project's properties
+ * Reads the android api version (e.g. 21) from a project's properties
  */
-var readAndroidVersion = function(projectPath) {
+var readAndroidApiVersion = function(projectPath) {
     var projectProperties = fs.readFileSync(projectPath+"/project.properties", 'utf8');
     var results = projectProperties.match(/target=android-(\d+)/);
     return results != null && results.length > 0 ? results[1] : null;
 };
 
 /**
- * Sets the android version to a a project's properties
+ * Sets the android api version to a a project's properties
  * @param projectPath The project's path
  * @param newVersion The new version, e.g. 21
  */
-var writeAndroidVersion = function(projectPath, newVersion) {
+var writeAndroidApiVersion = function(projectPath, newVersion) {
 
     if( !newVersion ) {
         return;
     }
 
-    var projectProperties = fs.readFileSync(projectPath+"/project.properties", 'utf8');
+    var projectPropertiesPath = projectPath+"/project.properties";
+
+    var projectProperties = fs.readFileSync(projectPropertiesPath, 'utf8');
     var currentVersions = projectProperties.match(/target=android-(\d+)/);
     if( currentVersions != null && currentVersions.length > 0 ) {
         // there is a version set. replace it
@@ -182,8 +184,8 @@ var writeAndroidVersion = function(projectPath, newVersion) {
         // no version yet. add it.
         projectProperties += "\n\rtarget=android-"+newVersion;
     }
-    fs.writeFileSync(projectPath+"/project.properties", projectProperties, "UTF-8",{'flags': 'w+'});
-    console.log("Setting android version "+newVersion+" to "+projectPath);
+    fs.writeFileSync(projectPropertiesPath, projectProperties, "UTF-8",{'flags': 'w+'});
+    console.log("Added android api version "+newVersion+" to "+projectPropertiesPath+":\n"+projectProperties);
 };
 
 
@@ -198,12 +200,12 @@ var playServicesLib = './platforms/android/PlayServicesLib';
 
 // HACK: avoid that the logic is executed for every plugin. TODO find something better.
 if (fs.existsSync(playServicesLib)) {
-    console.info("Already fFound play services lib at "+playServicesLib+". Skipping initialization.");
+    console.info("Already found play services lib at "+playServicesLib+". Skipping initialization.");
     return;
 }
 
-var androidVersion = readAndroidVersion("./platforms/android");
-console.log("Detected project's android version: "+androidVersion);
+var androidVersion = readAndroidApiVersion("./platforms/android");
+console.log("Detected project's android api version: "+androidVersion);
 
 copyRecursiveSync(androidHome+"/extras/android/support/v7/appcompat/", appCompatLib+"/");
 copyRecursiveSync(androidHome+"/extras/android/support/v7/mediarouter/", mediaRouterLib+'/');
