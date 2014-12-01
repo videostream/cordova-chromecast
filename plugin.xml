@@ -35,7 +35,10 @@
       </feature>
     </config-file>
 
-    <hook type="after_plugin_install" src="init-playservices-dependencies.js" />
+    <!-- required (transitive) dependencies -->
+    <dependency id="android.support.v7-appcompat"/>
+    <dependency id="android.support.v7-mediarouter"/>
+    <dependency id="com.google.playservices"/>
 
   </platform>
 </plugin>
