@@ -22,7 +22,7 @@ public class ChromecastMediaController {
 		this.remote = mRemoteMediaPlayer;
 	}
 	
-	public MediaInfo createLoadUrlRequest(String contentId, String contentType, long duration, String streamType) {
+	public MediaInfo createLoadUrlRequest(String contentId, String contentType, long duration, String streamType, JSONObject metadata) {
 		
         // Try creating a GENERIC MediaMetadata obj
 		MediaMetadata mediaMetadata = new MediaMetadata();
