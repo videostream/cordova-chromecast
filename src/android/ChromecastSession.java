@@ -4,14 +4,10 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 
-import org.apache.cordova.api.CordovaInterface;
+import org.apache.cordova.CordovaInterface;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import android.os.Bundle;
-import android.support.v7.media.MediaRouter.RouteInfo;
-import android.util.Log;
 
 import com.google.android.gms.cast.ApplicationMetadata;
 import com.google.android.gms.cast.Cast;
