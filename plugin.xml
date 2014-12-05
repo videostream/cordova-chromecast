@@ -35,10 +35,5 @@
       </feature>
     </config-file>
 
-    <!-- required (transitive) dependencies -->
-    <dependency id="android.support.v7-appcompat"/>
-    <dependency id="android.support.v7-mediarouter"/>
-    <dependency id="com.google.playservices"/>
-
   </platform>
 </plugin>
