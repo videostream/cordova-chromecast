@@ -634,7 +634,7 @@ public class ChromecastSession
 	@Override
 	public void onMetadataUpdated() {
 		if (this.onMediaUpdatedListener != null) {
-			this.onMediaUpdatedListener.onMediaUpdated(this.createMediaObject());
+			this.onMediaUpdatedListener.onMediaUpdated(true, this.createMediaObject());
 		}
 	}
 
@@ -642,7 +642,7 @@ public class ChromecastSession
 	@Override
 	public void onStatusUpdated() {
 		if (this.onMediaUpdatedListener != null) {
-			this.onMediaUpdatedListener.onMediaUpdated(this.createMediaObject());
+			this.onMediaUpdatedListener.onMediaUpdated(true, this.createMediaObject());
 		}
 	}
 	

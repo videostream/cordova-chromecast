@@ -993,10 +993,11 @@ chrome.cast.media.Media.prototype.removeUpdateListener = function (listener) {
 	this.removeListener('_mediaUpdated', listener);
 };
 
-chrome.cast.media.Media.prototype._update = function(obj) {
+chrome.cast.media.Media.prototype._update = function(isAlive, obj) {
 	this.currentTime = obj.currentTime || this.currentTime;
 	this.idleReason = obj.idleReason || this.idleReason;
 	this.mediaSessionId = obj.mediaSessionId || this.mediaSessionId;
+	this.sessionId = obj.sessionId || this.sessionId;
 	this.playbackRate = obj.playbackRate || this.playbackRate;
 	this.playerState = obj.playerState || this.playerState;
 
@@ -1010,7 +1011,7 @@ chrome.cast.media.Media.prototype._update = function(obj) {
 
 	this._lastUpdatedTime = Date.now();
 
-	this.emit('_mediaUpdated');
+	this.emit('_mediaUpdated', isAlive);
 };
 
 
@@ -1097,9 +1098,9 @@ chrome.cast._ = {
 			_sessions[session.sessionId]._update(isAlive, session);
 		}
 	},
-	mediaUpdated: function(media) {
+	mediaUpdated: function(isAlive, media) {
 		if (media && media.mediaSessionId !== undefined && _currentMedia) {
-			_currentMedia._update(media);
+			_currentMedia._update(isAlive, media);
 		}
 	},
 	mediaLoaded: function(media) {
