@@ -755,7 +755,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
 
 	@Override
 	public void onMediaLoaded(JSONObject media) {
-		this.webView.sendJavascript("chrome.cast._.mediaLoaded(" + media.toString() +");");
+		this.webView.sendJavascript("chrome.cast._.mediaLoaded(true, " + media.toString() +");");
 	}
 
 	@Override

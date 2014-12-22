@@ -207,6 +207,7 @@ public class ChromecastSession
 						if (result.getStatus().isSuccess()) {
 							System.out.println("Media loaded successfully");
 
+                            ChromecastSession.this.onMediaUpdatedListener.onMediaLoaded(ChromecastSession.this.createMediaObject());
 							callback.onSuccess(ChromecastSession.this.createMediaObject());
 						
 						} else {
@@ -427,7 +428,8 @@ public class ChromecastSession
 		@Override
 		public void onResult(MediaChannelResult result) {
 			if (result.getStatus().isSuccess()) {
-				ChromecastSession.this.onMediaUpdatedListener.onMediaLoaded(ChromecastSession.this.createMediaObject());
+                ChromecastSession.this.onMediaUpdatedListener.onMediaUpdated(true, ChromecastSession.this.createMediaObject());
+				/*ChromecastSession.this.onMediaUpdatedListener.onMediaLoaded(ChromecastSession.this.createMediaObject());*/
 			} else {
 				System.out.println("Failed to request status.");
 			}
