@@ -734,9 +734,13 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
 	}
 
 	@Override
-	public void onMediaUpdated(JSONObject media) {
-		this.webView.sendJavascript("chrome.cast._.mediaUpdated(" + media.toString() +");");
-	}
+    public void onMediaUpdated(boolean isAlive, JSONObject media) {
+        if (isAlive) {
+            this.webView.sendJavascript("chrome.cast._.mediaUpdated(true, " + media.toString() +");");
+        } else {
+            this.webView.sendJavascript("chrome.cast._.mediaUpdated(false, " + media.toString() +");");
+        }
+    }
 
 	@Override
 	public void onSessionUpdated(boolean isAlive, JSONObject session) {
@@ -751,7 +755,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
 
 	@Override
 	public void onMediaLoaded(JSONObject media) {
-		this.webView.sendJavascript("chrome.cast._.mediaLoaded(" + media.toString() +");");
+		this.webView.sendJavascript("chrome.cast._.mediaLoaded(true, " + media.toString() +");");
 	}
 
 	@Override
