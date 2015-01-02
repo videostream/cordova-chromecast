@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 
-import com.google.android.gms.cast.*;
+import com.google.android.gms.cast.CastMediaControlIntent;
 
 import org.apache.cordova.CordovaPlugin;
 import org.apache.cordova.CordovaWebView;
@@ -438,13 +438,13 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
      * @param  duration                Duration of the content
      * @param  streamType              buffered | live | other
      * @param  loadRequest.autoPlay    Whether or not to automatically start playing the media
-     * @param  loadReuqest.currentTime Where to begin playing from
+     * @param  loadRequest.currentTime Where to begin playing from
      * @param  callbackContext 
      */
-    public boolean loadMedia (String contentId, String contentType, Integer duration, String streamType, Boolean autoPlay, Double currentTime, final CallbackContext callbackContext) {
+    public boolean loadMedia (String contentId, String contentType, Integer duration, String streamType, Boolean autoPlay, Double currentTime, JSONObject metadata, final CallbackContext callbackContext) {
         
     	if (this.currentSession != null) {
-    		return this.currentSession.loadMedia(contentId, contentType, duration, streamType, autoPlay, currentTime, 
+    		return this.currentSession.loadMedia(contentId, contentType, duration, streamType, autoPlay, currentTime, metadata,
     				new ChromecastSessionCallback() {
 
 						@Override
@@ -467,8 +467,8 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
     		return false;
     	}
     }
-    public boolean loadMedia (String contentId, String contentType, Integer duration, String streamType, Boolean autoPlay, Integer currentTime, final CallbackContext callbackContext) {
-    	return this.loadMedia (contentId, contentType, duration, streamType, autoPlay, new Double(currentTime.doubleValue()), callbackContext);
+    public boolean loadMedia (String contentId, String contentType, Integer duration, String streamType, Boolean autoPlay, Integer currentTime, JSONObject metadata, final CallbackContext callbackContext) {
+    	return this.loadMedia (contentId, contentType, duration, streamType, autoPlay, new Double(currentTime.doubleValue()), metadata, callbackContext);
     }
     
     /**
@@ -734,9 +734,13 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
 	}
 
 	@Override
-	public void onMediaUpdated(JSONObject media) {
-		this.webView.sendJavascript("chrome.cast._.mediaUpdated(" + media.toString() +");");
-	}
+    public void onMediaUpdated(boolean isAlive, JSONObject media) {
+        if (isAlive) {
+            this.webView.sendJavascript("chrome.cast._.mediaUpdated(true, " + media.toString() +");");
+        } else {
+            this.webView.sendJavascript("chrome.cast._.mediaUpdated(false, " + media.toString() +");");
+        }
+    }
 
 	@Override
 	public void onSessionUpdated(boolean isAlive, JSONObject session) {
@@ -751,7 +755,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
 
 	@Override
 	public void onMediaLoaded(JSONObject media) {
-		this.webView.sendJavascript("chrome.cast._.mediaLoaded(" + media.toString() +");");
+		this.webView.sendJavascript("chrome.cast._.mediaLoaded(true, " + media.toString() +");");
 	}
 
 	@Override

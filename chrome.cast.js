@@ -528,7 +528,7 @@ chrome.cast.requestSession = function (successCallback, errorCallback, opt_sessi
 
 			var session = _sessions[sessionId] = new chrome.cast.Session(sessionId, appId, displayName, appImages, receiver);
 			successCallback(session);
-			_sessionListener(session);
+			/*_sessionListener(session); Fix - Already has a sessionListener*/
 		} else {
 			handleError(err, errorCallback);
 		}
@@ -703,10 +703,12 @@ chrome.cast.Session.prototype.loadMedia = function (loadRequest, successCallback
 	var self = this;
 
 	var mediaInfo = loadRequest.media;
-	execute('loadMedia', mediaInfo.contentId, mediaInfo.contentType, mediaInfo.duration || 0.0, mediaInfo.streamType, loadRequest.autoplay || false, loadRequest.currentTime || 0, function(err, obj) {
+	execute('loadMedia', mediaInfo.contentId, mediaInfo.contentType, mediaInfo.duration || 0.0, mediaInfo.streamType, loadRequest.autoplay || false, loadRequest.currentTime || 0, mediaInfo.metadata, function(err, obj) {
 		if (!err) {
 			_currentMedia = new chrome.cast.media.Media(self.sessionId, obj.mediaSessionId);
 			_currentMedia.media = mediaInfo;
+			_currentMedia.media.duration = obj.media.duration;
+			_currentMedia.currentTime = obj.currentTime /* ??? */
 
 			// TODO: Fill in the rest of the media properties
 			
@@ -993,9 +995,10 @@ chrome.cast.media.Media.prototype.removeUpdateListener = function (listener) {
 	this.removeListener('_mediaUpdated', listener);
 };
 
-chrome.cast.media.Media.prototype._update = function(obj) {
+chrome.cast.media.Media.prototype._update = function(isAlive, obj) {
 	this.currentTime = obj.currentTime || this.currentTime;
 	this.idleReason = obj.idleReason || this.idleReason;
+	this.sessionId = obj.sessionId || this.sessionId;
 	this.mediaSessionId = obj.mediaSessionId || this.mediaSessionId;
 	this.playbackRate = obj.playbackRate || this.playbackRate;
 	this.playerState = obj.playerState || this.playerState;
@@ -1010,7 +1013,7 @@ chrome.cast.media.Media.prototype._update = function(obj) {
 
 	this._lastUpdatedTime = Date.now();
 
-	this.emit('_mediaUpdated');
+	this.emit('_mediaUpdated', isAlive);
 };
 
 
@@ -1097,16 +1100,16 @@ chrome.cast._ = {
 			_sessions[session.sessionId]._update(isAlive, session);
 		}
 	},
-	mediaUpdated: function(media) {
+	mediaUpdated: function(isAlive, media) {
 		if (media && media.mediaSessionId !== undefined && _currentMedia) {
-			_currentMedia._update(media);
+			_currentMedia._update(isAlive, media);
 		}
 	},
-	mediaLoaded: function(media) {
+	mediaLoaded: function(isAlive, media) {
 		if (_sessions[media.sessionId]) {
 			console.log('mediaLoaded');
 			_currentMedia = new chrome.cast.media.Media(media.sessionId, media.mediaSessionId);
-			_currentMedia._update(media);
+			_currentMedia._update(isAlive, media);
 
 			_sessions[media.sessionId].emit('_mediaListener', _currentMedia);
 		} else {

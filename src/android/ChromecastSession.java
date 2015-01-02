@@ -196,9 +196,9 @@ public class ChromecastSession
 	 * @param callback
 	 * @return
 	 */
-	public boolean loadMedia(String contentId, String contentType, long duration, String streamType, boolean autoPlay, double currentTime, final ChromecastSessionCallback callback) {
+	public boolean loadMedia(String contentId, String contentType, long duration, String streamType, boolean autoPlay, double currentTime, JSONObject metadata, final ChromecastSessionCallback callback) {
 		try {
-			MediaInfo mediaInfo = chromecastMediaController.createLoadUrlRequest(contentId, contentType, duration, streamType);
+			MediaInfo mediaInfo = chromecastMediaController.createLoadUrlRequest(contentId, contentType, duration, streamType, metadata);
 			
 			mRemoteMediaPlayer.load(mApiClient, mediaInfo, autoPlay, (long)(currentTime * 1000))
 				.setResultCallback(new ResultCallback<RemoteMediaPlayer.MediaChannelResult>() {
@@ -207,6 +207,7 @@ public class ChromecastSession
 						if (result.getStatus().isSuccess()) {
 							System.out.println("Media loaded successfully");
 
+                            ChromecastSession.this.onMediaUpdatedListener.onMediaLoaded(ChromecastSession.this.createMediaObject());
 							callback.onSuccess(ChromecastSession.this.createMediaObject());
 						
 						} else {
@@ -427,7 +428,8 @@ public class ChromecastSession
 		@Override
 		public void onResult(MediaChannelResult result) {
 			if (result.getStatus().isSuccess()) {
-				ChromecastSession.this.onMediaUpdatedListener.onMediaLoaded(ChromecastSession.this.createMediaObject());
+                ChromecastSession.this.onMediaUpdatedListener.onMediaUpdated(true, ChromecastSession.this.createMediaObject());
+				/*ChromecastSession.this.onMediaUpdatedListener.onMediaLoaded(ChromecastSession.this.createMediaObject());*/
 			} else {
 				System.out.println("Failed to request status.");
 			}
@@ -634,7 +636,7 @@ public class ChromecastSession
 	@Override
 	public void onMetadataUpdated() {
 		if (this.onMediaUpdatedListener != null) {
-			this.onMediaUpdatedListener.onMediaUpdated(this.createMediaObject());
+			this.onMediaUpdatedListener.onMediaUpdated(true, this.createMediaObject());
 		}
 	}
 
@@ -642,7 +644,7 @@ public class ChromecastSession
 	@Override
 	public void onStatusUpdated() {
 		if (this.onMediaUpdatedListener != null) {
-			this.onMediaUpdatedListener.onMediaUpdated(this.createMediaObject());
+			this.onMediaUpdatedListener.onMediaUpdated(true, this.createMediaObject());
 		}
 	}
 	
