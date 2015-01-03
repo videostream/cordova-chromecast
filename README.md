@@ -16,7 +16,7 @@ You will need to import the following projects as Library Projects in order for 
 - `adt-bundle\sdk\extras\android\support\v7\mediarouter`
 
 This can be achieved by adding `https://github.com/pkaul/googleplayservices-cordova-plugin` as a plugin to your Cordova project, e.g.
-like `cordova plugin add https://github.com/pkaul/googleplayservices-cordova-plugin.git`.
+like `cordova plugin add https://github.com/pkaul/googleplayservices-cordova-plugin.git#1.0.0`.
 
 
 ##Usage
