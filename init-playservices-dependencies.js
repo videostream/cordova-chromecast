@@ -153,9 +153,9 @@ var registerPlayServices = function() {
 
 // copy libraries AppCompat, Mediarouter and PlayServices from Android SDK to local project
 
-var appCompatLib    = './platforms/android/AppCompatLib';
-var mediaRouterLib  = './platforms/android/MediarouterLib';
-var playServicesLib = './platforms/android/PlayServicesLib';
+var appCompatLib    = './platforms/android/libs/AppCompatLib';
+var mediaRouterLib  = './platforms/android/libs/MediarouterLib';
+var playServicesLib = './platforms/android/libs/PlayServicesLib';
 
 // HACK: avoid that the logic is executed for every plugin. TODO find something better.
 if (fs.existsSync(appCompatLib)) {
