@@ -120,33 +120,6 @@ var addLibraryReference = function(libraryPath, referencePaths, callback) {
     });
 };
 
-/**
- * Registers PlayServices in the AndroidManifest.xml
- */
-var registerPlayServices = function() {
-
-    var manifest = "./platforms/android/AndroidManifest.xml";
-    var gsmVersionEntry = '<meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />';
-
-    fs.readFile(manifest, 'utf8', function (err,data) {
-        if (err) {
-            throw new Error("Error reading "+manifest);
-        }
-
-
-        if( data.indexOf(gsmVersionEntry) === -1 ) {
-
-            // entry not contained yet.
-            // HACK: injecting it the dirty way. TODO find something better
-            data = data.replace("</manifest>", gsmVersionEntry+"\n</manifest>");
-            fs.writeFileSync(manifest, data, "UTF-8",{'flags': 'w+'});
-
-            console.log("Updated "+manifest);
-
-        }
-    });
-};
-
 
 // -------------------------------
 
@@ -176,8 +149,6 @@ prepareLibraryProject(appCompatLib, function() {
                 // add all three libraries to current project
                 addLibraryReference("./platforms/android", ['libs/AppCompatLib','libs/MediarouterLib','libs/PlayServicesLib'], function() {
 
-                    // registerPlayServices();
-                    // console.info("Added Play Services to project");
                     console.info("Plugin installed");
                 });
             });
