@@ -70,7 +70,7 @@ var execCommand = function(command, callback) {
  */
 var prepareLibraryProject = function(path, callback) {
 
-    execCommand(androidHome+"/tools/android update lib-project -p "+path, function() {
+    execCommand(androidHome+"/tools/android update lib-project -p "+path+" -t \"android-21\"", function() {
         execCommand("ant clean -f "+path+"/build.xml", function() {
             execCommand("ant release -f "+path+"/build.xml", function() {
 
@@ -120,42 +120,15 @@ var addLibraryReference = function(libraryPath, referencePaths, callback) {
     });
 };
 
-/**
- * Registers PlayServices in the AndroidManifest.xml
- */
-var registerPlayServices = function() {
-
-    var manifest = "./platforms/android/AndroidManifest.xml";
-    var gsmVersionEntry = '<meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />';
-
-    fs.readFile(manifest, 'utf8', function (err,data) {
-        if (err) {
-            throw new Error("Error reading "+manifest);
-        }
-
-
-        if( data.indexOf(gsmVersionEntry) === -1 ) {
-
-            // entry not contained yet.
-            // HACK: injecting it the dirty way. TODO find something better
-            data = data.replace("</manifest>", gsmVersionEntry+"\n</manifest>");
-            fs.writeFileSync(manifest, data, "UTF-8",{'flags': 'w+'});
-
-            console.log("Updated "+manifest);
-
-        }
-    });
-};
-
 
 // -------------------------------
 
 
 // copy libraries AppCompat, Mediarouter and PlayServices from Android SDK to local project
 
-var appCompatLib    = './platforms/android/AppCompatLib';
-var mediaRouterLib  = './platforms/android/MediarouterLib';
-var playServicesLib = './platforms/android/PlayServicesLib';
+var appCompatLib    = './platforms/android/libs/AppCompatLib';
+var mediaRouterLib  = './platforms/android/libs/MediarouterLib';
+var playServicesLib = './platforms/android/libs/PlayServicesLib';
 
 // HACK: avoid that the logic is executed for every plugin. TODO find something better.
 if (fs.existsSync(appCompatLib)) {
@@ -174,10 +147,9 @@ prepareLibraryProject(appCompatLib, function() {
             // --- turn PlayServicesLib into a library project
             prepareLibraryProject(playServicesLib, function() {
                 // add all three libraries to current project
-                addLibraryReference("./platforms/android", ['./AppCompatLib','./MediarouterLib','./PlayServicesLib'], function() {
+                addLibraryReference("./platforms/android", ['libs/AppCompatLib','libs/MediarouterLib','libs/PlayServicesLib'], function() {
 
-                    registerPlayServices();
-                    console.info("Added Play Services to project");
+                    console.info("Plugin installed");
                 });
             });
         });

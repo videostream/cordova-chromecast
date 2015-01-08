@@ -20,6 +20,22 @@
 
   <platform name="android">
 
+    <config-file target="res/xml/config.xml" parent="/*">
+      <feature name="Chromecast">
+        <param name="android-package" value="acidhax.cordova.chromecast.Chromecast"/>
+      </feature>
+    </config-file>
+
+    <config-file target="AndroidManifest.xml" parent="/*">
+        <uses-permission android:name="android.permission.INTERNET" />
+        <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+        <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    </config-file>
+
+    <config-file target="AndroidManifest.xml" parent="/manifest/application">
+        <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
+    </config-file>
+
     <source-file src="src/android/Chromecast.java" target-dir="src/acidhax/cordova/chromecast" />
     <source-file src="src/android/ChromecastMediaController.java" target-dir="src/acidhax/cordova/chromecast" />
     <source-file src="src/android/ChromecastMediaRouterCallback.java" target-dir="src/acidhax/cordova/chromecast" />
@@ -28,12 +44,6 @@
     <source-file src="src/android/ChromecastOnMediaUpdatedListener.java" target-dir="src/acidhax/cordova/chromecast" />
     <source-file src="src/android/ChromecastOnSessionUpdatedListener.java" target-dir="src/acidhax/cordova/chromecast" />
     <source-file src="src/android/ChromecastException.java" target-dir="src/acidhax/cordova/chromecast" />
-
-    <config-file target="res/xml/config.xml" parent="/widget">
-      <feature name="Chromecast">
-        <param name="android-package" value="acidhax.cordova.chromecast.Chromecast"/>
-      </feature>
-    </config-file>
 
     <hook type="after_plugin_install" src="init-playservices-dependencies.js" />
 
