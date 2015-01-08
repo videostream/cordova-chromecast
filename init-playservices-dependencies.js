@@ -174,7 +174,7 @@ prepareLibraryProject(appCompatLib, function() {
             // --- turn PlayServicesLib into a library project
             prepareLibraryProject(playServicesLib, function() {
                 // add all three libraries to current project
-                addLibraryReference("./platforms/android", ['./AppCompatLib','./MediarouterLib','./PlayServicesLib'], function() {
+                addLibraryReference("./platforms/android", ['libs/AppCompatLib','libs/MediarouterLib','libs/PlayServicesLib'], function() {
 
                     registerPlayServices();
                     console.info("Added Play Services to project");
