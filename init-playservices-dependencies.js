@@ -176,8 +176,9 @@ prepareLibraryProject(appCompatLib, function() {
                 // add all three libraries to current project
                 addLibraryReference("./platforms/android", ['libs/AppCompatLib','libs/MediarouterLib','libs/PlayServicesLib'], function() {
 
-                    registerPlayServices();
-                    console.info("Added Play Services to project");
+                    // registerPlayServices();
+                    // console.info("Added Play Services to project");
+                    console.info("Plugin installed");
                 });
             });
         });
