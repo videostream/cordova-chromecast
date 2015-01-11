@@ -481,7 +481,6 @@ chrome.cast.initialize = function (apiConfig, successCallback, errorCallback) {
 	_autoJoinPolicy = apiConfig.autoJoinPolicy;
 	_defaultActionPolicy = apiConfig.defaultActionPolicy;
 	_receiverListener = apiConfig.receiverListener;
-	_sessionListener = apiConfig.sessionListener;
 	_sessionRequest = apiConfig.sessionRequest;
 
 	execute('initialize', _sessionRequest.appId, _autoJoinPolicy, _defaultActionPolicy, function(err) {
