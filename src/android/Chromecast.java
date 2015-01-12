@@ -1,5 +1,7 @@
 package acidhax.cordova.chromecast;
 
+import android.annotation.TargetApi;
+import android.os.Build;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -46,7 +48,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
     private volatile ChromecastSession currentSession;
     
     private void log(String s) {
-    	this.webView.sendJavascript("console.log('" + s + "');");
+    	sendJavascript("console.log('" + s + "');");
     }
 
     
@@ -305,7 +307,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
 					if (callbackContext != null) {
 						callbackContext.success(session.createSessionObject());
 					} else {
-						Chromecast.this.webView.sendJavascript("chrome.cast._.sessionJoined(" + Chromecast.this.currentSession.createSessionObject().toString() + ");");
+						sendJavascript("chrome.cast._.sessionJoined(" + Chromecast.this.currentSession.createSessionObject().toString() + ");");
 					}
 				}
 			}
@@ -337,7 +339,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
 					try {
 						Chromecast.this.currentSession = (ChromecastSession) object;
 						Chromecast.this.setLastSessionId(Chromecast.this.currentSession.getSessionId());
-						Chromecast.this.webView.sendJavascript("chrome.cast._.sessionJoined(" + Chromecast.this.currentSession.createSessionObject().toString() + ");");
+						sendJavascript("chrome.cast._.sessionJoined(" + Chromecast.this.currentSession.createSessionObject().toString() + ");");
 					} catch (Exception e) {
 						log("wut.... " + e.getMessage() + e.getStackTrace());
 					}
@@ -608,7 +610,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
                 
                 for (RouteInfo route : routeList) {
                 	if (!route.getName().equals("Phone") && route.getId().indexOf("Cast") > -1) {
-	        			Chromecast.this.webView.sendJavascript("chrome.cast._.routeAdded(" + routeToJSON(route) + ")");
+	        			sendJavascript("chrome.cast._.routeAdded(" + routeToJSON(route) + ")");
 	        		}
                 }
             }
@@ -640,9 +642,9 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
                 	}
                 }
                 if (available || (Chromecast.this.currentSession != null && Chromecast.this.currentSession.isConnected())) {
-                	Chromecast.this.webView.sendJavascript("chrome.cast._.receiverAvailable()");
+                	sendJavascript("chrome.cast._.receiverAvailable()");
                 } else {
-                	Chromecast.this.webView.sendJavascript("chrome.cast._.receiverUnavailable()");
+                	sendJavascript("chrome.cast._.receiverUnavailable()");
                 }
             }
         });
@@ -682,7 +684,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
     		log("For some reason, not attempting to join route " + route.getName() + ", " + this.currentSession + ", " + this.autoConnect);
     	}
     	if (!route.getName().equals("Phone") && route.getId().indexOf("Cast") > -1) {
-			this.webView.sendJavascript("chrome.cast._.routeAdded(" + routeToJSON(route) + ")");
+			sendJavascript("chrome.cast._.routeAdded(" + routeToJSON(route) + ")");
 		}
     	this.checkReceiverAvailable();
     }
@@ -695,7 +697,7 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
 	protected void onRouteRemoved(MediaRouter router, RouteInfo route) {
 		this.checkReceiverAvailable();
 		if (!route.getName().equals("Phone") && route.getId().indexOf("Cast") > -1) {
-			this.webView.sendJavascript("chrome.cast._.routeRemoved(" + routeToJSON(route) + ")");
+			sendJavascript("chrome.cast._.routeRemoved(" + routeToJSON(route) + ")");
 		}
 	}
 
@@ -733,34 +735,51 @@ public class Chromecast extends CordovaPlugin implements ChromecastOnMediaUpdate
 		return obj;
 	}
 
-	@Override
+    @Override
     public void onMediaUpdated(boolean isAlive, JSONObject media) {
         if (isAlive) {
-            this.webView.sendJavascript("chrome.cast._.mediaUpdated(true, " + media.toString() +");");
+            sendJavascript("chrome.cast._.mediaUpdated(true, " + media.toString() +");");
         } else {
-            this.webView.sendJavascript("chrome.cast._.mediaUpdated(false, " + media.toString() +");");
+            sendJavascript("chrome.cast._.mediaUpdated(false, " + media.toString() +");");
         }
     }
 
 	@Override
 	public void onSessionUpdated(boolean isAlive, JSONObject session) {
 		if (isAlive) {
-			this.webView.sendJavascript("chrome.cast._.sessionUpdated(true, " + session.toString() + ");");
+			sendJavascript("chrome.cast._.sessionUpdated(true, " + session.toString() + ");");
 		} else {
 			log("SESSION DESTROYYYY");
-			this.webView.sendJavascript("chrome.cast._.sessionUpdated(false, " + session.toString() + ");");
+			sendJavascript("chrome.cast._.sessionUpdated(false, " + session.toString() + ");");
 			this.currentSession = null;
 		}
 	}
 
 	@Override
 	public void onMediaLoaded(JSONObject media) {
-		this.webView.sendJavascript("chrome.cast._.mediaLoaded(true, " + media.toString() +");");
+		sendJavascript("chrome.cast._.mediaLoaded(true, " + media.toString() +");");
 	}
 
 	@Override
 	public void onMessage(ChromecastSession session, String namespace, String message) {
-		this.webView.sendJavascript("chrome.cast._.onMessage('" + session.getSessionId() +"', '" + namespace + "', '" + message  + "')");
+		sendJavascript("chrome.cast._.onMessage('" + session.getSessionId() +"', '" + namespace + "', '" + message  + "')");
 	}
-}
 
+    //Change all @deprecated this.webView.sendJavascript(String) to this local function sendJavascript(String)
+    @TargetApi(Build.VERSION_CODES.KITKAT)
+    private void sendJavascript(final String javascript) {
+
+        webView.post(new Runnable() {
+            @Override
+            public void run() {
+                // See: https://github.com/GoogleChrome/chromium-webview-samples/blob/master/jsinterface-example/app/src/main/java/jsinterfacesample/android/chrome/google/com/jsinterface_example/MainFragment.java
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    webView.evaluateJavascript(javascript, null);
+                } else {
+                    webView.loadUrl("javascript:" + javascript);
+                }
+            }
+        });
+    }
+
+}

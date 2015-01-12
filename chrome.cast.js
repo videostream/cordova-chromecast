@@ -102,7 +102,7 @@ chrome.cast = {
 		requestSession: 10000,
 		sendCustomMessage: 3000,
 		setReceiverVolume: 3000,
-		stopSession: 3000,
+		stopSession: 3000
 	},
 
 	/**
@@ -447,14 +447,13 @@ chrome.cast = {
 		  this.customData = this.duration = this.metadata = null;
 		}
 	}
-}
+};
 
 var _sessionRequest = null;
 var _autoJoinPolicy = null;
 var _defaultActionPolicy = null;
 var _receiverListener = null;
 var _sessionListener = null;
-var _sessionRequest = null;
 
 var _sessions = {};
 var _currentMedia = null;
@@ -482,7 +481,6 @@ chrome.cast.initialize = function (apiConfig, successCallback, errorCallback) {
 	_autoJoinPolicy = apiConfig.autoJoinPolicy;
 	_defaultActionPolicy = apiConfig.defaultActionPolicy;
 	_receiverListener = apiConfig.receiverListener;
-	_sessionListener = apiConfig.sessionListener;
 	_sessionRequest = apiConfig.sessionRequest;
 
 	execute('initialize', _sessionRequest.appId, _autoJoinPolicy, _defaultActionPolicy, function(err) {
@@ -543,7 +541,7 @@ chrome.cast.requestSession = function (successCallback, errorCallback, opt_sessi
  */
 chrome.cast.setCustomReceivers = function (receivers, successCallback, errorCallback) {
 	// TODO: Implement
-},
+};
 
 
 
@@ -1024,7 +1022,7 @@ function createRouteElement(route) {
 	el.textContent = route.name;
 	el.setAttribute('data-routeid', route.id);
 	return el;
-};
+}
 
 function onRouteClick() {
 	var id = this.getAttribute('data-routeid');
@@ -1048,7 +1046,7 @@ function onRouteClick() {
 			_sessionListener && _sessionListener(session);
 		});
 	}
-};
+}
 
 chrome.cast.getRouteListElement = function() {
 	return _routeListEl;
@@ -1132,7 +1130,7 @@ chrome.cast._ = {
 			_sessions[sessionId].emit('message:' + namespace, namespace, message);
 		}
 	}
-}
+};
 
 
 module.exports = chrome.cast;
@@ -1177,7 +1175,7 @@ function handleError(err, callback) {
 	if (callback) {
 		callback(error);
 	}
-};
+}
 
 
 execute('setup', function(err) {
