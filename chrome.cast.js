@@ -526,7 +526,7 @@ chrome.cast.requestSession = function (successCallback, errorCallback, opt_sessi
 
 			var session = _sessions[sessionId] = new chrome.cast.Session(sessionId, appId, displayName, appImages, receiver);
 			successCallback(session);
-			/*_sessionListener(session); Fix - Already has a sessionListener*/
+			_sessionListener(session); /*Fix - Already has a sessionListener*/
 		} else {
 			handleError(err, errorCallback);
 		}
