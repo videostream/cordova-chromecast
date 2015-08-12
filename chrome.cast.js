@@ -525,6 +525,16 @@ chrome.cast.requestSession = function (successCallback, errorCallback, opt_sessi
 			var receiver = new chrome.cast.Receiver(obj.receiver.label, obj.receiver.friendlyName, obj.receiver.capabilities || [], obj.volume || null);
 
 			var session = _sessions[sessionId] = new chrome.cast.Session(sessionId, appId, displayName, appImages, receiver);
+
+            if (obj.media && obj.media.sessionId)
+            {
+                _currentMedia = new chrome.cast.media.Media(sessionId, obj.media.mediaSessionId);
+                _currentMedia.currentTime = obj.media.currentTime;
+                _currentMedia.playerState = obj.media.playerState;
+                _currentMedia.media = obj.media.media;
+                session.media[0] = _currentMedia;
+            }
+
 			successCallback(session);
 			_sessionListener(session); /*Fix - Already has a sessionListener*/
 		} else {
