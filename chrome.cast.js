@@ -1105,10 +1105,12 @@ chrome.cast._ = {
 	},
 	mediaLoaded: function(isAlive, media) {
 		if (_sessions[media.sessionId]) {
-			console.log('mediaLoaded');
-			_currentMedia = new chrome.cast.media.Media(media.sessionId, media.mediaSessionId);
-			_currentMedia._update(isAlive, media);
 
+            if (!_currentMedia)
+            {
+                _currentMedia = new chrome.cast.media.Media(media.sessionId, media.mediaSessionId);
+            }
+			_currentMedia._update(isAlive, media);
 			_sessions[media.sessionId].emit('_mediaListener', _currentMedia);
 		} else {
 			console.log('mediaLoaded --- but there is no session tied to it', media);
