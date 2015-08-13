@@ -444,6 +444,7 @@ public class ChromecastSession
 		JSONObject out = new JSONObject();
 		try {
 			out.put("appId", this.appId);
+			out.put("media", createMediaObject());
 		
 			if (this.appImages != null) {
 				JSONArray appImages = new JSONArray();
@@ -473,7 +474,7 @@ public class ChromecastSession
 			out.put("receiver", receiver);
 			
 		} catch(JSONException e) {
-			
+			e.printStackTrace();
 		}
 		
 		return out;

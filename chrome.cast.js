@@ -525,8 +525,18 @@ chrome.cast.requestSession = function (successCallback, errorCallback, opt_sessi
 			var receiver = new chrome.cast.Receiver(obj.receiver.label, obj.receiver.friendlyName, obj.receiver.capabilities || [], obj.volume || null);
 
 			var session = _sessions[sessionId] = new chrome.cast.Session(sessionId, appId, displayName, appImages, receiver);
+
+            if (obj.media && obj.media.sessionId)
+            {
+                _currentMedia = new chrome.cast.media.Media(sessionId, obj.media.mediaSessionId);
+                _currentMedia.currentTime = obj.media.currentTime;
+                _currentMedia.playerState = obj.media.playerState;
+                _currentMedia.media = obj.media.media;
+                session.media[0] = _currentMedia;
+            }
+
 			successCallback(session);
-			/*_sessionListener(session); Fix - Already has a sessionListener*/
+			_sessionListener(session); /*Fix - Already has a sessionListener*/
 		} else {
 			handleError(err, errorCallback);
 		}
@@ -1105,10 +1115,12 @@ chrome.cast._ = {
 	},
 	mediaLoaded: function(isAlive, media) {
 		if (_sessions[media.sessionId]) {
-			console.log('mediaLoaded');
-			_currentMedia = new chrome.cast.media.Media(media.sessionId, media.mediaSessionId);
-			_currentMedia._update(isAlive, media);
 
+            if (!_currentMedia)
+            {
+                _currentMedia = new chrome.cast.media.Media(media.sessionId, media.mediaSessionId);
+            }
+			_currentMedia._update(isAlive, media);
 			_sessions[media.sessionId].emit('_mediaListener', _currentMedia);
 		} else {
 			console.log('mediaLoaded --- but there is no session tied to it', media);
