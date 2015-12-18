@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <plugin xmlns="http://phonegap.com/ns/plugins/1.0"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    id="acidhax.cordova.chromecast"
-    version="0.0.1-alpha">
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        id="acidhax.cordova.chromecast"
+        version="0.0.1-alpha">
   <engines>
     <engine name="cordova" version=">=3.4.0" />
   </engines>
@@ -27,14 +27,19 @@
     </config-file>
 
     <config-file target="AndroidManifest.xml" parent="/*">
-        <uses-permission android:name="android.permission.INTERNET" />
-        <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-        <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+      <uses-permission android:name="android.permission.INTERNET" />
+      <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+      <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     </config-file>
 
     <config-file target="AndroidManifest.xml" parent="/manifest/application">
-        <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
+      <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
     </config-file>
+
+    <framework src="com.google.android.gms:play-services-gcm:7.8.0" />
+    <framework src="com.google.android.gms:play-services-cast:7.8.0" />
+    <framework src="com.android.support:appcompat-v7:21+" />
+    <framework src="com.android.support:mediarouter-v7:21+" />
 
     <source-file src="src/android/Chromecast.java" target-dir="src/acidhax/cordova/chromecast" />
     <source-file src="src/android/ChromecastMediaController.java" target-dir="src/acidhax/cordova/chromecast" />
@@ -44,8 +49,6 @@
     <source-file src="src/android/ChromecastOnMediaUpdatedListener.java" target-dir="src/acidhax/cordova/chromecast" />
     <source-file src="src/android/ChromecastOnSessionUpdatedListener.java" target-dir="src/acidhax/cordova/chromecast" />
     <source-file src="src/android/ChromecastException.java" target-dir="src/acidhax/cordova/chromecast" />
-
-    <hook type="after_plugin_install" src="init-playservices-dependencies.js" />
 
   </platform>
 </plugin>
