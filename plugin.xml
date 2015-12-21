@@ -36,9 +36,9 @@
       <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
     </config-file>
 
-    <framework src="com.google.android.gms:play-services-gcm:7.8.0" />
-    <framework src="com.google.android.gms:play-services-cast:7.8.0" />
-    <framework src="com.google.android.gms:play-services-ads:7.8.0" />
+    <framework src="com.google.android.gms:play-services-gcm:7.5.0" />
+    <framework src="com.google.android.gms:play-services-cast:7.5.0" />
+    <framework src="com.google.android.gms:play-services-ads:7.5.0" />
     <framework src="com.android.support:appcompat-v7:21+" />
     <framework src="com.android.support:mediarouter-v7:21+" />
 
