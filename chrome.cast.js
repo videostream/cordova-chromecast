@@ -1110,17 +1110,20 @@ chrome.cast._ = {
 	},
 	mediaUpdated: function(isAlive, media) {
 
-		if (media && media.mediaSessionId !== undefined && _currentMedia) {
-			_currentMedia._update(isAlive, media);
-		} else if (media) {
-            _currentMedia = new chrome.cast.media.Media(media.sessionId, media.mediaSessionId);
-            _currentMedia.currentTime = media.currentTime;
-            _currentMedia.playerState = media.playerState;
-            _currentMedia.media = media.media;
+		if (media && media.mediaSessionId !== undefined)
+		{
+			if (_currentMedia) {
+				_currentMedia._update(isAlive, media);
+			} else {
+				_currentMedia = new chrome.cast.media.Media(media.sessionId, media.mediaSessionId);
+				_currentMedia.currentTime = media.currentTime;
+				_currentMedia.playerState = media.playerState;
+				_currentMedia.media = media.media;
 
-            _sessions[media.sessionId].media[0] = _currentMedia;
-            _sessionListener && _sessionListener(_sessions[media.sessionId]);
-        }
+				_sessions[media.sessionId].media[0] = _currentMedia;
+				_sessionListener && _sessionListener(_sessions[media.sessionId]);
+			}
+		}
 	},
 	mediaLoaded: function(isAlive, media) {
 		if (_sessions[media.sessionId]) {
