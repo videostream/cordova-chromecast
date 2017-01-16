@@ -70,7 +70,7 @@ var execCommand = function(command, callback) {
  */
 var prepareLibraryProject = function(path, callback) {
 
-    execCommand(androidHome+"/tools/android update lib-project -p "+path+" -t \"android-21\"", function() {
+    execCommand("\"" + androidHome+"/tools/android\" update lib-project -p "+path+" -t \"android-21\"", function() {
         execCommand("ant clean -f "+path+"/build.xml", function() {
             execCommand("ant release -f "+path+"/build.xml", function() {
 
@@ -155,7 +155,3 @@ prepareLibraryProject(appCompatLib, function() {
         });
     });
 });
-
-
-
-
